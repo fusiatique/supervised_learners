@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Maze RL Simulation</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="app-header">
+    <h1>Maze RL Simulation</h1>
+    <p>A reinforcement-learning agent explores a maze and learns which item is worth going for.</p>
+  </header>
+
+  <main class="layout">
+    <aside class="panel controls">
+      <section>
+        <h2>Setup</h2>
+        <label class="field">
+          <span>Maze</span>
+          <select id="maze-select"></select>
+        </label>
+        <label class="field">
+          <span>Learning model</span>
+          <select id="agent-select"></select>
+        </label>
+      </section>
+
+      <section>
+        <h2>Items</h2>
+        <p class="hint">Pick an item, then click a maze cell to place it. Click it again to remove it. The number is the item's value.</p>
+        <div id="items"></div>
+      </section>
+
+      <section>
+        <h2>Parameters</h2>
+        <div id="params"></div>
+      </section>
+    </aside>
+
+    <section class="panel maze-panel">
+      <div class="toolbar">
+        <button id="play" type="button" class="primary">Play</button>
+        <button id="step" type="button">Step</button>
+        <button id="reset" type="button">Reset learning</button>
+        <label class="speed">
+          <span>Speed</span>
+          <input id="speed" type="range" min="0" max="100" value="35">
+          <output id="speed-label"></output>
+        </label>
+        <label class="check">
+          <input id="show-values" type="checkbox" checked>
+          <span>Show learned values</span>
+        </label>
+      </div>
+      <canvas id="maze" aria-label="Maze with the agent and placed items"></canvas>
+    </section>
+
+    <div class="side">
+      <section class="panel">
+        <h2>Reward state over time</h2>
+        <canvas id="reward-chart" aria-label="Line chart of the agent's reward state by step"></canvas>
+      </section>
+
+      <section class="panel">
+        <h2>Progress</h2>
+        <dl id="stats" class="stats"></dl>
+        <h3 id="choices-title"></h3>
+        <div id="choices"></div>
+      </section>
+    </div>
+  </main>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
