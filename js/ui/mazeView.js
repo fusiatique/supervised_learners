@@ -10,6 +10,8 @@ export class MazeView {
     this.showValues = true;
     this.hoverCell = null;
     this.env = null;
+    this.selectedWall = null;
+    this.editingWalls = false;
 
     canvas.addEventListener('click', (e) => {
       const cell = this.cellAt(e);
@@ -89,7 +91,13 @@ export class MazeView {
     ctx.strokeStyle = cssVar('--maze-floor');
     ctx.stroke();
 
-    if (this.hoverCell !== null && env.canHoldItem(this.hoverCell)) {
+    if (this.selectedWall !== null && env.isWall(this.selectedWall)) {
+      ctx.strokeStyle = cssVar('--agent');
+      ctx.lineWidth = 3;
+      ctx.strokeRect(xOf(this.selectedWall) + 2, yOf(this.selectedWall) + 2, size - 4, size - 4);
+    }
+
+    if (this.hoverCell !== null && (this.editingWalls || env.canHoldItem(this.hoverCell))) {
       ctx.strokeStyle = cssVar('--text-secondary');
       ctx.lineWidth = 2;
       ctx.strokeRect(xOf(this.hoverCell) + 1, yOf(this.hoverCell) + 1, size - 2, size - 2);

@@ -218,7 +218,8 @@ input[type="range"] {
   text-align: left;
 }
 
-.tool[aria-pressed="true"] {
+.tool[aria-pressed="true"],
+.wall-tools button[aria-pressed="true"] {
   border-color: var(--agent);
   box-shadow: 0 0 0 1px var(--agent);
 }
@@ -235,6 +236,13 @@ input[type="range"] {
 }
 
 /* --- Maze ---------------------------------------------------------------- */
+
+.wall-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
 
 .toolbar {
   display: flex;

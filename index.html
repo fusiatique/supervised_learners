@@ -27,6 +27,17 @@
       </section>
 
       <section>
+        <h2>Walls</h2>
+        <div class="wall-tools" role="group" aria-label="Wall editing tools">
+          <button id="add-wall" type="button" aria-pressed="false">Add walls</button>
+          <button id="erase-wall" type="button" aria-pressed="false">Erase wall</button>
+          <button id="move-wall" type="button" aria-pressed="false">Move wall</button>
+          <button id="clear-walls" type="button">Erase all walls</button>
+        </div>
+        <p id="wall-hint" class="hint" role="status">Choose a wall tool to edit the maze. Editing pauses the simulation.</p>
+      </section>
+
+      <section>
         <h2>Items</h2>
         <p class="hint">Pick an item, then click a maze cell to place it. Click it again to remove it. The number is the item's value.</p>
         <div id="items"></div>
