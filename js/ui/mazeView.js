@@ -2,25 +2,55 @@ import { ACTIONS } from '../environment.js';
 import { getItemType } from '../items.js';
 import { cssVar, prepareCanvas, CANVAS_FONT } from './theme.js';
 
+function drawPolygon(ctx, points) {
+  ctx.beginPath();
+  ctx.moveTo(points[0][0], points[0][1]);
+  for (const [x, y] of points.slice(1)) ctx.lineTo(x, y);
+  ctx.closePath();
+}
+
 // Draws the maze, the items, the agent and (optionally) what the agent has
-// learned. Reports clicks on cells through `onCellClick(cellIndex)`.
+// learned. Reports clicks and drag-painting on cells through its callbacks.
 export class MazeView {
-  constructor(canvas, { onCellClick }) {
+  constructor(canvas, { onCellClick, onCellDrag, onCellDragEnd }) {
     this.canvas = canvas;
     this.showValues = true;
     this.hoverCell = null;
     this.env = null;
+    this.pointerDown = false;
+    this.onCellDrag = onCellDrag;
+    this.onCellDragEnd = onCellDragEnd;
 
     canvas.addEventListener('click', (e) => {
       const cell = this.cellAt(e);
       if (cell !== null) onCellClick(cell);
     });
-    canvas.addEventListener('mousemove', (e) => {
-      this.hoverCell = this.cellAt(e);
+    canvas.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0) return;
+      this.pointerDown = true;
+      canvas.setPointerCapture(e.pointerId);
+      this.paintCell(e);
     });
-    canvas.addEventListener('mouseleave', () => {
+    canvas.addEventListener('pointermove', (e) => {
+      this.hoverCell = this.cellAt(e);
+      if (this.pointerDown) this.paintCell(e);
+    });
+    const endPointer = () => {
+      if (!this.pointerDown) return;
+      this.pointerDown = false;
+      this.onCellDragEnd();
+    };
+    canvas.addEventListener('pointerup', endPointer);
+    canvas.addEventListener('pointercancel', endPointer);
+    canvas.addEventListener('lostpointercapture', endPointer);
+    canvas.addEventListener('pointerleave', () => {
       this.hoverCell = null;
     });
+  }
+
+  paintCell(event) {
+    const cell = this.cellAt(event);
+    if (cell !== null) this.onCellDrag(cell);
   }
 
   cellAt(event) {
@@ -67,27 +97,63 @@ export class MazeView {
       if (!item) continue;
       const cx = xOf(cell) + size / 2;
       const cy = yOf(cell) + size / 2;
-      ctx.beginPath();
-      ctx.arc(cx, cy, size * 0.38, 0, Math.PI * 2);
+      const radius = size * 0.36;
+      drawPolygon(ctx, Array.from({ length: 6 }, (_, i) => {
+        const angle = (Math.PI / 3) * i - Math.PI / 6;
+        return [cx + Math.cos(angle) * radius, cy + Math.sin(angle) * radius];
+      }));
       ctx.fillStyle = cssVar(item.colorVar);
+      ctx.shadowColor = 'rgba(22, 24, 39, 0.24)';
+      ctx.shadowBlur = size * 0.1;
+      ctx.shadowOffsetY = size * 0.04;
       ctx.fill();
-      ctx.lineWidth = 2;
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetY = 0;
+      ctx.lineWidth = Math.max(1.5, size * 0.045);
       ctx.strokeStyle = cssVar('--maze-floor');
       ctx.stroke();
-      if (size >= 18) {
-        ctx.fillStyle = cssVar('--on-item');
-        ctx.fillText(String(item.value), cx, cy + 1);
-      }
+
+      drawPolygon(ctx, [
+        [cx - radius * 0.78, cy - radius * 0.45],
+        [cx, cy - radius * 0.98],
+        [cx + radius * 0.78, cy - radius * 0.45],
+      ]);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.24)';
+      ctx.fill();
+
+      ctx.fillStyle = cssVar('--on-item');
+      ctx.font = `700 ${Math.max(9, size * 0.3)}px ${CANVAS_FONT}`;
+      ctx.fillText(String(item.value), cx, cy + 1);
     }
 
     // Agent
-    ctx.beginPath();
-    ctx.arc(xOf(env.state) + size / 2, yOf(env.state) + size / 2, size * 0.28, 0, Math.PI * 2);
+    const agentX = xOf(env.state) + size / 2;
+    const agentY = yOf(env.state) + size / 2;
+    const agentRadius = size * 0.38;
+    drawPolygon(ctx, [
+      [agentX, agentY - agentRadius],
+      [agentX + agentRadius * 0.3, agentY - agentRadius * 0.3],
+      [agentX + agentRadius, agentY],
+      [agentX + agentRadius * 0.3, agentY + agentRadius * 0.3],
+      [agentX, agentY + agentRadius],
+      [agentX - agentRadius * 0.3, agentY + agentRadius * 0.3],
+      [agentX - agentRadius, agentY],
+      [agentX - agentRadius * 0.3, agentY - agentRadius * 0.3],
+    ]);
     ctx.fillStyle = cssVar('--agent');
     ctx.fill();
     ctx.lineWidth = 2;
     ctx.strokeStyle = cssVar('--maze-floor');
     ctx.stroke();
+    drawPolygon(ctx, [
+      [agentX, agentY - size * 0.1],
+      [agentX + size * 0.1, agentY],
+      [agentX, agentY + size * 0.1],
+      [agentX - size * 0.1, agentY],
+    ]);
+    ctx.fillStyle = cssVar('--maze-floor');
+    ctx.fill();
 
     if (this.hoverCell !== null && env.canHoldItem(this.hoverCell)) {
       ctx.strokeStyle = cssVar('--text-secondary');

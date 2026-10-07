@@ -16,10 +16,10 @@
     <aside class="panel controls">
       <section>
         <h2>Setup</h2>
-        <label class="field">
+        <div class="field">
           <span>Maze</span>
-          <select id="maze-select"></select>
-        </label>
+          <output>Medium (13 × 13)</output>
+        </div>
         <label class="field">
           <span>Learning model</span>
           <select id="agent-select"></select>
@@ -28,7 +28,7 @@
 
       <section>
         <h2>Items</h2>
-        <p class="hint">Pick an item, then click a maze cell to place it. Click it again to remove it. The number is the item's value.</p>
+        <p class="hint">The Medium (13 × 13) maze starts with an open interior and a fixed outer wall. Pick an item and click a cell to place it. Choose Wall to paint interior walls by dragging, or Eraser to remove walls by dragging and items by clicking.</p>
         <div id="items"></div>
       </section>
 

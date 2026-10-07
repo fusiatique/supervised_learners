@@ -10,13 +10,13 @@
   --grid: #e9e8e3;
   --axis: #b9b7b0;
 
-  --maze-wall: #33332f;
-  --maze-floor: #fcfcfb;
-  --agent: #4a3aa7;
-  --item-1: #2a78d6;
-  --item-2: #eb6834;
-  --item-3: #1baf7a;
-  --on-item: #0b0b0b;
+  --maze-wall: #625b73;
+  --maze-floor: #ffffff;
+  --agent: #087f8c;
+  --item-1: #6846a5;
+  --item-2: #b84d3b;
+  --item-3: #95600f;
+  --on-item: #ffffff;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -31,12 +31,12 @@
     --grid: #2a2a28;
     --axis: #5a5953;
 
-    --maze-wall: #0a0a09;
-    --maze-floor: #2a2a28;
-    --agent: #9085e9;
-    --item-1: #3987e5;
-    --item-2: #d95926;
-    --item-3: #199e70;
+    --maze-wall: #8c849d;
+    --maze-floor: #ffffff;
+    --agent: #087f8c;
+    --item-1: #6846a5;
+    --item-2: #b84d3b;
+    --item-3: #95600f;
     --on-item: #ffffff;
   }
 }
@@ -226,7 +226,14 @@ input[type="range"] {
 .swatch {
   width: 14px;
   height: 14px;
-  border-radius: 50%;
+  clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
+  border: 1px solid rgb(0 0 0 / 10%);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 18%);
+}
+
+.wall-swatch {
+  background: var(--maze-wall);
+  border: 1px solid var(--border);
 }
 
 .tool-row input[type="number"] {
@@ -274,6 +281,7 @@ input[type="range"] {
   margin: 0 auto;
   border-radius: 6px;
   cursor: pointer;
+  touch-action: none;
 }
 
 /* --- Chart and stats ----------------------------------------------------- */

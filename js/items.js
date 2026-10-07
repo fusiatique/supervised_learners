@@ -1,6 +1,6 @@
 // Item types the user can place in the maze. `value` is the reward the agent
 // receives on reaching the item and is editable from the UI. `colorVar` names
-// a CSS custom property so items follow the light/dark theme.
+// a CSS custom property so items share the simulation's palette.
 // Further per-item properties (e.g. harm, tolerance) can be added here.
 export const ITEM_TYPES = [
   { id: 'low', name: 'Low', value: 1, colorVar: '--item-1' },

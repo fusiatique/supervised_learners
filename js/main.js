@@ -1,10 +1,9 @@
 import { defaultParams, RECENT_EPISODES } from './config.js';
-import { MAZES } from './mazes.js';
 import { AGENTS } from './agents/index.js';
 import { Simulation } from './simulation.js';
 import { MazeView } from './ui/mazeView.js';
 import { LineChart } from './ui/chart.js';
-import { ERASER, fillSelect, buildParamControls, buildItemPalette, renderStats, renderChoices } from './ui/controls.js';
+import { ERASER, WALL_TOOL, fillSelect, buildParamControls, buildItemPalette, renderStats, renderChoices } from './ui/controls.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -13,22 +12,35 @@ const sim = new Simulation(params);
 let tool = null;
 let running = false;
 let stepsPerSecond = 1;
+let wallStrokeReset = false;
 
 // --- Views -----------------------------------------------------------------
 
 const mazeView = new MazeView($('maze'), {
   onCellClick(cell) {
     const env = sim.env;
+    if (tool === WALL_TOOL) return;
     if (!env.canHoldItem(cell)) return;
     if (tool === ERASER || env.items.get(cell) === tool) env.removeItem(cell);
     else env.placeItem(cell, tool);
+  },
+  onCellDrag(cell) {
+    if (tool !== WALL_TOOL && tool !== ERASER) return;
+    if (running) setRunning(false);
+    const changed = sim.env.setWall(cell, tool === WALL_TOOL);
+    if (changed && !wallStrokeReset) {
+      sim.resetLearning();
+      wallStrokeReset = true;
+    }
+  },
+  onCellDragEnd() {
+    wallStrokeReset = false;
   },
 });
 const chart = new LineChart($('reward-chart'), { colorVar: '--agent', xLabel: 'Step' });
 
 // --- Controls --------------------------------------------------------------
 
-fillSelect($('maze-select'), MAZES, (id) => sim.setMaze(id));
 fillSelect($('agent-select'), AGENTS, (id) => sim.setAgent(id));
 buildParamControls($('params'), params);
 tool = buildItemPalette($('items'), (id) => {

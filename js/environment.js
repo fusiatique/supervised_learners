@@ -25,6 +25,18 @@ export class Environment {
     return this.walls[cell] === 1;
   }
 
+  setWall(cell, isWall) {
+    if (!Number.isInteger(cell) || cell < 0 || cell >= this.numStates || cell === this.start) return false;
+    const x = cell % this.cols;
+    const y = Math.floor(cell / this.cols);
+    if (x === 0 || y === 0 || x === this.cols - 1 || y === this.rows - 1) return false;
+    if (this.isWall(cell) === isWall) return false;
+
+    this.walls[cell] = Number(isWall);
+    if (isWall) this.items.delete(cell);
+    return true;
+  }
+
   reset() {
     this.state = this.start;
     return this.state;

@@ -2,6 +2,7 @@ import { PARAMS } from '../config.js';
 import { ITEM_TYPES } from '../items.js';
 
 export const ERASER = 'erase';
+export const WALL_TOOL = 'wall';
 
 function el(tag, props = {}, children = []) {
   const node = Object.assign(document.createElement(tag), props);
@@ -60,6 +61,14 @@ export function buildItemPalette(container, onSelect) {
   eraser.addEventListener('click', () => select(ERASER));
   buttons.set(ERASER, eraser);
   container.append(el('div', { className: 'tool-row' }, [eraser]));
+
+  const wall = el('button', { type: 'button', className: 'tool' }, [
+    el('span', { className: 'swatch wall-swatch' }),
+    'Wall (drag to paint)',
+  ]);
+  wall.addEventListener('click', () => select(WALL_TOOL));
+  buttons.set(WALL_TOOL, wall);
+  container.append(el('div', { className: 'tool-row' }, [wall]));
 
   const initial = ITEM_TYPES[ITEM_TYPES.length - 1].id;
   select(initial);
