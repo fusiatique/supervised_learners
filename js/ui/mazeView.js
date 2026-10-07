@@ -2,22 +2,43 @@ import { ACTIONS } from '../environment.js';
 import { getItemType } from '../items.js';
 import { cssVar, prepareCanvas, CANVAS_FONT } from './theme.js';
 
-function drawPolygon(ctx, points) {
+const GLITCH_INTERVAL_MS = 250;
+
+function drawDirectionCone(ctx, cx, cy, size, { dx, dy }, slotX = 0, slotY = 0, scale = 1) {
+  const centerX = cx + slotX * size;
+  const centerY = cy + slotY * size;
+  const length = size * 0.3 * scale;
+  const halfWidth = size * 0.19 * scale;
+  const tipX = centerX + dx * length / 2;
+  const tipY = centerY + dy * length / 2;
+  const baseX = centerX - dx * length / 2;
+  const baseY = centerY - dy * length / 2;
   ctx.beginPath();
-  ctx.moveTo(points[0][0], points[0][1]);
-  for (const [x, y] of points.slice(1)) ctx.lineTo(x, y);
+  ctx.moveTo(tipX, tipY);
+  ctx.lineTo(baseX - dy * halfWidth, baseY + dx * halfWidth);
+  ctx.lineTo(baseX + dy * halfWidth, baseY - dx * halfWidth);
   ctx.closePath();
+  ctx.fill();
 }
 
-// Draws the maze, the items, the agent and (optionally) what the agent has
-// learned. Reports clicks and drag-painting on cells through its callbacks.
+const ARROW_SLOTS = [
+  [-0.24, 0],
+  [0, -0.24],
+  [0.24, 0],
+  [0, 0.24],
+];
+
+// Draws the maze, the items, the agent and what the agent has learned.
+// Reports clicks and drag-painting on cells through its callbacks.
 export class MazeView {
   constructor(canvas, { onCellClick, onCellDrag, onCellDragEnd }) {
     this.canvas = canvas;
-    this.showValues = true;
     this.hoverCell = null;
     this.env = null;
     this.pointerDown = false;
+    this.glitchPhase = -1;
+    this.glitchActions = new Map();
+    this.wasPolicyConverged = false;
     this.onCellDrag = onCellDrag;
     this.onCellDragEnd = onCellDragEnd;
 
@@ -62,7 +83,7 @@ export class MazeView {
     return y * this.env.cols + x;
   }
 
-  draw(sim) {
+  draw(sim, now = performance.now()) {
     const env = (this.env = sim.env);
     const { ctx, width } = prepareCanvas(this.canvas);
     const size = width / env.cols;
@@ -79,7 +100,7 @@ export class MazeView {
       if (!env.isWall(cell)) ctx.fillRect(xOf(cell) - 0.5, yOf(cell) - 0.5, size + 1, size + 1);
     }
 
-    if (this.showValues) this.drawValues(ctx, sim, size, xOf, yOf);
+    this.drawValues(ctx, sim, size, xOf, yOf, now);
 
     // Start marker
     ctx.strokeStyle = cssVar('--agent');
@@ -98,29 +119,13 @@ export class MazeView {
       const cx = xOf(cell) + size / 2;
       const cy = yOf(cell) + size / 2;
       const radius = size * 0.36;
-      drawPolygon(ctx, Array.from({ length: 6 }, (_, i) => {
-        const angle = (Math.PI / 3) * i - Math.PI / 6;
-        return [cx + Math.cos(angle) * radius, cy + Math.sin(angle) * radius];
-      }));
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
       ctx.fillStyle = cssVar(item.colorVar);
-      ctx.shadowColor = 'rgba(22, 24, 39, 0.24)';
-      ctx.shadowBlur = size * 0.1;
-      ctx.shadowOffsetY = size * 0.04;
       ctx.fill();
-      ctx.shadowColor = 'transparent';
-      ctx.shadowBlur = 0;
-      ctx.shadowOffsetY = 0;
       ctx.lineWidth = Math.max(1.5, size * 0.045);
       ctx.strokeStyle = cssVar('--maze-floor');
       ctx.stroke();
-
-      drawPolygon(ctx, [
-        [cx - radius * 0.78, cy - radius * 0.45],
-        [cx, cy - radius * 0.98],
-        [cx + radius * 0.78, cy - radius * 0.45],
-      ]);
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.24)';
-      ctx.fill();
 
       ctx.fillStyle = cssVar('--on-item');
       ctx.font = `700 ${Math.max(9, size * 0.3)}px ${CANVAS_FONT}`;
@@ -131,28 +136,17 @@ export class MazeView {
     const agentX = xOf(env.state) + size / 2;
     const agentY = yOf(env.state) + size / 2;
     const agentRadius = size * 0.38;
-    drawPolygon(ctx, [
-      [agentX, agentY - agentRadius],
-      [agentX + agentRadius * 0.3, agentY - agentRadius * 0.3],
-      [agentX + agentRadius, agentY],
-      [agentX + agentRadius * 0.3, agentY + agentRadius * 0.3],
-      [agentX, agentY + agentRadius],
-      [agentX - agentRadius * 0.3, agentY + agentRadius * 0.3],
-      [agentX - agentRadius, agentY],
-      [agentX - agentRadius * 0.3, agentY - agentRadius * 0.3],
-    ]);
+    ctx.beginPath();
+    ctx.arc(agentX, agentY, agentRadius, 0, Math.PI * 2);
     ctx.fillStyle = cssVar('--agent');
     ctx.fill();
     ctx.lineWidth = 2;
     ctx.strokeStyle = cssVar('--maze-floor');
     ctx.stroke();
-    drawPolygon(ctx, [
-      [agentX, agentY - size * 0.1],
-      [agentX + size * 0.1, agentY],
-      [agentX, agentY + size * 0.1],
-      [agentX - size * 0.1, agentY],
-    ]);
-    ctx.fillStyle = cssVar('--maze-floor');
+
+    ctx.beginPath();
+    ctx.arc(agentX, agentY, size * 0.13, 0, Math.PI * 2);
+    ctx.fillStyle = cssVar('--agent-core');
     ctx.fill();
 
     if (this.hoverCell !== null && env.canHoldItem(this.hoverCell)) {
@@ -164,9 +158,20 @@ export class MazeView {
 
   // Tint each visited cell by its learned value (relative to the other
   // visited cells) and draw an arrow for the action the agent prefers there.
-  drawValues(ctx, sim, size, xOf, yOf) {
+  drawValues(ctx, sim, size, xOf, yOf, now) {
     const { env, agent } = sim;
     const shown = (cell) => !env.isWall(cell) && !env.items.has(cell) && agent.hasVisited(cell);
+    if (agent.policyConverged) {
+      this.wasPolicyConverged = true;
+    } else {
+      const phase = Math.floor(now / GLITCH_INTERVAL_MS);
+      if (this.wasPolicyConverged || phase !== this.glitchPhase) {
+        this.glitchActions.clear();
+        this.glitchPhase = phase;
+        this.wasPolicyConverged = false;
+      }
+    }
+
     let min = Infinity;
     let max = -Infinity;
     for (let cell = 0; cell < env.numStates; cell++) {
@@ -187,17 +192,30 @@ export class MazeView {
       ctx.globalAlpha = 1;
 
       if (cell === env.state) continue;
-      const { dx, dy } = ACTIONS[agent.bestAction(cell)];
+      let actions;
+      if (agent.policyConverged) {
+        actions = agent.bestActions(cell);
+      } else {
+        if (!this.glitchActions.has(cell)) {
+          this.glitchActions.set(cell, Math.floor(Math.random() * ACTIONS.length));
+        }
+        actions = [this.glitchActions.get(cell)];
+      }
       const cx = xOf(cell) + size / 2;
       const cy = yOf(cell) + size / 2;
-      const r = size * 0.16;
-      ctx.beginPath();
-      ctx.moveTo(cx + dx * r, cy + dy * r);
-      ctx.lineTo(cx - dx * r + dy * r, cy - dy * r + dx * r);
-      ctx.lineTo(cx - dx * r - dy * r, cy - dy * r - dx * r);
-      ctx.closePath();
+      ctx.strokeStyle = arrow;
       ctx.fillStyle = arrow;
-      ctx.fill();
+      ctx.lineWidth = actions.length > 1 ? Math.max(1.5, size * 0.0525) : Math.max(1.5, size * 0.0675);
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      if (actions.length > 1) {
+        actions.forEach((action, i) => {
+          const [slotX, slotY] = ARROW_SLOTS[action];
+          drawDirectionCone(ctx, cx, cy, size, ACTIONS[action], slotX, slotY, 0.65);
+        });
+      } else {
+        drawDirectionCone(ctx, cx, cy, size, ACTIONS[actions[0]]);
+      }
     }
   }
 }

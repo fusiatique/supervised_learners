@@ -11,8 +11,10 @@
 //   endEpisode()
 //   hasVisited(state) -> boolean  (the overlay only covers visited cells)
 //   stateValue(state) -> number   (used for the value overlay)
-//   bestAction(state) -> action   (used for the policy arrows)
+//   bestActions(state) -> action[] (used for the policy arrows)
 //   info() -> [[label, text], ...] (model-specific readouts for the stats panel)
+const POLICY_STABILITY_EPISODES = 20;
+
 export class QLearningAgent {
   constructor(env, params) {
     this.params = params;
@@ -20,6 +22,9 @@ export class QLearningAgent {
     this.q = new Float64Array(env.numStates * env.numActions).fill(params.initialValue);
     this.visited = new Uint8Array(env.numStates);
     this.episodes = 0;
+    this.policySnapshot = null;
+    this.policyStableEpisodes = 0;
+    this.policyConverged = false;
   }
 
   get epsilon() {
@@ -38,10 +43,27 @@ export class QLearningAgent {
     const i = state * this.numActions + action;
     this.q[i] += alpha * (target - this.q[i]);
     this.visited[state] = 1;
+    if (this.policyConverged && this.bestActionMask(state) !== this.policySnapshot[state]) {
+      this.policyConverged = false;
+    }
   }
 
   endEpisode() {
     this.episodes++;
+    const policy = new Uint8Array(this.visited.length);
+    for (let state = 0; state < policy.length; state++) policy[state] = this.bestActionMask(state);
+
+    if (this.policySnapshot && policy.every((actions, state) => actions === this.policySnapshot[state])) {
+      this.policyStableEpisodes++;
+    } else {
+      this.policyStableEpisodes = 0;
+    }
+    this.policySnapshot = policy;
+    this.policyConverged = this.policyStableEpisodes >= POLICY_STABILITY_EPISODES;
+  }
+
+  bestActionMask(state) {
+    return this.bestActions(state).reduce((mask, action) => mask | (1 << action), 0);
   }
 
   hasVisited(state) {
@@ -55,22 +77,27 @@ export class QLearningAgent {
     return best;
   }
 
-  // Ties are broken at random so an untrained agent wanders instead of
-  // repeatedly walking into the same wall.
-  bestAction(state) {
+  bestActions(state) {
     const base = state * this.numActions;
-    let best = 0;
-    let ties = 1;
-    for (let a = 1; a < this.numActions; a++) {
-      const diff = this.q[base + a] - this.q[base + best];
-      if (diff > 0) {
-        best = a;
-        ties = 1;
-      } else if (diff === 0 && Math.random() < 1 / ++ties) {
-        best = a;
+    let bestValue = -Infinity;
+    const best = [];
+    for (let a = 0; a < this.numActions; a++) {
+      const value = this.q[base + a];
+      if (value > bestValue) {
+        bestValue = value;
+        best.length = 0;
+        best.push(a);
+      } else if (value === bestValue) {
+        best.push(a);
       }
     }
     return best;
+  }
+
+  // Ties are broken at random for the agent's actual moves.
+  bestAction(state) {
+    const best = this.bestActions(state);
+    return best[Math.floor(Math.random() * best.length)];
   }
 
   info() {

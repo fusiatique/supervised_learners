@@ -66,10 +66,6 @@ function updateSpeed() {
 $('speed').addEventListener('input', updateSpeed);
 updateSpeed();
 
-$('show-values').addEventListener('change', (e) => {
-  mazeView.showValues = e.target.checked;
-});
-
 // --- Main loop -------------------------------------------------------------
 
 let lastTime = performance.now();
@@ -90,7 +86,7 @@ function frame(now) {
     if (stepDebt >= 1) stepDebt = 0;
   }
 
-  mazeView.draw(sim);
+  mazeView.draw(sim, now);
   chart.draw(sim.history.points);
   renderStats($('stats'), [
     ['Steps', sim.steps.toLocaleString()],

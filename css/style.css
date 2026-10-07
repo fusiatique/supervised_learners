@@ -12,11 +12,12 @@
 
   --maze-wall: #625b73;
   --maze-floor: #ffffff;
-  --agent: #087f8c;
-  --item-1: #6846a5;
-  --item-2: #b84d3b;
-  --item-3: #95600f;
-  --on-item: #ffffff;
+  --agent: #9bbce8;
+  --agent-core: #f3dc91;
+  --item-1: #c8b5e8;
+  --item-2: #f0b9ae;
+  --item-3: #a8d8c4;
+  --on-item: #34313d;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -33,11 +34,12 @@
 
     --maze-wall: #8c849d;
     --maze-floor: #ffffff;
-    --agent: #087f8c;
-    --item-1: #6846a5;
-    --item-2: #b84d3b;
-    --item-3: #95600f;
-    --on-item: #ffffff;
+    --agent: #9bbce8;
+    --agent-core: #f3dc91;
+    --item-1: #c8b5e8;
+    --item-2: #f0b9ae;
+    --item-3: #a8d8c4;
+    --on-item: #34313d;
   }
 }
 
@@ -226,7 +228,7 @@ input[type="range"] {
 .swatch {
   width: 14px;
   height: 14px;
-  clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
+  border-radius: 50%;
   border: 1px solid rgb(0 0 0 / 10%);
   box-shadow: 0 1px 3px rgb(0 0 0 / 18%);
 }
