@@ -1,3 +1,5 @@
+import { ACTIONS } from '../environment.js';
+
 // Tabular Q-learning with ε-greedy exploration. ε starts at `epsilonStart` and
 // shrinks by `epsilonDecay` every episode down to `epsilonMin`.
 // Estimates start at zero. Exploration comes from ε-greedy random moves,
@@ -17,6 +19,7 @@ const POLICY_STABILITY_EPISODES = 20;
 export class QLearningAgent {
   constructor(env, params) {
     this.params = params;
+    this.env = env;
     this.numActions = env.numActions;
     this.q = new Float64Array(env.numStates * env.numActions);
     this.visited = new Uint8Array(env.numStates);
@@ -32,6 +35,9 @@ export class QLearningAgent {
   }
 
   act(state) {
+    this.visited[state] = 1;
+    const coverageAction = this.actionTowardUnvisited(state);
+    if (coverageAction !== null) return coverageAction;
     if (Math.random() < this.epsilon) return Math.floor(Math.random() * this.numActions);
     return this.bestAction(state);
   }
@@ -42,9 +48,33 @@ export class QLearningAgent {
     const i = state * this.numActions + action;
     this.q[i] += alpha * (target - this.q[i]);
     this.visited[state] = 1;
+    this.visited[nextState] = 1;
     if (this.policyConverged && this.bestActionMask(state) !== this.policySnapshot[state]) {
       this.policyConverged = false;
     }
+  }
+
+  actionTowardUnvisited(state) {
+    const firstAction = new Int8Array(this.visited.length).fill(-1);
+    const queue = [state];
+    this.visited[state] = 1;
+
+    for (let i = 0; i < queue.length; i++) {
+      const cell = queue[i];
+      for (let action = 0; action < this.numActions; action++) {
+        const next = this.env.neighbor(cell, ACTIONS[action]);
+        if (next === null || this.env.isWall(next) || firstAction[next] !== -1 || next === state) continue;
+        firstAction[next] = cell === state ? action : firstAction[cell];
+        if (!this.visited[next]) return firstAction[next];
+        queue.push(next);
+      }
+    }
+    return null;
+  }
+
+  hasVisitedReachableCells() {
+    const distances = this.env.distancesFrom(this.env.start);
+    return distances.every((distance, cell) => distance === Infinity || this.visited[cell] === 1);
   }
 
   endEpisode() {
@@ -52,13 +82,16 @@ export class QLearningAgent {
     const policy = new Uint8Array(this.visited.length);
     for (let state = 0; state < policy.length; state++) policy[state] = this.bestActionMask(state);
 
-    if (this.policySnapshot && policy.every((actions, state) => actions === this.policySnapshot[state])) {
+    if (this.hasVisitedReachableCells()
+      && this.policySnapshot
+      && policy.every((actions, state) => actions === this.policySnapshot[state])) {
       this.policyStableEpisodes++;
     } else {
       this.policyStableEpisodes = 0;
     }
     this.policySnapshot = policy;
-    this.policyConverged = this.policyStableEpisodes >= POLICY_STABILITY_EPISODES;
+    this.policyConverged = this.hasVisitedReachableCells()
+      && this.policyStableEpisodes >= POLICY_STABILITY_EPISODES;
   }
 
   bestActionMask(state) {

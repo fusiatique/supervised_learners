@@ -22,10 +22,10 @@ function drawDirectionCone(ctx, cx, cy, size, { dx, dy }, slotX = 0, slotY = 0, 
 }
 
 const ARROW_SLOTS = [
-  [-0.24, 0],
   [0, -0.24],
   [0.24, 0],
   [0, 0.24],
+  [-0.24, 0],
 ];
 
 // Draws the maze, the items, the agent and what the agent has learned.
