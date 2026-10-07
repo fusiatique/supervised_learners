@@ -37,21 +37,57 @@ export class Environment {
     return true;
   }
 
+  isValidCell(cell) {
+    return Number.isInteger(cell) && cell >= 0 && cell < this.numStates;
+  }
+
+  neighbor(cell, { dx, dy }) {
+    const x = cell % this.cols + dx;
+    const y = Math.floor(cell / this.cols) + dy;
+    return x >= 0 && x < this.cols && y >= 0 && y < this.rows ? y * this.cols + x : null;
+  }
+
+  canAddWall(cell) {
+    return this.isValidCell(cell) && !this.isWall(cell) && cell !== this.start && cell !== this.state && !this.items.has(cell);
+  }
+
+  addWall(cell) {
+    if (!this.canAddWall(cell)) return false;
+    this.walls[cell] = 1;
+    return true;
+  }
+
+  removeWall(cell) {
+    if (!this.isValidCell(cell) || !this.isWall(cell)) return false;
+    this.walls[cell] = 0;
+    return true;
+  }
+
+  moveWall(from, to) {
+    if (!this.isValidCell(from) || !this.isWall(from) || !this.canAddWall(to)) return false;
+    this.walls[from] = 0;
+    this.walls[to] = 1;
+    return true;
+  }
+
+  clearWalls() {
+    this.walls.fill(0);
+  }
+
   reset() {
     this.state = this.start;
     return this.state;
   }
 
   step(action) {
-    const { dx, dy } = ACTIONS[action];
-    const next = this.state + dx + dy * this.cols;
-    if (!this.isWall(next)) this.state = next;
+    const next = this.neighbor(this.state, ACTIONS[action]);
+    if (next !== null && !this.isWall(next)) this.state = next;
     const item = getItemType(this.items.get(this.state));
     return { state: this.state, item, done: item !== null };
   }
 
   canHoldItem(cell) {
-    return !this.isWall(cell) && cell !== this.start;
+    return this.isValidCell(cell) && !this.isWall(cell) && cell !== this.start;
   }
 
   placeItem(cell, itemId) {
@@ -69,9 +105,9 @@ export class Environment {
     const queue = [from];
     for (let i = 0; i < queue.length; i++) {
       const cell = queue[i];
-      for (const { dx, dy } of ACTIONS) {
-        const next = cell + dx + dy * this.cols;
-        if (!this.isWall(next) && dist[next] === Infinity) {
+      for (const action of ACTIONS) {
+        const next = this.neighbor(cell, action);
+        if (next !== null && !this.isWall(next) && dist[next] === Infinity) {
           dist[next] = dist[cell] + 1;
           queue.push(next);
         }
@@ -81,7 +117,10 @@ export class Environment {
   }
 
   isDeadEnd(cell) {
-    const open = ACTIONS.filter(({ dx, dy }) => !this.isWall(cell + dx + dy * this.cols));
+    const open = ACTIONS.filter((action) => {
+      const next = this.neighbor(cell, action);
+      return next !== null && !this.isWall(next);
+    });
     return !this.isWall(cell) && open.length === 1;
   }
 

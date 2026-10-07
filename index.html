@@ -27,6 +27,17 @@
       </section>
 
       <section>
+        <h2>Walls</h2>
+        <div class="wall-tools" role="group" aria-label="Wall editing tools">
+          <button id="add-wall" type="button" aria-pressed="false">Add walls</button>
+          <button id="erase-wall" type="button" aria-pressed="false">Erase wall</button>
+          <button id="move-wall" type="button" aria-pressed="false">Move wall</button>
+          <button id="clear-walls" type="button">Erase all walls</button>
+        </div>
+        <p id="wall-hint" class="hint" role="status">Choose a wall tool to edit the maze. Editing pauses the simulation.</p>
+      </section>
+
+      <section>
         <h2>Items</h2>
         <p class="hint">The Medium (13 × 13) maze starts with an open interior and a fixed outer wall. Pick an item and click a cell to place it. Choose Wall to paint interior walls by dragging, or Eraser to remove walls by dragging and items by clicking.</p>
         <div id="items"></div>

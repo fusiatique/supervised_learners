@@ -1,8 +1,7 @@
 // Tabular Q-learning with ε-greedy exploration. ε starts at `epsilonStart` and
 // shrinks by `epsilonDecay` every episode down to `epsilonMin`.
-// Estimates start at `initialValue`: a value above zero makes untried moves
-// look promising, so the agent explores the whole maze instead of settling on
-// the first item it happens to find.
+// Estimates start at zero. Exploration comes from ε-greedy random moves,
+// with random tie-breaking when moves have equal estimated values.
 //
 // Every agent exposes the same interface so the simulation and the views can
 // work with any learning model:
@@ -19,7 +18,7 @@ export class QLearningAgent {
   constructor(env, params) {
     this.params = params;
     this.numActions = env.numActions;
-    this.q = new Float64Array(env.numStates * env.numActions).fill(params.initialValue);
+    this.q = new Float64Array(env.numStates * env.numActions);
     this.visited = new Uint8Array(env.numStates);
     this.episodes = 0;
     this.policySnapshot = null;
