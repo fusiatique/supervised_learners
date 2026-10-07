@@ -4,7 +4,6 @@
 export const PARAMS = [
   { key: 'alpha', group: 'Agent', label: 'Learning rate (α)', min: 0.01, max: 1, step: 0.01, value: 0.5 },
   { key: 'gamma', group: 'Agent', label: 'Discount factor (γ)', min: 0.5, max: 0.99, step: 0.01, value: 0.98 },
-  { key: 'initialValue', group: 'Agent', label: 'Initial value estimate (on reset)', min: 0, max: 20, step: 0.5, value: 6 },
   { key: 'epsilonStart', group: 'Agent', label: 'Initial exploration (ε)', min: 0, max: 1, step: 0.01, value: 0.3 },
   { key: 'epsilonDecay', group: 'Agent', label: 'ε decay per episode', min: 0.9, max: 1, step: 0.001, value: 0.985 },
   { key: 'epsilonMin', group: 'Agent', label: 'Minimum ε', min: 0, max: 0.5, step: 0.01, value: 0.05 },

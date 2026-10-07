@@ -13,12 +13,51 @@ const sim = new Simulation(params);
 let tool = null;
 let running = false;
 let stepsPerSecond = 1;
+let wallTool = null;
+const wallButtons = ['add-wall', 'erase-wall', 'move-wall'];
+const wallHints = {
+  'add-wall': 'Click an empty cell to add a wall. The start, agent, and items are protected.',
+  'erase-wall': 'Click a wall to erase it.',
+  'move-wall': 'Click a wall, then click an empty cell to move it. Click the selected wall to cancel.',
+};
+
+function selectWallTool(id) {
+  wallTool = id;
+  mazeView.selectedWall = null;
+  mazeView.editingWalls = id !== null;
+  for (const buttonId of wallButtons) $(buttonId).setAttribute('aria-pressed', String(buttonId === id));
+  for (const button of $('items').querySelectorAll('button')) {
+    button.setAttribute('aria-pressed', String(id === null && button.dataset.tool === tool));
+  }
+  $('wall-hint').textContent = wallHints[id] ?? 'Choose a wall tool to edit the maze. Editing pauses the simulation.';
+  if (id !== null) setRunning(false);
+}
 
 // --- Views -----------------------------------------------------------------
 
 const mazeView = new MazeView($('maze'), {
   onCellClick(cell) {
     const env = sim.env;
+    if (wallTool !== null) {
+      setRunning(false);
+      if (wallTool === 'add-wall') {
+        $('wall-hint').textContent = env.addWall(cell) ? wallHints[wallTool] : 'Choose an empty cell without the start, agent, or an item.';
+      } else if (wallTool === 'erase-wall') {
+        env.removeWall(cell);
+      } else if (cell === mazeView.selectedWall) {
+        mazeView.selectedWall = null;
+        $('wall-hint').textContent = wallHints[wallTool];
+      } else if (mazeView.selectedWall !== null && env.moveWall(mazeView.selectedWall, cell)) {
+        mazeView.selectedWall = null;
+        $('wall-hint').textContent = wallHints[wallTool];
+      } else if (env.isWall(cell)) {
+        mazeView.selectedWall = cell;
+        $('wall-hint').textContent = 'Wall selected. Click an empty cell to move it.';
+      } else {
+        $('wall-hint').textContent = mazeView.selectedWall === null ? 'Select a wall first.' : 'Choose an empty cell without the start, agent, or an item.';
+      }
+      return;
+    }
     if (!env.canHoldItem(cell)) return;
     if (tool === ERASER || env.items.get(cell) === tool) env.removeItem(cell);
     else env.placeItem(cell, tool);
@@ -28,11 +67,23 @@ const chart = new LineChart($('reward-chart'), { colorVar: '--agent', xLabel: 'S
 
 // --- Controls --------------------------------------------------------------
 
-fillSelect($('maze-select'), MAZES, (id) => sim.setMaze(id));
+fillSelect($('maze-select'), MAZES, (id) => {
+  sim.setMaze(id);
+  selectWallTool(wallTool);
+});
 fillSelect($('agent-select'), AGENTS, (id) => sim.setAgent(id));
 buildParamControls($('params'), params);
 tool = buildItemPalette($('items'), (id) => {
   tool = id;
+  selectWallTool(null);
+});
+
+for (const id of wallButtons) $(id).addEventListener('click', () => selectWallTool(wallTool === id ? null : id));
+$('clear-walls').addEventListener('click', () => {
+  setRunning(false);
+  sim.env.clearWalls();
+  mazeView.selectedWall = null;
+  $('wall-hint').textContent = 'All walls erased. Choose Add walls to build a new layout.';
 });
 
 function setRunning(value) {

@@ -47,6 +47,7 @@ export function buildItemPalette(container, onSelect) {
     const button = el('button', { type: 'button', className: 'tool' }, [swatch, item.name]);
     button.addEventListener('click', () => select(item.id));
     buttons.set(item.id, button);
+    button.dataset.tool = item.id;
 
     const value = el('input', { type: 'number', value: item.value, min: -20, max: 20, step: 0.5, title: `Value of ${item.name}` });
     value.setAttribute('aria-label', `Value of ${item.name}`);
@@ -59,6 +60,7 @@ export function buildItemPalette(container, onSelect) {
   const eraser = el('button', { type: 'button', className: 'tool', textContent: 'Eraser' });
   eraser.addEventListener('click', () => select(ERASER));
   buttons.set(ERASER, eraser);
+  eraser.dataset.tool = ERASER;
   container.append(el('div', { className: 'tool-row' }, [eraser]));
 
   const initial = ITEM_TYPES[ITEM_TYPES.length - 1].id;
