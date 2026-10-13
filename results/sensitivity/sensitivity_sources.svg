@@ -1,0 +1,299 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1064 797" width="1064" height="797" font-family='system-ui, -apple-system, "Segoe UI", sans-serif'>
+<rect width="1064" height="797" fill="#fcfcfb"/>
+<text x="52.0" y="22.0" font-size="14" font-weight="600" fill="#0b0b0b" text-anchor="start">Source use under background drift and a low starting state</text>
+<text x="52.0" y="39.0" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">Interactions per greedy evaluation episode. Mean ± sd over 20 seeds, 1500 training episodes each.</text>
+<rect x="52" y="49" width="12" height="12" rx="2" fill="#2a78d6"/>
+<text x="69.0" y="59.0" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">A: fixed trade-off</text>
+<rect x="198.60000000000002" y="49" width="12" height="12" rx="2" fill="#eb6834"/>
+<text x="215.6" y="59.0" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">B: adaptive trade-off</text>
+<rect x="363.80000000000007" y="49" width="12" height="12" rx="2" fill="#1baf7a"/>
+<text x="380.8" y="59.0" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">C: no accumulated-harm penalty</text>
+<text x="52.0" y="85.0" font-size="11" font-weight="600" fill="#0b0b0b" text-anchor="start">Base: drift 0, start d 50</text>
+<line x1="52" x2="352" y1="267.5" y2="267.5" stroke="#898781" stroke-width="1"/>
+<text x="46.0" y="271.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">0</text>
+<line x1="52" x2="352" y1="209.5" y2="209.5" stroke="#e1e0d9" stroke-width="1"/>
+<text x="46.0" y="213.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">50</text>
+<line x1="52" x2="352" y1="151.5" y2="151.5" stroke="#e1e0d9" stroke-width="1"/>
+<text x="46.0" y="155.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">100</text>
+<line x1="52" x2="352" y1="93.5" y2="93.5" stroke="#e1e0d9" stroke-width="1"/>
+<text x="46.0" y="97.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">150</text>
+<text x="82.0" y="282.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Food</text>
+<path d="M60,267 v-41.066 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v41.066 z" fill="#2a78d6"><title>A: fixed trade-off, Food: 38.9 ± 54.3</title></path>
+<line x1="66.7" x2="66.7" y1="158.9" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<path d="M75.33333333333333,267 v-34.627999999999986 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v34.627999999999986 z" fill="#eb6834"><title>B: adaptive trade-off, Food: 33.3 ± 52.2</title></path>
+<line x1="82.0" x2="82.0" y1="167.8" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<path d="M90.66666666666667,267 v-2.437999999999988 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v2.437999999999988 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Food: 5.55 ± 24.8</title></path>
+<line x1="97.3" x2="97.3" y1="231.8" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<text x="142.0" y="282.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Social</text>
+<path d="M120,267 v-15.313999999999993 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v15.313999999999993 z" fill="#2a78d6"><title>A: fixed trade-off, Social: 16.6 ± 40.7</title></path>
+<line x1="126.7" x2="126.7" y1="200.5" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<path d="M135.33333333333334,267 v-28.189999999999998 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v28.189999999999998 z" fill="#eb6834"><title>B: adaptive trade-off, Social: 27.8 ± 49.3</title></path>
+<line x1="142.0" x2="142.0" y1="177.6" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<path d="M150.66666666666666,267 v-21.75200000000001 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v21.75200000000001 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Social: 22.2 ± 45.6</title></path>
+<line x1="157.3" x2="157.3" y1="188.4" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<text x="202.0" y="282.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Rest</text>
+<path d="M180,267 v-60.09 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v60.09 z" fill="#2a78d6"><title>A: fixed trade-off, Rest: 55.3 ± 56.7</title></path>
+<line x1="186.7" x2="186.7" y1="137.1" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<path d="M195.33333333333334,267 v-53.94200000000001 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v53.94200000000001 z" fill="#eb6834"><title>B: adaptive trade-off, Rest: 50.0 ± 56.7</title></path>
+<line x1="202.0" x2="202.0" y1="143.3" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<path d="M210.66666666666666,267 v-79.69400000000002 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v79.69400000000002 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Rest: 72.2 ± 54.3</title></path>
+<line x1="217.3" x2="217.3" y1="120.3" y2="246.3" stroke="#52514e" stroke-width="1"/>
+<text x="262.0" y="282.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Drug A</text>
+<path d="M240,267 v0 q0,0 0,0 h13.333333333333334 q0,0 0,0 v0 z" fill="#2a78d6"><title>A: fixed trade-off, Drug A: 0.00</title></path>
+<path d="M255.33333333333334,267 v0 q0,0 0,0 h13.333333333333334 q0,0 0,0 v0 z" fill="#eb6834"><title>B: adaptive trade-off, Drug A: 0.00</title></path>
+<path d="M270.6666666666667,267 v-2.437999999999988 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v2.437999999999988 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Drug A: 5.55 ± 24.8</title></path>
+<line x1="277.3" x2="277.3" y1="231.8" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<text x="322.0" y="282.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Drug B</text>
+<path d="M300,267 v0 q0,-0.11599999999998545 0.11599999999998545,-0.11599999999998545 h13.101333333333363 q0.11599999999998545,0 0.11599999999998545,0.11599999999998545 v0 z" fill="#2a78d6"><title>A: fixed trade-off, Drug B: 0.10 ± 0.45</title></path>
+<line x1="306.7" x2="306.7" y1="266.4" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<path d="M315.3333333333333,267 v0 q0,0 0,0 h13.333333333333334 q0,0 0,0 v0 z" fill="#eb6834"><title>B: adaptive trade-off, Drug B: 0.00</title></path>
+<path d="M330.6666666666667,267 v0 q0,-3.132000000000005 3.132000000000005,-3.132000000000005 h7.069333333333324 q3.132000000000005,0 3.132000000000005,3.132000000000005 v0 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Drug B: 2.70 ± 12.1</title></path>
+<line x1="337.3" x2="337.3" y1="249.9" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<text x="400.0" y="85.0" font-size="11" font-weight="600" fill="#0b0b0b" text-anchor="start">Drift 0.2, start d 50</text>
+<line x1="400" x2="700" y1="267.5" y2="267.5" stroke="#898781" stroke-width="1"/>
+<text x="394.0" y="271.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">0</text>
+<line x1="400" x2="700" y1="209.5" y2="209.5" stroke="#e1e0d9" stroke-width="1"/>
+<text x="394.0" y="213.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">50</text>
+<line x1="400" x2="700" y1="151.5" y2="151.5" stroke="#e1e0d9" stroke-width="1"/>
+<text x="394.0" y="155.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">100</text>
+<line x1="400" x2="700" y1="93.5" y2="93.5" stroke="#e1e0d9" stroke-width="1"/>
+<text x="394.0" y="97.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">150</text>
+<text x="430.0" y="282.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Food</text>
+<path d="M408,267 v-15.313999999999993 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v15.313999999999993 z" fill="#2a78d6"><title>A: fixed trade-off, Food: 16.6 ± 40.7</title></path>
+<line x1="414.7" x2="414.7" y1="200.5" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<path d="M423.3333333333333,267 v-40.77600000000001 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v40.77600000000001 z" fill="#eb6834"><title>B: adaptive trade-off, Food: 38.6 ± 54.0</title></path>
+<line x1="430.0" x2="430.0" y1="159.6" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<path d="M438.6666666666667,267 v-15.313999999999993 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v15.313999999999993 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Food: 16.6 ± 40.7</title></path>
+<line x1="445.3" x2="445.3" y1="200.5" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<text x="490.0" y="282.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Social</text>
+<path d="M468,267 v-28.189999999999998 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v28.189999999999998 z" fill="#2a78d6"><title>A: fixed trade-off, Social: 27.8 ± 49.3</title></path>
+<line x1="474.7" x2="474.7" y1="177.6" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<path d="M483.3333333333333,267 v-34.337999999999994 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v34.337999999999994 z" fill="#eb6834"><title>B: adaptive trade-off, Social: 33.0 ± 51.8</title></path>
+<line x1="490.0" x2="490.0" y1="168.6" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<path d="M498.6666666666667,267 v0 q0,0 0,0 h13.333333333333334 q0,0 0,0 v0 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Social: 0.00</title></path>
+<text x="550.0" y="282.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Rest</text>
+<path d="M528,267 v-72.44400000000002 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v72.44400000000002 z" fill="#2a78d6"><title>A: fixed trade-off, Rest: 65.9 ± 55.2</title></path>
+<line x1="534.7" x2="534.7" y1="126.5" y2="254.6" stroke="#52514e" stroke-width="1"/>
+<path d="M543.3333333333334,267 v-40.196 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v40.196 z" fill="#eb6834"><title>B: adaptive trade-off, Rest: 38.1 ± 53.3</title></path>
+<line x1="550.0" x2="550.0" y1="161.0" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<path d="M558.6666666666666,267 v-86.132 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v86.132 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Rest: 77.7 ± 52.2</title></path>
+<line x1="565.3" x2="565.3" y1="116.3" y2="237.4" stroke="#52514e" stroke-width="1"/>
+<text x="610.0" y="282.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Drug A</text>
+<path d="M588,267 v0 q0,0 0,0 h13.333333333333334 q0,0 0,0 v0 z" fill="#2a78d6"><title>A: fixed trade-off, Drug A: 0.00</title></path>
+<path d="M603.3333333333334,267 v0 q0,-0.29000000000002046 0.29000000000002046,-0.29000000000002046 h12.753333333333293 q0.29000000000002046,0 0.29000000000002046,0.29000000000002046 v0 z" fill="#eb6834"><title>B: adaptive trade-off, Drug A: 0.25 ± 0.79</title></path>
+<line x1="610.0" x2="610.0" y1="265.8" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<path d="M618.6666666666666,267 v-15.313999999999993 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v15.313999999999993 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Drug A: 16.6 ± 40.7</title></path>
+<line x1="625.3" x2="625.3" y1="200.5" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<text x="670.0" y="282.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Drug B</text>
+<path d="M648,267 v0 q0,-0.3480000000000132 0.3480000000000132,-0.3480000000000132 h12.637333333333308 q0.3480000000000132,0 0.3480000000000132,0.3480000000000132 v0 z" fill="#2a78d6"><title>A: fixed trade-off, Drug B: 0.30 ± 0.98</title></path>
+<line x1="654.7" x2="654.7" y1="265.5" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<path d="M663.3333333333334,267 v0 q0,-0.17399999999997817 0.17399999999997817,-0.17399999999997817 h12.985333333333378 q0.17399999999997817,0 0.17399999999997817,0.17399999999997817 v0 z" fill="#eb6834"><title>B: adaptive trade-off, Drug B: 0.15 ± 0.37</title></path>
+<line x1="670.0" x2="670.0" y1="266.4" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<path d="M678.6666666666666,267 v0 q0,0 0,0 h13.333333333333334 q0,0 0,0 v0 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Drug B: 0.00</title></path>
+<text x="748.0" y="85.0" font-size="11" font-weight="600" fill="#0b0b0b" text-anchor="start">Drift 0, start d 20</text>
+<line x1="748" x2="1048" y1="267.5" y2="267.5" stroke="#898781" stroke-width="1"/>
+<text x="742.0" y="271.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">0</text>
+<line x1="748" x2="1048" y1="209.5" y2="209.5" stroke="#e1e0d9" stroke-width="1"/>
+<text x="742.0" y="213.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">50</text>
+<line x1="748" x2="1048" y1="151.5" y2="151.5" stroke="#e1e0d9" stroke-width="1"/>
+<text x="742.0" y="155.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">100</text>
+<line x1="748" x2="1048" y1="93.5" y2="93.5" stroke="#e1e0d9" stroke-width="1"/>
+<text x="742.0" y="97.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">150</text>
+<text x="778.0" y="282.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Food</text>
+<path d="M756,267 v-19.954000000000008 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v19.954000000000008 z" fill="#2a78d6"><title>A: fixed trade-off, Food: 20.6 ± 42.4</title></path>
+<line x1="762.7" x2="762.7" y1="193.9" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<path d="M771.3333333333334,267 v-2.1480000000000246 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v2.1480000000000246 z" fill="#eb6834"><title>B: adaptive trade-off, Food: 5.30 ± 23.7</title></path>
+<line x1="778.0" x2="778.0" y1="233.4" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<path d="M786.6666666666666,267 v0 q0,0 0,0 h13.333333333333334 q0,0 0,0 v0 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Food: 0.00</title></path>
+<text x="838.0" y="282.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Social</text>
+<path d="M816,267 v-46.633999999999986 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v46.633999999999986 z" fill="#2a78d6"><title>A: fixed trade-off, Social: 43.6 ± 54.9</title></path>
+<line x1="822.7" x2="822.7" y1="152.7" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<path d="M831.3333333333334,267 v-59.103999999999985 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v59.103999999999985 z" fill="#eb6834"><title>B: adaptive trade-off, Social: 54.4 ± 55.9</title></path>
+<line x1="838.0" x2="838.0" y1="139.1" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<path d="M846.6666666666666,267 v-34.627999999999986 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v34.627999999999986 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Social: 33.3 ± 52.2</title></path>
+<line x1="853.3" x2="853.3" y1="167.8" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<text x="898.0" y="282.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Rest</text>
+<path d="M876,267 v-47.50399999999999 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v47.50399999999999 z" fill="#2a78d6"><title>A: fixed trade-off, Rest: 44.4 ± 55.8</title></path>
+<line x1="882.7" x2="882.7" y1="150.8" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<path d="M891.3333333333334,267 v-47.03999999999999 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v47.03999999999999 z" fill="#eb6834"><title>B: adaptive trade-off, Rest: 44.0 ± 55.3</title></path>
+<line x1="898.0" x2="898.0" y1="151.8" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<path d="M906.6666666666666,267 v-40.94999999999999 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v40.94999999999999 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Rest: 38.8 ± 54.2</title></path>
+<line x1="913.3" x2="913.3" y1="159.2" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<text x="958.0" y="282.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Drug A</text>
+<path d="M936,267 v0 q0,-0.8700000000000045 0.8700000000000045,-0.8700000000000045 h11.593333333333325 q0.8700000000000045,0 0.8700000000000045,0.8700000000000045 v0 z" fill="#2a78d6"><title>A: fixed trade-off, Drug A: 0.75 ± 1.62</title></path>
+<line x1="942.7" x2="942.7" y1="264.3" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<path d="M951.3333333333334,267 v0 q0,-0.6960000000000264 0.6960000000000264,-0.6960000000000264 h11.941333333333281 q0.6960000000000264,0 0.6960000000000264,0.6960000000000264 v0 z" fill="#eb6834"><title>B: adaptive trade-off, Drug A: 0.60 ± 1.35</title></path>
+<line x1="958.0" x2="958.0" y1="264.7" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<path d="M966.6666666666666,267 v-33.584 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v33.584 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Drug A: 32.4 ± 50.8</title></path>
+<line x1="973.3" x2="973.3" y1="170.5" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<text x="1018.0" y="282.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Drug B</text>
+<path d="M996,267 v0 q0,-0.4060000000000059 0.4060000000000059,-0.4060000000000059 h12.521333333333322 q0.4060000000000059,0 0.4060000000000059,0.4060000000000059 v0 z" fill="#2a78d6"><title>A: fixed trade-off, Drug B: 0.35 ± 0.88</title></path>
+<line x1="1002.7" x2="1002.7" y1="265.6" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<path d="M1011.3333333333334,267 v0 q0,-0.23200000000002774 0.23200000000002774,-0.23200000000002774 h12.869333333333278 q0.23200000000002774,0 0.23200000000002774,0.23200000000002774 v0 z" fill="#eb6834"><title>B: adaptive trade-off, Drug B: 0.20 ± 0.52</title></path>
+<line x1="1018.0" x2="1018.0" y1="266.2" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<path d="M1026.6666666666667,267 v0 q0,-0.5219999999999914 0.5219999999999914,-0.5219999999999914 h12.289333333333351 q0.5219999999999914,0 0.5219999999999914,0.5219999999999914 v0 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Drug B: 0.45 ± 1.15</title></path>
+<line x1="1033.3" x2="1033.3" y1="265.1" y2="267.0" stroke="#52514e" stroke-width="1"/>
+<text x="52.0" y="333.0" font-size="11" font-weight="600" fill="#0b0b0b" text-anchor="start">Drift 0.2, start d 20</text>
+<line x1="52" x2="352" y1="515.5" y2="515.5" stroke="#898781" stroke-width="1"/>
+<text x="46.0" y="519.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">0</text>
+<line x1="52" x2="352" y1="457.5" y2="457.5" stroke="#e1e0d9" stroke-width="1"/>
+<text x="46.0" y="461.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">50</text>
+<line x1="52" x2="352" y1="399.5" y2="399.5" stroke="#e1e0d9" stroke-width="1"/>
+<text x="46.0" y="403.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">100</text>
+<line x1="52" x2="352" y1="341.5" y2="341.5" stroke="#e1e0d9" stroke-width="1"/>
+<text x="46.0" y="345.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">150</text>
+<text x="82.0" y="530.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Food</text>
+<path d="M60,515 v-20.824000000000012 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v20.824000000000012 z" fill="#2a78d6"><title>A: fixed trade-off, Food: 21.4 ± 44.0</title></path>
+<line x1="66.7" x2="66.7" y1="439.2" y2="515.0" stroke="#52514e" stroke-width="1"/>
+<path d="M75.33333333333333,515 v-33.120000000000005 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v33.120000000000005 z" fill="#eb6834"><title>B: adaptive trade-off, Food: 32.0 ± 50.2</title></path>
+<line x1="82.0" x2="82.0" y1="419.7" y2="515.0" stroke="#52514e" stroke-width="1"/>
+<path d="M90.66666666666667,515 v-8.875999999999976 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v8.875999999999976 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Food: 11.1 ± 34.2</title></path>
+<line x1="97.3" x2="97.3" y1="462.5" y2="515.0" stroke="#52514e" stroke-width="1"/>
+<text x="142.0" y="530.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Social</text>
+<path d="M120,515 v-27.726 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v27.726 z" fill="#2a78d6"><title>A: fixed trade-off, Social: 27.4 ± 48.6</title></path>
+<line x1="126.7" x2="126.7" y1="426.9" y2="515.0" stroke="#52514e" stroke-width="1"/>
+<path d="M135.33333333333334,515 v-27.610000000000014 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v27.610000000000014 z" fill="#eb6834"><title>B: adaptive trade-off, Social: 27.3 ± 48.4</title></path>
+<line x1="142.0" x2="142.0" y1="427.2" y2="515.0" stroke="#52514e" stroke-width="1"/>
+<path d="M150.66666666666666,515 v-8.875999999999976 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v8.875999999999976 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Social: 11.1 ± 34.2</title></path>
+<line x1="157.3" x2="157.3" y1="462.5" y2="515.0" stroke="#52514e" stroke-width="1"/>
+<text x="202.0" y="530.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Rest</text>
+<path d="M180,515 v-66.41200000000003 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v66.41200000000003 z" fill="#2a78d6"><title>A: fixed trade-off, Rest: 60.7 ± 56.4</title></path>
+<line x1="186.7" x2="186.7" y1="379.2" y2="510.0" stroke="#52514e" stroke-width="1"/>
+<path d="M195.33333333333334,515 v-53.94200000000001 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v53.94200000000001 z" fill="#eb6834"><title>B: adaptive trade-off, Rest: 50.0 ± 56.7</title></path>
+<line x1="202.0" x2="202.0" y1="391.3" y2="515.0" stroke="#52514e" stroke-width="1"/>
+<path d="M210.66666666666666,515 v-66.81799999999998 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v66.81799999999998 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Rest: 61.0 ± 56.7</title></path>
+<line x1="217.3" x2="217.3" y1="378.5" y2="509.9" stroke="#52514e" stroke-width="1"/>
+<text x="262.0" y="530.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Drug A</text>
+<path d="M240,515 v0 q0,-0.5800000000000409 0.5800000000000409,-0.5800000000000409 h12.173333333333252 q0.5800000000000409,0 0.5800000000000409,0.5800000000000409 v0 z" fill="#2a78d6"><title>A: fixed trade-off, Drug A: 0.50 ± 1.54</title></path>
+<line x1="246.7" x2="246.7" y1="512.6" y2="515.0" stroke="#52514e" stroke-width="1"/>
+<path d="M255.33333333333334,515 v0 q0,-0.6380000000000337 0.6380000000000337,-0.6380000000000337 h12.057333333333267 q0.6380000000000337,0 0.6380000000000337,0.6380000000000337 v0 z" fill="#eb6834"><title>B: adaptive trade-off, Drug A: 0.55 ± 1.36</title></path>
+<line x1="262.0" x2="262.0" y1="512.8" y2="515.0" stroke="#52514e" stroke-width="1"/>
+<path d="M270.6666666666667,515 v-27.262 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v27.262 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Drug A: 26.9 ± 47.9</title></path>
+<line x1="277.3" x2="277.3" y1="428.2" y2="515.0" stroke="#52514e" stroke-width="1"/>
+<text x="322.0" y="530.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Drug B</text>
+<path d="M300,515 v0 q0,-0.40599999999994907 0.40599999999994907,-0.40599999999994907 h12.521333333333436 q0.40599999999994907,0 0.40599999999994907,0.40599999999994907 v0 z" fill="#2a78d6"><title>A: fixed trade-off, Drug B: 0.35 ± 1.09</title></path>
+<line x1="306.7" x2="306.7" y1="513.3" y2="515.0" stroke="#52514e" stroke-width="1"/>
+<path d="M315.3333333333333,515 v0 q0,-0.34799999999995634 0.34799999999995634,-0.34799999999995634 h12.637333333333421 q0.34799999999995634,0 0.34799999999995634,0.34799999999995634 v0 z" fill="#eb6834"><title>B: adaptive trade-off, Drug B: 0.30 ± 0.73</title></path>
+<line x1="322.0" x2="322.0" y1="513.8" y2="515.0" stroke="#52514e" stroke-width="1"/>
+<path d="M330.6666666666667,515 v0 q0,-0.4640000000000555 0.4640000000000555,-0.4640000000000555 h12.405333333333223 q0.4640000000000555,0 0.4640000000000555,0.4640000000000555 v0 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Drug B: 0.40 ± 0.99</title></path>
+<line x1="337.3" x2="337.3" y1="513.4" y2="515.0" stroke="#52514e" stroke-width="1"/>
+<text x="400.0" y="333.0" font-size="11" font-weight="600" fill="#0b0b0b" text-anchor="start">Drift 1 (exploratory)</text>
+<line x1="400" x2="700" y1="515.5" y2="515.5" stroke="#898781" stroke-width="1"/>
+<text x="394.0" y="519.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">0</text>
+<line x1="400" x2="700" y1="457.5" y2="457.5" stroke="#e1e0d9" stroke-width="1"/>
+<text x="394.0" y="461.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">50</text>
+<line x1="400" x2="700" y1="399.5" y2="399.5" stroke="#e1e0d9" stroke-width="1"/>
+<text x="394.0" y="403.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">100</text>
+<line x1="400" x2="700" y1="341.5" y2="341.5" stroke="#e1e0d9" stroke-width="1"/>
+<text x="394.0" y="345.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">150</text>
+<text x="430.0" y="530.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Food</text>
+<path d="M408,515 v-34.627999999999986 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v34.627999999999986 z" fill="#2a78d6"><title>A: fixed trade-off, Food: 33.3 ± 52.2</title></path>
+<line x1="414.7" x2="414.7" y1="415.8" y2="515.0" stroke="#52514e" stroke-width="1"/>
+<path d="M423.3333333333333,515 v-34.396000000000015 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v34.396000000000015 z" fill="#eb6834"><title>B: adaptive trade-off, Food: 33.1 ± 51.9</title></path>
+<line x1="430.0" x2="430.0" y1="416.4" y2="515.0" stroke="#52514e" stroke-width="1"/>
+<path d="M438.6666666666667,515 v-28.189999999999998 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v28.189999999999998 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Food: 27.8 ± 49.3</title></path>
+<line x1="445.3" x2="445.3" y1="425.6" y2="515.0" stroke="#52514e" stroke-width="1"/>
+<text x="490.0" y="530.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Social</text>
+<path d="M468,515 v-21.75200000000001 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v21.75200000000001 z" fill="#2a78d6"><title>A: fixed trade-off, Social: 22.2 ± 45.6</title></path>
+<line x1="474.7" x2="474.7" y1="436.4" y2="515.0" stroke="#52514e" stroke-width="1"/>
+<path d="M483.3333333333333,515 v-34.56999999999999 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v34.56999999999999 z" fill="#eb6834"><title>B: adaptive trade-off, Social: 33.3 ± 52.1</title></path>
+<line x1="490.0" x2="490.0" y1="416.0" y2="515.0" stroke="#52514e" stroke-width="1"/>
+<path d="M498.6666666666667,515 v-60.379999999999995 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v60.379999999999995 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Social: 55.5 ± 56.9</title></path>
+<line x1="505.3" x2="505.3" y1="384.6" y2="515.0" stroke="#52514e" stroke-width="1"/>
+<text x="550.0" y="530.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Rest</text>
+<path d="M528,515 v-60.379999999999995 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v60.379999999999995 z" fill="#2a78d6"><title>A: fixed trade-off, Rest: 55.5 ± 56.9</title></path>
+<line x1="534.7" x2="534.7" y1="384.6" y2="515.0" stroke="#52514e" stroke-width="1"/>
+<path d="M543.3333333333334,515 v-47.50400000000002 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v47.50400000000002 z" fill="#eb6834"><title>B: adaptive trade-off, Rest: 44.4 ± 55.8</title></path>
+<line x1="550.0" x2="550.0" y1="398.8" y2="515.0" stroke="#52514e" stroke-width="1"/>
+<path d="M558.6666666666666,515 v-28.189999999999998 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v28.189999999999998 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Rest: 27.8 ± 49.3</title></path>
+<line x1="565.3" x2="565.3" y1="425.6" y2="515.0" stroke="#52514e" stroke-width="1"/>
+<text x="610.0" y="530.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Drug A</text>
+<path d="M588,515 v0 q0,0 0,0 h13.333333333333334 q0,0 0,0 v0 z" fill="#2a78d6"><title>A: fixed trade-off, Drug A: 0.00</title></path>
+<path d="M603.3333333333334,515 v0 q0,0 0,0 h13.333333333333334 q0,0 0,0 v0 z" fill="#eb6834"><title>B: adaptive trade-off, Drug A: 0.00</title></path>
+<path d="M618.6666666666666,515 v0 q0,0 0,0 h13.333333333333334 q0,0 0,0 v0 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Drug A: 0.00</title></path>
+<text x="670.0" y="530.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Drug B</text>
+<path d="M648,515 v0 q0,0 0,0 h13.333333333333334 q0,0 0,0 v0 z" fill="#2a78d6"><title>A: fixed trade-off, Drug B: 0.00</title></path>
+<path d="M663.3333333333334,515 v0 q0,0 0,0 h13.333333333333334 q0,0 0,0 v0 z" fill="#eb6834"><title>B: adaptive trade-off, Drug B: 0.00</title></path>
+<path d="M678.6666666666666,515 v0 q0,0 0,0 h13.333333333333334 q0,0 0,0 v0 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Drug B: 0.00</title></path>
+<text x="748.0" y="333.0" font-size="11" font-weight="600" fill="#0b0b0b" text-anchor="start">Drift 2 (exploratory)</text>
+<line x1="748" x2="1048" y1="515.5" y2="515.5" stroke="#898781" stroke-width="1"/>
+<text x="742.0" y="519.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">0</text>
+<line x1="748" x2="1048" y1="457.5" y2="457.5" stroke="#e1e0d9" stroke-width="1"/>
+<text x="742.0" y="461.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">50</text>
+<line x1="748" x2="1048" y1="399.5" y2="399.5" stroke="#e1e0d9" stroke-width="1"/>
+<text x="742.0" y="403.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">100</text>
+<line x1="748" x2="1048" y1="341.5" y2="341.5" stroke="#e1e0d9" stroke-width="1"/>
+<text x="742.0" y="345.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">150</text>
+<text x="778.0" y="530.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Food</text>
+<path d="M756,515 v-51.738 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v51.738 z" fill="#2a78d6"><title>A: fixed trade-off, Food: 48.0 ± 55.0</title></path>
+<line x1="762.7" x2="762.7" y1="395.5" y2="515.0" stroke="#52514e" stroke-width="1"/>
+<path d="M771.3333333333334,515 v-60.26400000000001 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v60.26400000000001 z" fill="#eb6834"><title>B: adaptive trade-off, Food: 55.4 ± 56.8</title></path>
+<line x1="778.0" x2="778.0" y1="384.8" y2="515.0" stroke="#52514e" stroke-width="1"/>
+<path d="M786.6666666666666,515 v-28.189999999999998 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v28.189999999999998 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Food: 27.8 ± 49.3</title></path>
+<line x1="793.3" x2="793.3" y1="425.6" y2="515.0" stroke="#52514e" stroke-width="1"/>
+<text x="838.0" y="530.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Social</text>
+<path d="M816,515 v-40.94999999999999 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v40.94999999999999 z" fill="#2a78d6"><title>A: fixed trade-off, Social: 38.8 ± 54.2</title></path>
+<line x1="822.7" x2="822.7" y1="407.2" y2="515.0" stroke="#52514e" stroke-width="1"/>
+<path d="M831.3333333333334,515 v-34.396000000000015 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v34.396000000000015 z" fill="#eb6834"><title>B: adaptive trade-off, Social: 33.1 ± 51.9</title></path>
+<line x1="838.0" x2="838.0" y1="416.4" y2="515.0" stroke="#52514e" stroke-width="1"/>
+<path d="M846.6666666666666,515 v-2.437999999999988 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v2.437999999999988 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Social: 5.55 ± 24.8</title></path>
+<line x1="853.3" x2="853.3" y1="479.8" y2="515.0" stroke="#52514e" stroke-width="1"/>
+<text x="898.0" y="530.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Rest</text>
+<path d="M876,515 v-21.636000000000024 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v21.636000000000024 z" fill="#2a78d6"><title>A: fixed trade-off, Rest: 22.1 ± 45.3</title></path>
+<line x1="882.7" x2="882.7" y1="436.8" y2="515.0" stroke="#52514e" stroke-width="1"/>
+<path d="M891.3333333333334,515 v-21.636000000000024 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v21.636000000000024 z" fill="#eb6834"><title>B: adaptive trade-off, Rest: 22.1 ± 45.3</title></path>
+<line x1="898.0" x2="898.0" y1="436.8" y2="515.0" stroke="#52514e" stroke-width="1"/>
+<path d="M906.6666666666666,515 v0 q0,0 0,0 h13.333333333333334 q0,0 0,0 v0 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Rest: 0.00</title></path>
+<text x="958.0" y="530.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Drug A</text>
+<path d="M936,515 v0 q0,0 0,0 h13.333333333333334 q0,0 0,0 v0 z" fill="#2a78d6"><title>A: fixed trade-off, Drug A: 0.00</title></path>
+<path d="M951.3333333333334,515 v0 q0,0 0,0 h13.333333333333334 q0,0 0,0 v0 z" fill="#eb6834"><title>B: adaptive trade-off, Drug A: 0.00</title></path>
+<path d="M966.6666666666666,515 v-32.01800000000003 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v32.01800000000003 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Drug A: 31.1 ± 23.7</title></path>
+<line x1="973.3" x2="973.3" y1="451.5" y2="506.4" stroke="#52514e" stroke-width="1"/>
+<text x="1018.0" y="530.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Drug B</text>
+<path d="M996,515 v0 q0,0 0,0 h13.333333333333334 q0,0 0,0 v0 z" fill="#2a78d6"><title>A: fixed trade-off, Drug B: 0.00</title></path>
+<path d="M1011.3333333333334,515 v0 q0,0 0,0 h13.333333333333334 q0,0 0,0 v0 z" fill="#eb6834"><title>B: adaptive trade-off, Drug B: 0.00</title></path>
+<path d="M1026.6666666666667,515 v0 q0,-1.8559999999999945 1.8559999999999945,-1.8559999999999945 h9.621333333333345 q1.8559999999999945,0 1.8559999999999945,1.8559999999999945 v0 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Drug B: 1.60 ± 7.16</title></path>
+<line x1="1033.3" x2="1033.3" y1="504.8" y2="515.0" stroke="#52514e" stroke-width="1"/>
+<text x="52.0" y="581.0" font-size="11" font-weight="600" fill="#0b0b0b" text-anchor="start">Drift 3 (exploratory)</text>
+<line x1="52" x2="352" y1="763.5" y2="763.5" stroke="#898781" stroke-width="1"/>
+<text x="46.0" y="767.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">0</text>
+<line x1="52" x2="352" y1="705.5" y2="705.5" stroke="#e1e0d9" stroke-width="1"/>
+<text x="46.0" y="709.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">50</text>
+<line x1="52" x2="352" y1="647.5" y2="647.5" stroke="#e1e0d9" stroke-width="1"/>
+<text x="46.0" y="651.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">100</text>
+<line x1="52" x2="352" y1="589.5" y2="589.5" stroke="#e1e0d9" stroke-width="1"/>
+<text x="46.0" y="593.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">150</text>
+<text x="82.0" y="778.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Food</text>
+<path d="M60,763 v-33.351999999999975 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v33.351999999999975 z" fill="#2a78d6"><title>A: fixed trade-off, Food: 32.2 ± 50.5</title></path>
+<line x1="66.7" x2="66.7" y1="667.1" y2="763.0" stroke="#52514e" stroke-width="1"/>
+<path d="M75.33333333333333,763 v-21.577999999999975 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v21.577999999999975 z" fill="#eb6834"><title>B: adaptive trade-off, Food: 22.1 ± 45.2</title></path>
+<line x1="82.0" x2="82.0" y1="684.9" y2="763.0" stroke="#52514e" stroke-width="1"/>
+<path d="M90.66666666666667,763 v0 q0,0 0,0 h13.333333333333334 q0,0 0,0 v0 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Food: 0.00</title></path>
+<text x="142.0" y="778.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Social</text>
+<path d="M120,763 v-33.932000000000016 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v33.932000000000016 z" fill="#2a78d6"><title>A: fixed trade-off, Social: 32.7 ± 51.3</title></path>
+<line x1="126.7" x2="126.7" y1="665.6" y2="763.0" stroke="#52514e" stroke-width="1"/>
+<path d="M135.33333333333334,763 v-8.470000000000027 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v8.470000000000027 z" fill="#eb6834"><title>B: adaptive trade-off, Social: 10.8 ± 33.1</title></path>
+<line x1="142.0" x2="142.0" y1="712.1" y2="763.0" stroke="#52514e" stroke-width="1"/>
+<path d="M150.66666666666666,763 v-7.947999999999979 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v7.947999999999979 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Social: 10.3 ± 31.8</title></path>
+<line x1="157.3" x2="157.3" y1="714.2" y2="763.0" stroke="#52514e" stroke-width="1"/>
+<text x="202.0" y="778.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Rest</text>
+<path d="M180,763 v-39.73199999999997 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v39.73199999999997 z" fill="#2a78d6"><title>A: fixed trade-off, Rest: 37.7 ± 52.7</title></path>
+<line x1="186.7" x2="186.7" y1="658.1" y2="763.0" stroke="#52514e" stroke-width="1"/>
+<path d="M195.33333333333334,763 v-14.734000000000037 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v14.734000000000037 z" fill="#eb6834"><title>B: adaptive trade-off, Rest: 16.1 ± 39.4</title></path>
+<line x1="202.0" x2="202.0" y1="698.5" y2="763.0" stroke="#52514e" stroke-width="1"/>
+<path d="M210.66666666666666,763 v-2.2060000000000173 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v2.2060000000000173 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Rest: 5.35 ± 23.9</title></path>
+<line x1="217.3" x2="217.3" y1="729.0" y2="763.0" stroke="#52514e" stroke-width="1"/>
+<text x="262.0" y="778.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Drug A</text>
+<path d="M240,763 v0 q0,-2.203999999999951 2.203999999999951,-2.203999999999951 h8.925333333333432 q2.203999999999951,0 2.203999999999951,2.203999999999951 v0 z" fill="#2a78d6"><title>A: fixed trade-off, Drug A: 1.90 ± 8.50</title></path>
+<line x1="246.7" x2="246.7" y1="750.9" y2="763.0" stroke="#52514e" stroke-width="1"/>
+<path d="M255.33333333333334,763 v-18.793999999999983 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v18.793999999999983 z" fill="#eb6834"><title>B: adaptive trade-off, Drug A: 19.6 ± 18.3</title></path>
+<line x1="262.0" x2="262.0" y1="718.9" y2="761.5" stroke="#52514e" stroke-width="1"/>
+<path d="M270.6666666666667,763 v-43.096000000000004 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v43.096000000000004 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Drug A: 40.6 ± 30.9</title></path>
+<line x1="277.3" x2="277.3" y1="680.1" y2="751.7" stroke="#52514e" stroke-width="1"/>
+<text x="322.0" y="778.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Drug B</text>
+<path d="M300,763 v0 q0,0 0,0 h13.333333333333334 q0,0 0,0 v0 z" fill="#2a78d6"><title>A: fixed trade-off, Drug B: 0.00</title></path>
+<path d="M315.3333333333333,763 v0 q0,0 0,0 h13.333333333333334 q0,0 0,0 v0 z" fill="#eb6834"><title>B: adaptive trade-off, Drug B: 0.00</title></path>
+<path d="M330.6666666666667,763 v-4.467999999999961 q0,-4 4,-4 h5.333333333333334 q4,0 4,4 v4.467999999999961 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Drug B: 7.30 ± 15.0</title></path>
+<line x1="337.3" x2="337.3" y1="737.1" y2="763.0" stroke="#52514e" stroke-width="1"/>
+<text transform="translate(13 172) rotate(-90)" font-size="11" fill="#898781" text-anchor="middle">Interactions per episode</text>
+</svg>

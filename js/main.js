@@ -1,125 +1,56 @@
-import { defaultParams, RECENT_EPISODES } from './config.js';
-import { AGENTS } from './agents/index.js';
+import { PARAMS, RECENT_EPISODES } from './config.js';
+import { DEPENDENCE, HRL_SLIDERS, MODELS, hrlConfig, getSourceType } from './hrl/config.js';
+import { harmWeight } from './hrl/reward.js';
+import { moodOf } from './hrl/mood.js';
 import { Simulation } from './simulation.js';
-import { layoutOf } from './mazes.js';
 import { MazeView } from './ui/mazeView.js';
+import { AgentView } from './ui/agentView.js';
 import { LineChart } from './ui/chart.js';
-import { ERASER, WALL_TOOL, fillSelect, buildParamControls, buildItemPalette, renderStats, renderChoices } from './ui/controls.js';
+import { fillSelect, buildParamControls, renderStats, renderLegend, renderMeter, renderChoices } from './ui/controls.js';
 
 const $ = (id) => document.getElementById(id);
 
-const params = defaultParams();
+// The source the "Give" button administers.
+const DOSE = getSourceType('drugB');
+
+const params = hrlConfig(DEPENDENCE);
 const sim = new Simulation(params);
-let tool = null;
 let running = false;
 let stepsPerSecond = 1;
-let wallStrokeReset = false;
-let resumeAfterAgentDrag = false;
-let wallTool = null;
-const wallButtons = ['add-wall', 'erase-wall', 'move-wall'];
-const wallHints = {
-  'add-wall': 'Click an empty cell to add a wall. The start, agent, and items are protected.',
-  'erase-wall': 'Click a wall to erase it.',
-  'move-wall': 'Click a wall, then click an empty cell to move it. Click the selected wall to cancel.',
-};
-
-function selectWallTool(id) {
-  wallTool = id;
-  mazeView.selectedWall = null;
-  mazeView.editingWalls = id !== null;
-  for (const buttonId of wallButtons) $(buttonId).setAttribute('aria-pressed', String(buttonId === id));
-  for (const button of $('items').querySelectorAll('button')) {
-    button.setAttribute('aria-pressed', String(id === null && button.dataset.tool === tool));
-  }
-  $('wall-hint').textContent = wallHints[id] ?? 'Choose a wall tool to edit the maze. Editing pauses the simulation.';
-  if (id !== null) setRunning(false);
-}
 
 // --- Views -----------------------------------------------------------------
 
-const mazeView = new MazeView($('maze'), {
-  onCellClick(cell) {
-    const env = sim.env;
-    if (wallTool !== null) {
-      setRunning(false);
-      if (wallTool === 'add-wall') {
-        $('wall-hint').textContent = env.addWall(cell) ? wallHints[wallTool] : 'Choose an empty cell without the start, agent, or an item.';
-      } else if (wallTool === 'erase-wall') {
-        env.removeWall(cell);
-      } else if (cell === mazeView.selectedWall) {
-        mazeView.selectedWall = null;
-        $('wall-hint').textContent = wallHints[wallTool];
-      } else if (mazeView.selectedWall !== null && env.moveWall(mazeView.selectedWall, cell)) {
-        mazeView.selectedWall = null;
-        $('wall-hint').textContent = wallHints[wallTool];
-      } else if (env.isWall(cell)) {
-        mazeView.selectedWall = cell;
-        $('wall-hint').textContent = 'Wall selected. Click an empty cell to move it.';
-      } else {
-        $('wall-hint').textContent = mazeView.selectedWall === null ? 'Select a wall first.' : 'Choose an empty cell without the start, agent, or an item.';
-      }
-      return;
-    }
-    if (tool === WALL_TOOL) return;
-    if (!env.canHoldItem(cell)) return;
-    if (tool === ERASER || env.items.get(cell) === tool) env.removeItem(cell);
-    else env.placeItem(cell, tool);
-  },
-  onCellDrag(cell) {
-    if (wallTool !== null || (tool !== WALL_TOOL && tool !== ERASER)) return;
-    if (running) setRunning(false);
-    const changed = sim.env.setWall(cell, tool === WALL_TOOL);
-    if (changed && !wallStrokeReset) {
-      sim.resetLearning();
-      wallStrokeReset = true;
-    }
-  },
-  onCellDragEnd() {
-    wallStrokeReset = false;
-  },
-  // Dragging the agent moves its starting cell. The simulation holds still
-  // while it is carried and picks up again from the new start.
-  onAgentDragStart() {
-    resumeAfterAgentDrag = running;
-    setRunning(false);
-  },
-  onAgentDragEnd(cell) {
-    if (cell !== null) sim.setStart(cell);
-    if (resumeAfterAgentDrag) setRunning(true);
-  },
+const mazeView = new MazeView($('maze'));
+const agentView = new AgentView($('agent-state'));
+const chart = new LineChart($('state-chart'), {
+  series: [
+    { name: 'd', colorVar: '--agent' },
+    { name: 'resting', colorVar: '--text-muted' },
+  ],
+  xLabel: 'Step',
+  reference: '--target',
 });
-const chart = new LineChart($('reward-chart'), { colorVar: '--agent', xLabel: 'Step' });
+renderLegend($('state-legend'), [
+  { name: 'd, dopamine-related state', colorVar: '--agent' },
+  { name: 'level d rests at', colorVar: '--text-muted' },
+  { name: 'level the agent wants (target)', colorVar: '--target', dashed: true },
+]);
 
 // --- Controls --------------------------------------------------------------
 
-fillSelect($('agent-select'), AGENTS, (id) => sim.setAgent(id));
-buildParamControls($('params'), params);
-tool = buildItemPalette($('items'), (id) => {
-  tool = id;
-  selectWallTool(null);
+// The few sliders marked essential are always on show, the rest fold away.
+const sliders = [...HRL_SLIDERS, ...PARAMS];
+const syncParamControls = [
+  buildParamControls($('params'), params, sliders.filter((def) => def.essential)),
+  buildParamControls($('more-params'), params, sliders.filter((def) => !def.essential)),
+];
+fillSelect($('model-select'), MODELS, (id) => {
+  sim.setModel(id);
+  for (const sync of syncParamControls) sync();
 });
-
-for (const id of wallButtons) $(id).addEventListener('click', () => selectWallTool(wallTool === id ? null : id));
-$('clear-walls').addEventListener('click', () => {
-  setRunning(false);
-  sim.env.clearWalls();
-  mazeView.selectedWall = null;
-  $('wall-hint').textContent = 'All walls erased. Choose Add walls to build a new layout.';
-});
-
-// Copies the maze on screen as a `layout` entry for MAZES in mazes.js, which is
-// how a hand-built maze becomes the one the page opens with.
-$('copy-layout').addEventListener('click', async () => {
-  const rows = layoutOf(sim.env).map((row) => `      '${row}',`).join('\n');
-  const text = `    layout: [\n${rows}\n    ],`;
-  console.log(text);
-  try {
-    await navigator.clipboard.writeText(text);
-    $('wall-hint').textContent = 'Layout copied. Paste it into the maze entry in js/mazes.js to make it the default.';
-  } catch {
-    $('wall-hint').textContent = 'Could not reach the clipboard; the layout was written to the browser console instead.';
-  }
-});
+$('model-select').value = sim.modelId;
+$('dependence').checked = sim.dependence;
+$('dependence').addEventListener('change', () => sim.setDependence($('dependence').checked));
 
 function setRunning(value) {
   running = value;
@@ -131,6 +62,7 @@ $('step').addEventListener('click', () => {
   sim.step();
 });
 $('reset').addEventListener('click', () => sim.resetLearning());
+$('dose').addEventListener('click', () => sim.administer(DOSE));
 
 // The speed slider is logarithmic: 1 to 10,000 steps per second.
 function updateSpeed() {
@@ -160,17 +92,26 @@ function frame(now) {
     if (stepDebt >= 1) stepDebt = 0;
   }
 
-  mazeView.draw(sim, now);
-  chart.draw(sim.history.points);
+  const { env } = sim;
+  const mood = moodOf(env.d, env.restingLevel, params);
+  mazeView.draw(sim);
+  agentView.draw(mood, env.h, now);
+  $('mood-name').textContent = mood.name;
+  $('mood-text').textContent = mood.description;
+  renderMeter($('harm-meter'), env.h, params.hMax);
+  chart.draw([sim.history.d.points, sim.history.rest.points], params.dTarget);
   renderStats($('stats'), [
     ['Steps', sim.steps.toLocaleString()],
     ['Episodes', sim.episodes.toLocaleString()],
-    ['Last episode length', sim.lastEpisodeSteps === null ? '–' : `${sim.lastEpisodeSteps} steps`],
-    ['Reward state', sim.rewardState.level.toFixed(2)],
+    ['d', env.d.toFixed(1)],
+    ['Resting level of d', env.restingLevel.toFixed(1)],
+    ['Harm weight λ', harmWeight(env.d, params).toFixed(2)],
+    ['Reward, last step', sim.lastOutcome ? sim.lastOutcome.reward.toFixed(2) : '–'],
+    ['Doses given', sim.dosesGiven.toLocaleString()],
     ...sim.agent.info(),
   ]);
-  renderChoices($('choices'), sim.recentChoices(), sim.outcomes.length);
-  $('choices-title').textContent = `Item reached, last ${Math.min(sim.outcomes.length, RECENT_EPISODES)} episodes`;
+  renderChoices($('choices'), sim.recentChoices());
+  $('choices-title').textContent = `Sources the agent chose, last ${Math.min(sim.episodes + 1, RECENT_EPISODES + 1)} episodes`;
 
   requestAnimationFrame(frame);
 }

@@ -9,44 +9,32 @@
 <body>
   <header class="app-header">
     <h1>Maze RL Simulation</h1>
-    <p>A reinforcement-learning agent explores a maze and learns which item is worth going for.</p>
+    <p>A Q-learning agent with a dopamine-related state <i>d</i> and accumulated harm <i>h</i> learns which sources to use: food, social interaction, rest or two drugs. A computational hypothesis in abstract units, not a model of physiology.</p>
   </header>
 
   <main class="layout">
     <aside class="panel controls">
       <section>
-        <h2>Setup</h2>
-        <div class="field">
-          <span>Maze</span>
-          <output>Medium (13 × 13)</output>
-        </div>
+        <h2>Model</h2>
         <label class="field">
-          <span>Learning model</span>
-          <select id="agent-select"></select>
+          <span>Harm trade-off</span>
+          <select id="model-select"></select>
         </label>
-      </section>
-
-      <section>
-        <h2>Walls</h2>
-        <div class="wall-tools" role="group" aria-label="Wall editing tools">
-          <button id="add-wall" type="button" aria-pressed="false">Add walls</button>
-          <button id="erase-wall" type="button" aria-pressed="false">Erase wall</button>
-          <button id="move-wall" type="button" aria-pressed="false">Move wall</button>
-          <button id="clear-walls" type="button">Erase all walls</button>
-          <button id="copy-layout" type="button">Copy layout</button>
-        </div>
-        <p id="wall-hint" class="hint" role="status">Choose a wall tool to edit the maze. Editing pauses the simulation.</p>
-      </section>
-
-      <section>
-        <h2>Items</h2>
-        <p class="hint">The Medium (13 × 13) maze starts with an open interior and a fixed outer wall. Pick an item and click a cell to place it. Choose Wall to paint interior walls by dragging, or Eraser to remove walls by dragging and items by clicking. Drag the agent to move its starting position.</p>
-        <div id="items"></div>
+        <p class="hint">A weighs harm the same at any <i>d</i>. B weighs it less the further <i>d</i> is below its target. C is B without the ongoing cost of accumulated harm.</p>
+        <label class="check">
+          <input id="dependence" type="checkbox">
+          <span>Dependence mechanisms</span>
+        </label>
+        <p class="hint">Each drug use lowers the level <i>d</i> rests at, which heals only slowly, and a used source needs 15 steps before it can be used again. Changing either setting resets learning.</p>
       </section>
 
       <section>
         <h2>Parameters</h2>
         <div id="params"></div>
+        <details>
+          <summary>More parameters</summary>
+          <div id="more-params"></div>
+        </details>
       </section>
     </aside>
 
@@ -55,19 +43,37 @@
         <button id="play" type="button" class="primary">Play</button>
         <button id="step" type="button">Step</button>
         <button id="reset" type="button">Reset learning</button>
+        <button id="dose" type="button" title="Gives the agent one dose of Drug B wherever it is. The agent does not choose it and gets no reward for it. About 13 doses in quick succession take the resting level of d to its floor.">Give Drug B</button>
         <label class="speed">
           <span>Speed</span>
           <input id="speed" type="range" min="0" max="100" value="35">
           <output id="speed-label"></output>
         </label>
       </div>
-      <canvas id="maze" aria-label="Maze with the agent and placed items"></canvas>
+      <canvas id="maze" aria-label="Maze with the agent and the sources"></canvas>
+      <p class="hint maze-hint">The agent uses a source by standing on it and choosing to interact, once per visit; a faded source is not yet available again. Shading and arrows show what it has learned for its current <i>d</i> and <i>h</i>; a ring marks a source it would use now.</p>
     </section>
 
     <div class="side">
+      <section class="panel agent-panel">
+        <h2>Agent state</h2>
+        <canvas id="agent-state" aria-label="The agent's face, showing its mood and its accumulated harm"></canvas>
+        <div>
+          <p id="mood-name" class="mood-name" role="status"></p>
+          <p id="mood-text" class="hint"></p>
+          <div id="harm-meter" class="meter" role="meter" aria-label="Accumulated harm" aria-valuemin="0" aria-valuemax="100">
+            <span>Accumulated harm <i>h</i></span>
+            <output></output>
+            <span class="bar"><span class="bar-fill"></span></span>
+          </div>
+          <p class="hint">The expression follows <i>d</i> and the level it rests at. The skin turns greyer and paler as harm rises.</p>
+        </div>
+      </section>
+
       <section class="panel">
-        <h2>Reward state over time</h2>
-        <canvas id="reward-chart" aria-label="Line chart of the agent's reward state by step"></canvas>
+        <h2>Dopamine-related state over time</h2>
+        <div id="state-legend" class="legend"></div>
+        <canvas id="state-chart" aria-label="Line chart of the agent's dopamine-related state, the level it rests at and the level it wants, by step"></canvas>
       </section>
 
       <section class="panel">

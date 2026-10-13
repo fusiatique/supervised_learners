@@ -1,8 +1,6 @@
 import { ACTIONS } from '../environment.js';
-import { getItemType } from '../items.js';
+import { INTERACT } from '../hrl/environment.js';
 import { cssVar, prepareCanvas, CANVAS_FONT } from './theme.js';
-
-const GLITCH_INTERVAL_MS = 250;
 
 function drawDirectionCone(ctx, cx, cy, size, { dx, dy }, slotX = 0, slotY = 0, scale = 1) {
   const centerX = cx + slotX * size;
@@ -28,97 +26,14 @@ const ARROW_SLOTS = [
   [-0.24, 0],
 ];
 
-// Draws the maze, the items, the agent and what the agent has learned.
-// Reports clicks, drag-painting on cells and dragging the agent to a new
-// starting cell through its callbacks.
+// Draws the maze, the sources, the agent and what the agent has learned.
 export class MazeView {
-  constructor(canvas, { onCellClick, onCellDrag, onCellDragEnd, onAgentDragStart, onAgentDragEnd }) {
+  constructor(canvas) {
     this.canvas = canvas;
-    this.hoverCell = null;
-    this.env = null;
-    this.pointerDown = false;
-    this.glitchPhase = -1;
-    this.glitchActions = new Map();
-    this.wasPolicyConverged = false;
-    this.onCellDrag = onCellDrag;
-    this.onCellDragEnd = onCellDragEnd;
-    this.selectedWall = null;
-    this.editingWalls = false;
-    // While the agent is being dragged: { from, target, moved }. `target` is
-    // the cell it would be dropped on, or null if it can't be dropped there.
-    this.agentDrag = null;
-    this.suppressClick = false;
-
-    canvas.addEventListener('click', (e) => {
-      if (this.suppressClick) {
-        this.suppressClick = false;
-        return;
-      }
-      const cell = this.cellAt(e);
-      if (cell !== null) onCellClick(cell);
-    });
-    canvas.addEventListener('pointerdown', (e) => {
-      if (e.button !== 0) return;
-      this.pointerDown = true;
-      this.suppressClick = false;
-      canvas.setPointerCapture(e.pointerId);
-      const cell = this.cellAt(e);
-      if (cell !== null && (cell === this.env.state || cell === this.env.start)) {
-        this.agentDrag = { from: cell, target: null, moved: false };
-        canvas.style.cursor = 'grabbing';
-        onAgentDragStart();
-        return;
-      }
-      this.paintCell(e);
-    });
-    canvas.addEventListener('pointermove', (e) => {
-      this.hoverCell = this.cellAt(e);
-      if (this.agentDrag) {
-        const drag = this.agentDrag;
-        if (this.hoverCell !== drag.from) drag.moved = true;
-        drag.target = drag.moved && this.env.canStartAt(this.hoverCell) ? this.hoverCell : null;
-      } else if (this.pointerDown) {
-        this.paintCell(e);
-      }
-    });
-    const endPointer = (e) => {
-      if (!this.pointerDown) return;
-      this.pointerDown = false;
-      if (this.agentDrag) {
-        const { target, moved } = this.agentDrag;
-        this.agentDrag = null;
-        canvas.style.cursor = '';
-        // A press and release on the same cell is still an ordinary click.
-        this.suppressClick = moved;
-        onAgentDragEnd(e.type === 'pointerup' ? target : null);
-        return;
-      }
-      this.onCellDragEnd();
-    };
-    canvas.addEventListener('pointerup', endPointer);
-    canvas.addEventListener('pointercancel', endPointer);
-    canvas.addEventListener('lostpointercapture', endPointer);
-    canvas.addEventListener('pointerleave', () => {
-      this.hoverCell = null;
-    });
   }
 
-  paintCell(event) {
-    const cell = this.cellAt(event);
-    if (cell !== null) this.onCellDrag(cell);
-  }
-
-  cellAt(event) {
-    if (!this.env) return null;
-    const rect = this.canvas.getBoundingClientRect();
-    const x = Math.floor(((event.clientX - rect.left) / rect.width) * this.env.cols);
-    const y = Math.floor(((event.clientY - rect.top) / rect.height) * this.env.rows);
-    if (x < 0 || y < 0 || x >= this.env.cols || y >= this.env.rows) return null;
-    return y * this.env.cols + x;
-  }
-
-  draw(sim, now = performance.now()) {
-    const env = (this.env = sim.env);
+  draw(sim) {
+    const { env } = sim;
     const { ctx, width } = prepareCanvas(this.canvas);
     const size = width / env.cols;
     const xOf = (cell) => (cell % env.cols) * size;
@@ -130,16 +45,14 @@ export class MazeView {
     // Floor. Cells are drawn slightly oversized so no wall colour shows
     // through the seams between neighbours.
     ctx.fillStyle = cssVar('--maze-floor');
-    for (let cell = 0; cell < env.numStates; cell++) {
+    for (let cell = 0; cell < env.numCells; cell++) {
       if (!env.isWall(cell)) ctx.fillRect(xOf(cell) - 0.5, yOf(cell) - 0.5, size + 1, size + 1);
     }
 
-    this.drawValues(ctx, sim, size, xOf, yOf, now);
+    this.drawValues(ctx, sim, size, xOf, yOf);
 
-    // While the agent is dragged, preview it and its start on the drop cell.
-    const dropCell = this.agentDrag?.target ?? null;
-    const startCell = dropCell ?? env.start;
-    const agentCell = dropCell ?? env.state;
+    const startCell = env.start;
+    const agentCell = env.state;
 
     // Start marker
     ctx.strokeStyle = cssVar('--agent');
@@ -148,27 +61,38 @@ export class MazeView {
     ctx.strokeRect(xOf(startCell) + size * 0.14, yOf(startCell) + size * 0.14, size * 0.72, size * 0.72);
     ctx.setLineDash([]);
 
-    // Items
+    // Sources, each with its letter, faded while they cannot be used. A ring
+    // marks one the agent would use if it stood there in its current state.
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.font = `600 ${Math.max(10, size * 0.36)}px ${CANVAS_FONT}`;
-    for (const [cell, itemId] of env.items) {
-      const item = getItemType(itemId);
-      if (!item) continue;
+    for (const cell of env.items.keys()) {
+      const source = env.sourceAt(cell);
+      if (!source) continue;
       const cx = xOf(cell) + size / 2;
       const cy = yOf(cell) + size / 2;
       const radius = size * 0.36;
+      const available = !env.isRefractory(cell);
+      ctx.globalAlpha = available ? 1 : 0.3;
       ctx.beginPath();
       ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-      ctx.fillStyle = cssVar(item.colorVar);
+      ctx.fillStyle = cssVar(source.colorVar);
       ctx.fill();
       ctx.lineWidth = Math.max(1.5, size * 0.045);
       ctx.strokeStyle = cssVar('--maze-floor');
       ctx.stroke();
+      ctx.globalAlpha = 1;
+
+      if (available && this.preferredActions(sim, cell).includes(INTERACT)) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, size * 0.44, 0, Math.PI * 2);
+        ctx.lineWidth = Math.max(2, size * 0.05);
+        ctx.strokeStyle = cssVar('--agent');
+        ctx.stroke();
+      }
 
       ctx.fillStyle = cssVar('--on-item');
       ctx.font = `700 ${Math.max(9, size * 0.3)}px ${CANVAS_FONT}`;
-      ctx.fillText(String(item.value), cx, cy + 1);
+      ctx.fillText(source.char, cx, cy + 1);
     }
 
     // Agent
@@ -188,78 +112,57 @@ export class MazeView {
     ctx.fillStyle = cssVar('--agent-core');
     ctx.fill();
 
-    if (this.selectedWall !== null && env.isWall(this.selectedWall)) {
-      ctx.strokeStyle = cssVar('--agent');
-      ctx.lineWidth = 3;
-      ctx.strokeRect(xOf(this.selectedWall) + 2, yOf(this.selectedWall) + 2, size - 4, size - 4);
-    }
+  }
 
-    if (!this.agentDrag && this.hoverCell !== null && (this.editingWalls || env.canHoldItem(this.hoverCell))) {
-      ctx.strokeStyle = cssVar('--text-secondary');
-      ctx.lineWidth = 2;
-      ctx.strokeRect(xOf(this.hoverCell) + 1, yOf(this.hoverCell) + 1, size - 2, size - 2);
-    }
+  // The actions the agent rates best on `cell` at its current d and h, or
+  // none while it has not learned to tell them apart there.
+  preferredActions(sim, cell) {
+    const { env, agent } = sim;
+    if (!agent.hasVisited(cell)) return [];
+    const state = env.qStateAt(cell);
+    const best = agent.bestActions(state);
+    return best.length === agent.validActions(state).length ? [] : best;
   }
 
   // Tint each visited cell by its learned value (relative to the other
-  // visited cells) and draw an arrow for the action the agent prefers there.
-  drawValues(ctx, sim, size, xOf, yOf, now) {
+  // visited cells) and draw arrows for the moves the agent prefers there.
+  // Both are for the agent's current d and h, so they shift as those change.
+  drawValues(ctx, sim, size, xOf, yOf) {
     const { env, agent } = sim;
-    const shown = (cell) => !env.isWall(cell) && !env.items.has(cell) && agent.hasVisited(cell);
-    if (agent.policyConverged) {
-      this.wasPolicyConverged = true;
-    } else {
-      const phase = Math.floor(now / GLITCH_INTERVAL_MS);
-      if (this.wasPolicyConverged || phase !== this.glitchPhase) {
-        this.glitchActions.clear();
-        this.glitchPhase = phase;
-        this.wasPolicyConverged = false;
-      }
-    }
+    const shown = (cell) => !env.isWall(cell) && agent.hasVisited(cell);
+    const valueOf = (cell) => agent.stateValue(env.qStateAt(cell));
 
     let min = Infinity;
     let max = -Infinity;
-    for (let cell = 0; cell < env.numStates; cell++) {
+    for (let cell = 0; cell < env.numCells; cell++) {
       if (!shown(cell)) continue;
-      min = Math.min(min, agent.stateValue(cell));
-      max = Math.max(max, agent.stateValue(cell));
+      min = Math.min(min, valueOf(cell));
+      max = Math.max(max, valueOf(cell));
     }
 
     const tint = cssVar('--agent');
     const arrow = cssVar('--text-secondary');
-    for (let cell = 0; cell < env.numStates; cell++) {
+    for (let cell = 0; cell < env.numCells; cell++) {
       if (!shown(cell)) continue;
 
-      const strength = max > min ? (agent.stateValue(cell) - min) / (max - min) : 0;
+      const strength = max > min ? (valueOf(cell) - min) / (max - min) : 0;
       ctx.globalAlpha = 0.06 + 0.5 * strength;
       ctx.fillStyle = tint;
       ctx.fillRect(xOf(cell) - 0.5, yOf(cell) - 0.5, size + 1, size + 1);
       ctx.globalAlpha = 1;
 
-      if (cell === env.state) continue;
-      let actions;
-      if (agent.policyConverged) {
-        actions = agent.bestActions(cell);
-      } else {
-        if (!this.glitchActions.has(cell)) {
-          this.glitchActions.set(cell, Math.floor(Math.random() * ACTIONS.length));
-        }
-        actions = [this.glitchActions.get(cell)];
-      }
+      if (cell === env.state || env.items.has(cell)) continue;
+      const moves = this.preferredActions(sim, cell).filter((action) => action !== INTERACT);
       const cx = xOf(cell) + size / 2;
       const cy = yOf(cell) + size / 2;
-      ctx.strokeStyle = arrow;
       ctx.fillStyle = arrow;
-      ctx.lineWidth = actions.length > 1 ? Math.max(1.5, size * 0.0525) : Math.max(1.5, size * 0.0675);
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      if (actions.length > 1) {
-        actions.forEach((action, i) => {
+      if (moves.length > 1) {
+        for (const action of moves) {
           const [slotX, slotY] = ARROW_SLOTS[action];
           drawDirectionCone(ctx, cx, cy, size, ACTIONS[action], slotX, slotY, 0.65);
-        });
-      } else {
-        drawDirectionCone(ctx, cx, cy, size, ACTIONS[actions[0]]);
+        }
+      } else if (moves.length === 1) {
+        drawDirectionCone(ctx, cx, cy, size, ACTIONS[moves[0]]);
       }
     }
   }

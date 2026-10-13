@@ -15,12 +15,16 @@ function compact(n) {
   return String(n);
 }
 
-// Single-series line chart of [{x, y}] points, with a crosshair readout on
-// hover. `xLabel` names the x unit in the readout (e.g. "Step").
+// Line chart of one or more series of [{x, y}] points on a shared y axis,
+// with a crosshair readout on hover. `series` gives each line's short name
+// and colour; `xLabel` names the x unit in the readout (e.g. "Step").
+// `reference` is the colour of an optional dashed horizontal line marking a
+// fixed level.
 export class LineChart {
-  constructor(canvas, { colorVar, xLabel }) {
+  constructor(canvas, { series, xLabel, reference = null }) {
     this.canvas = canvas;
-    this.colorVar = colorVar;
+    this.series = series;
+    this.reference = reference;
     this.xLabel = xLabel;
     this.hoverX = null;
 
@@ -32,19 +36,24 @@ export class LineChart {
     });
   }
 
-  draw(points) {
+  // `lines[i]` holds the points of `series[i]`; `referenceValue` is where the
+  // reference line goes.
+  draw(lines, referenceValue = null) {
     const { ctx, width, height } = prepareCanvas(this.canvas);
     const left = MARGIN.left;
     const right = width - MARGIN.right;
     const top = MARGIN.top;
     const bottom = height - MARGIN.bottom;
 
-    const xMax = Math.max(points.length ? points[points.length - 1].x : 0, 10);
-    let yMin = 0;
-    let yMax = 1;
-    for (const p of points) {
-      yMin = Math.min(yMin, p.y);
-      yMax = Math.max(yMax, p.y);
+    let xMax = 10;
+    let yMin = Math.min(0, referenceValue ?? 0);
+    let yMax = Math.max(1, referenceValue ?? 0);
+    for (const points of lines) {
+      if (points.length) xMax = Math.max(xMax, points[points.length - 1].x);
+      for (const p of points) {
+        yMin = Math.min(yMin, p.y);
+        yMax = Math.max(yMax, p.y);
+      }
     }
     const yStep = niceStep(yMax - yMin, 4);
     yMin = Math.floor(yMin / yStep) * yStep;
@@ -77,25 +86,37 @@ export class LineChart {
       ctx.fillText(compact(x), px(x), bottom + 7);
     }
 
-    if (points.length > 1) {
+    if (this.reference && referenceValue !== null) {
       ctx.beginPath();
-      points.forEach((p, i) => (i ? ctx.lineTo(px(p.x), py(p.y)) : ctx.moveTo(px(p.x), py(p.y))));
-      ctx.strokeStyle = cssVar(this.colorVar);
+      ctx.moveTo(left, Math.round(py(referenceValue)) + 0.5);
+      ctx.lineTo(right, Math.round(py(referenceValue)) + 0.5);
+      ctx.strokeStyle = cssVar(this.reference);
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([6, 4]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    lines.forEach((points, i) => {
+      if (points.length < 2) return;
+      ctx.beginPath();
+      points.forEach((p, j) => (j ? ctx.lineTo(px(p.x), py(p.y)) : ctx.moveTo(px(p.x), py(p.y))));
+      ctx.strokeStyle = cssVar(this.series[i].colorVar);
       ctx.lineWidth = 2;
       ctx.lineJoin = 'round';
       ctx.stroke();
-    }
+    });
 
-    if (this.hoverX !== null && points.length) this.drawHover(ctx, points, px, py, { left, right, top, bottom });
+    if (this.hoverX !== null && lines[0]?.length) this.drawHover(ctx, lines, px, py, { left, right, top, bottom });
   }
 
-  drawHover(ctx, points, px, py, { left, right, top, bottom }) {
-    let nearest = points[0];
-    for (const p of points) {
-      if (Math.abs(px(p.x) - this.hoverX) < Math.abs(px(nearest.x) - this.hoverX)) nearest = p;
-    }
-    const x = px(nearest.x);
-    const y = py(nearest.y);
+  // The series are sampled at the same x positions, so one index serves all.
+  drawHover(ctx, lines, px, py, { left, right, top, bottom }) {
+    let nearest = 0;
+    lines[0].forEach((p, i) => {
+      if (Math.abs(px(p.x) - this.hoverX) < Math.abs(px(lines[0][nearest].x) - this.hoverX)) nearest = i;
+    });
+    const x = px(lines[0][nearest].x);
 
     ctx.strokeStyle = cssVar('--axis');
     ctx.lineWidth = 1;
@@ -104,15 +125,21 @@ export class LineChart {
     ctx.lineTo(Math.round(x) + 0.5, bottom);
     ctx.stroke();
 
-    ctx.beginPath();
-    ctx.arc(x, y, 4, 0, Math.PI * 2);
-    ctx.fillStyle = cssVar(this.colorVar);
-    ctx.fill();
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = cssVar('--surface');
-    ctx.stroke();
+    const values = [];
+    lines.forEach((points, i) => {
+      const point = points[nearest];
+      if (!point) return;
+      ctx.beginPath();
+      ctx.arc(x, py(point.y), 4, 0, Math.PI * 2);
+      ctx.fillStyle = cssVar(this.series[i].colorVar);
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = cssVar('--surface');
+      ctx.stroke();
+      values.push(`${this.series[i].name} ${point.y.toFixed(1)}`);
+    });
 
-    const text = `${this.xLabel} ${nearest.x.toLocaleString()}:  ${nearest.y.toFixed(2)}`;
+    const text = `${this.xLabel} ${lines[0][nearest].x.toLocaleString()}:  ${values.join('   ')}`;
     ctx.font = `600 12px ${CANVAS_FONT}`;
     ctx.textBaseline = 'top';
     ctx.textAlign = x > (left + right) / 2 ? 'left' : 'right';
