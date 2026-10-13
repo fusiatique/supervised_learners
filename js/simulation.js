@@ -46,7 +46,8 @@ export class Simulation {
   setMaze(mazeId) {
     this.mazeId = mazeId;
     this.env = new Environment(getMaze(mazeId));
-    this.env.placeDefaultItems(ITEM_TYPES);
+    if (this.env.defaultItems) this.env.items = new Map(this.env.defaultItems);
+    else this.env.placeDefaultItems(ITEM_TYPES);
     this.maxEpisodeSteps = this.env.numStates * 2;
     this.resetLearning();
   }
@@ -67,6 +68,14 @@ export class Simulation {
     this.lastEpisodeSteps = null;
     this.outcomes = []; // item id (or null for a timeout) of recent episodes
     this.env.reset();
+  }
+
+  // Move the agent's starting cell. What was learned is kept; the episode in
+  // progress is abandoned and a new one begins from the new start.
+  setStart(cell) {
+    if (!this.env.setStart(cell)) return false;
+    this.episodeSteps = 0;
+    return true;
   }
 
   // The learning signal for one transition. Extend here for harm, withdrawal

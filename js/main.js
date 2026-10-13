@@ -1,6 +1,7 @@
 import { defaultParams, RECENT_EPISODES } from './config.js';
 import { AGENTS } from './agents/index.js';
 import { Simulation } from './simulation.js';
+import { layoutOf } from './mazes.js';
 import { MazeView } from './ui/mazeView.js';
 import { LineChart } from './ui/chart.js';
 import { ERASER, WALL_TOOL, fillSelect, buildParamControls, buildItemPalette, renderStats, renderChoices } from './ui/controls.js';
@@ -13,6 +14,7 @@ let tool = null;
 let running = false;
 let stepsPerSecond = 1;
 let wallStrokeReset = false;
+let resumeAfterAgentDrag = false;
 let wallTool = null;
 const wallButtons = ['add-wall', 'erase-wall', 'move-wall'];
 const wallHints = {
@@ -75,6 +77,16 @@ const mazeView = new MazeView($('maze'), {
   onCellDragEnd() {
     wallStrokeReset = false;
   },
+  // Dragging the agent moves its starting cell. The simulation holds still
+  // while it is carried and picks up again from the new start.
+  onAgentDragStart() {
+    resumeAfterAgentDrag = running;
+    setRunning(false);
+  },
+  onAgentDragEnd(cell) {
+    if (cell !== null) sim.setStart(cell);
+    if (resumeAfterAgentDrag) setRunning(true);
+  },
 });
 const chart = new LineChart($('reward-chart'), { colorVar: '--agent', xLabel: 'Step' });
 
@@ -93,6 +105,20 @@ $('clear-walls').addEventListener('click', () => {
   sim.env.clearWalls();
   mazeView.selectedWall = null;
   $('wall-hint').textContent = 'All walls erased. Choose Add walls to build a new layout.';
+});
+
+// Copies the maze on screen as a `layout` entry for MAZES in mazes.js, which is
+// how a hand-built maze becomes the one the page opens with.
+$('copy-layout').addEventListener('click', async () => {
+  const rows = layoutOf(sim.env).map((row) => `      '${row}',`).join('\n');
+  const text = `    layout: [\n${rows}\n    ],`;
+  console.log(text);
+  try {
+    await navigator.clipboard.writeText(text);
+    $('wall-hint').textContent = 'Layout copied. Paste it into the maze entry in js/mazes.js to make it the default.';
+  } catch {
+    $('wall-hint').textContent = 'Could not reach the clipboard; the layout was written to the browser console instead.';
+  }
 });
 
 function setRunning(value) {

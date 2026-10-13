@@ -29,9 +29,10 @@ const ARROW_SLOTS = [
 ];
 
 // Draws the maze, the items, the agent and what the agent has learned.
-// Reports clicks and drag-painting on cells through its callbacks.
+// Reports clicks, drag-painting on cells and dragging the agent to a new
+// starting cell through its callbacks.
 export class MazeView {
-  constructor(canvas, { onCellClick, onCellDrag, onCellDragEnd }) {
+  constructor(canvas, { onCellClick, onCellDrag, onCellDragEnd, onAgentDragStart, onAgentDragEnd }) {
     this.canvas = canvas;
     this.hoverCell = null;
     this.env = null;
@@ -43,24 +44,55 @@ export class MazeView {
     this.onCellDragEnd = onCellDragEnd;
     this.selectedWall = null;
     this.editingWalls = false;
+    // While the agent is being dragged: { from, target, moved }. `target` is
+    // the cell it would be dropped on, or null if it can't be dropped there.
+    this.agentDrag = null;
+    this.suppressClick = false;
 
     canvas.addEventListener('click', (e) => {
+      if (this.suppressClick) {
+        this.suppressClick = false;
+        return;
+      }
       const cell = this.cellAt(e);
       if (cell !== null) onCellClick(cell);
     });
     canvas.addEventListener('pointerdown', (e) => {
       if (e.button !== 0) return;
       this.pointerDown = true;
+      this.suppressClick = false;
       canvas.setPointerCapture(e.pointerId);
+      const cell = this.cellAt(e);
+      if (cell !== null && (cell === this.env.state || cell === this.env.start)) {
+        this.agentDrag = { from: cell, target: null, moved: false };
+        canvas.style.cursor = 'grabbing';
+        onAgentDragStart();
+        return;
+      }
       this.paintCell(e);
     });
     canvas.addEventListener('pointermove', (e) => {
       this.hoverCell = this.cellAt(e);
-      if (this.pointerDown) this.paintCell(e);
+      if (this.agentDrag) {
+        const drag = this.agentDrag;
+        if (this.hoverCell !== drag.from) drag.moved = true;
+        drag.target = drag.moved && this.env.canStartAt(this.hoverCell) ? this.hoverCell : null;
+      } else if (this.pointerDown) {
+        this.paintCell(e);
+      }
     });
-    const endPointer = () => {
+    const endPointer = (e) => {
       if (!this.pointerDown) return;
       this.pointerDown = false;
+      if (this.agentDrag) {
+        const { target, moved } = this.agentDrag;
+        this.agentDrag = null;
+        canvas.style.cursor = '';
+        // A press and release on the same cell is still an ordinary click.
+        this.suppressClick = moved;
+        onAgentDragEnd(e.type === 'pointerup' ? target : null);
+        return;
+      }
       this.onCellDragEnd();
     };
     canvas.addEventListener('pointerup', endPointer);
@@ -104,11 +136,16 @@ export class MazeView {
 
     this.drawValues(ctx, sim, size, xOf, yOf, now);
 
+    // While the agent is dragged, preview it and its start on the drop cell.
+    const dropCell = this.agentDrag?.target ?? null;
+    const startCell = dropCell ?? env.start;
+    const agentCell = dropCell ?? env.state;
+
     // Start marker
     ctx.strokeStyle = cssVar('--agent');
     ctx.lineWidth = 2;
     ctx.setLineDash([4, 3]);
-    ctx.strokeRect(xOf(env.start) + size * 0.14, yOf(env.start) + size * 0.14, size * 0.72, size * 0.72);
+    ctx.strokeRect(xOf(startCell) + size * 0.14, yOf(startCell) + size * 0.14, size * 0.72, size * 0.72);
     ctx.setLineDash([]);
 
     // Items
@@ -135,8 +172,8 @@ export class MazeView {
     }
 
     // Agent
-    const agentX = xOf(env.state) + size / 2;
-    const agentY = yOf(env.state) + size / 2;
+    const agentX = xOf(agentCell) + size / 2;
+    const agentY = yOf(agentCell) + size / 2;
     const agentRadius = size * 0.38;
     ctx.beginPath();
     ctx.arc(agentX, agentY, agentRadius, 0, Math.PI * 2);
@@ -157,7 +194,7 @@ export class MazeView {
       ctx.strokeRect(xOf(this.selectedWall) + 2, yOf(this.selectedWall) + 2, size - 4, size - 4);
     }
 
-    if (this.hoverCell !== null && (this.editingWalls || env.canHoldItem(this.hoverCell))) {
+    if (!this.agentDrag && this.hoverCell !== null && (this.editingWalls || env.canHoldItem(this.hoverCell))) {
       ctx.strokeStyle = cssVar('--text-secondary');
       ctx.lineWidth = 2;
       ctx.strokeRect(xOf(this.hoverCell) + 1, yOf(this.hoverCell) + 1, size - 2, size - 2);

@@ -74,6 +74,18 @@ export class Environment {
     this.walls.fill(0);
   }
 
+  canStartAt(cell) {
+    return this.isValidCell(cell) && !this.isWall(cell) && !this.items.has(cell);
+  }
+
+  // Moves the starting cell and puts the agent on it.
+  setStart(cell) {
+    if (!this.canStartAt(cell)) return false;
+    this.start = cell;
+    this.state = cell;
+    return true;
+  }
+
   reset() {
     this.state = this.start;
     return this.state;

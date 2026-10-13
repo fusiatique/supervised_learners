@@ -5,7 +5,6 @@ import { QLearningAgent } from './qlearning.js';
 export const AGENTS = [
   { id: 'qlearning', name: 'Q-learning', create: (env, params) => new QLearningAgent(env, params) },
 ];
-
 export function createAgent(id, env, params) {
   const entry = AGENTS.find((a) => a.id === id) ?? AGENTS[0];
   return entry.create(env, params);
