@@ -424,3 +424,95 @@ summary {
   height: 100%;
   border-radius: 0 4px 4px 0;
 }
+
+/* Inline parameter explanations use native, keyboard-accessible disclosures. */
+.param-help {
+  grid-column: 1 / -1;
+  margin: 4px 0 2px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.param-help summary {
+  padding: 7px 10px;
+  min-height: 32px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.param-help summary:hover,
+.param-help[open] summary {
+  background: var(--grid);
+  color: var(--text-primary);
+}
+
+.param-help summary:focus-visible {
+  outline: 2px solid var(--text-primary);
+  outline-offset: -3px;
+  border-radius: 7px;
+}
+
+.param-help p {
+  margin: 0;
+  padding: 10px 12px;
+  border-top: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.param-help .param-tip {
+  display: grid;
+  gap: 4px;
+  background: var(--grid);
+}
+
+.param-tip strong {
+  color: var(--text-primary);
+  font-size: 11px;
+}
+
+/* Match the Drug B marker while giving the intervention a distinct emphasis. */
+button.dose-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 7px 13px;
+  background: var(--item-5);
+  border-color: #9b3b55;
+  border-radius: 9px;
+  color: #30131d;
+  font-weight: 700;
+  box-shadow: 0 2px 4px rgb(48 19 29 / 15%);
+}
+
+button.dose-button::before {
+  content: '';
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  background:
+    linear-gradient(currentColor, currentColor) center / 8px 2px no-repeat,
+    linear-gradient(currentColor, currentColor) center / 2px 8px no-repeat;
+}
+
+button.dose-button:hover {
+  background: #efa2b6;
+  border-color: #753044;
+  box-shadow: 0 3px 7px rgb(48 19 29 / 22%);
+}
+
+button.dose-button:focus-visible {
+  outline: 3px solid var(--text-primary);
+  outline-offset: 3px;
+}
+
+button.dose-button:active {
+  box-shadow: inset 0 1px 3px rgb(48 19 29 / 25%);
+}

@@ -22,13 +22,32 @@ export function buildParamControls(container, params, defs) {
     container.append(el('h3', { textContent: group }));
     for (const def of defs.filter((p) => p.group === group)) {
       const output = el('output', { textContent: params[def.key] });
-      const input = el('input', { type: 'range', min: def.min, max: def.max, step: def.step, value: params[def.key] });
+      const input = el('input', { id: `param-${def.key}`, type: 'range', min: def.min, max: def.max, step: def.step, value: params[def.key] });
       input.addEventListener('input', () => {
         params[def.key] = Number(input.value);
         output.textContent = input.value;
       });
       controls.push({ def, input, output });
-      container.append(el('label', { className: 'param' }, [el('span', { textContent: def.label }), output, input]));
+      const label = el('label', { htmlFor: input.id, textContent: def.label });
+      output.htmlFor = input.id;
+      const row = el('div', { className: 'param' }, [label, output, input]);
+      if (def.description) {
+        const description = el('p', { id: `${input.id}-help`, textContent: def.description });
+        input.setAttribute('aria-describedby', description.id);
+        const summary = el('summary', { textContent: 'About this parameter' });
+        summary.setAttribute('aria-label', `About ${def.label}`);
+        const help = el('details', { className: 'param-help' }, [summary, description]);
+        if (def.tryIt) {
+          const tip = el('p', { id: `${input.id}-tip`, className: 'param-tip' }, [
+            el('strong', { textContent: 'Try it' }),
+            el('span', { textContent: def.tryIt }),
+          ]);
+          help.append(tip);
+          input.setAttribute('aria-describedby', `${description.id} ${tip.id}`);
+        }
+        row.append(help);
+      }
+      container.append(row);
     }
   }
   return () => {

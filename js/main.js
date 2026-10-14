@@ -39,7 +39,10 @@ renderLegend($('state-legend'), [
 // --- Controls --------------------------------------------------------------
 
 // The few sliders marked essential are always on show, the rest fold away.
-const sliders = [...HRL_SLIDERS, ...PARAMS];
+const parameterGroups = ['Internal states', 'Agent', 'Reward'];
+const sliders = [...HRL_SLIDERS, ...PARAMS].sort(
+  (a, b) => parameterGroups.indexOf(a.group) - parameterGroups.indexOf(b.group),
+);
 const syncParamControls = [
   buildParamControls($('params'), params, sliders.filter((def) => def.essential)),
   buildParamControls($('more-params'), params, sliders.filter((def) => !def.essential)),
