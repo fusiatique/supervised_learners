@@ -1,7 +1,7 @@
 import { PARAMS, RECENT_EPISODES } from './config.js';
-import { DEPENDENCE, HRL_SLIDERS, MODELS, hrlConfig, getSourceType } from './hrl/config.js';
+import { SOURCE_TYPES, DEPENDENCE, HRL_SLIDERS, MODELS, hrlConfig, getSourceType } from './hrl/config.js';
 import { harmWeight } from './hrl/reward.js';
-import { moodOf } from './hrl/mood.js';
+import { MOODS, moodOf } from './hrl/mood.js';
 import { Simulation } from './simulation.js';
 import { MazeView } from './ui/mazeView.js';
 import { AgentView } from './ui/agentView.js';
@@ -9,6 +9,35 @@ import { LineChart } from './ui/chart.js';
 import { fillSelect, buildParamControls, renderStats, renderLegend, renderMeter, renderChoices } from './ui/controls.js';
 
 const $ = (id) => document.getElementById(id);
+
+// Reserve space for every mood at the current width, including wrapped text.
+// Hidden copies share a grid cell, so the longest text sets a stable height.
+for (const [id, field] of [['mood-name', 'name'], ['mood-text', 'description']]) {
+  const live = $(id);
+  const slot = document.createElement('div');
+  slot.className = 'mood-slot';
+  live.before(slot);
+  slot.append(live);
+  for (const mood of MOODS) {
+    const reserve = document.createElement('p');
+    reserve.className = `${live.className} mood-reserve`;
+    reserve.textContent = mood[field];
+    reserve.setAttribute('aria-hidden', 'true');
+    slot.append(reserve);
+  }
+}
+
+// Keep the letter key aligned with the source colours used in the maze.
+for (const source of SOURCE_TYPES) {
+  const entry = document.createElement('span');
+  const marker = document.createElement('span');
+  marker.className = 'swatch';
+  marker.textContent = source.char;
+  marker.style.background = `var(${source.colorVar})`;
+  const name = source.name.replace(' (moderate)', '').replace(' (potent)', '');
+  entry.append(marker, document.createTextNode(name));
+  $('maze-source-key').append(entry);
+}
 
 // The source the "Give" button administers.
 const DOSE = getSourceType('drugB');
@@ -28,25 +57,33 @@ const chart = new LineChart($('state-chart'), {
     { name: 'resting', colorVar: '--text-muted' },
   ],
   xLabel: 'Step',
+  yLabel: 'Dopamine-related level',
+  yRange: [0, 100],
+  xWindow: 200,
   reference: '--target',
 });
 renderLegend($('state-legend'), [
-  { name: 'd, dopamine-related state', colorVar: '--agent' },
-  { name: 'level d rests at', colorVar: '--text-muted' },
-  { name: 'level the agent wants (target)', colorVar: '--target', dashed: true },
+  { name: 'Current state (d)', colorVar: '--agent' },
+  { name: 'Resting level', colorVar: '--text-muted' },
+  { name: 'Neutral threshold (50)', colorVar: '--target', dashed: true },
 ]);
 
 // --- Controls --------------------------------------------------------------
 
-// The few sliders marked essential are always on show, the rest fold away.
+// One disclosure reveals every parameter, grouped by purpose.
 const parameterGroups = ['Internal states', 'Agent', 'Reward'];
 const sliders = [...HRL_SLIDERS, ...PARAMS].sort(
   (a, b) => parameterGroups.indexOf(a.group) - parameterGroups.indexOf(b.group),
 );
 const syncParamControls = [
-  buildParamControls($('params'), params, sliders.filter((def) => def.essential)),
-  buildParamControls($('more-params'), params, sliders.filter((def) => !def.essential)),
+  buildParamControls($('params'), params, sliders),
 ];
+$('toggle-params').addEventListener('click', () => {
+  const expanded = $('toggle-params').getAttribute('aria-expanded') === 'true';
+  $('toggle-params').setAttribute('aria-expanded', String(!expanded));
+  $('toggle-params').textContent = expanded ? 'Show all parameters' : 'Hide parameters';
+  $('params').hidden = expanded;
+});
 fillSelect($('model-select'), MODELS, (id) => {
   sim.setModel(id);
   for (const sync of syncParamControls) sync();
@@ -97,7 +134,7 @@ function frame(now) {
 
   const { env } = sim;
   const mood = moodOf(env.d, env.restingLevel, params);
-  mazeView.draw(sim);
+  mazeView.draw(sim, mood, now);
   agentView.draw(mood, env.h, now);
   $('mood-name').textContent = mood.name;
   $('mood-text').textContent = mood.description;
@@ -105,12 +142,14 @@ function frame(now) {
   chart.draw([sim.history.d.points, sim.history.rest.points], params.dTarget);
   renderStats($('stats'), [
     ['Steps', sim.steps.toLocaleString()],
+    ['Current state (d)', env.d.toFixed(1)],
+    ['Resting level', env.restingLevel.toFixed(1)],
+    ['Drug B doses given', sim.dosesGiven.toLocaleString()],
+  ]);
+  renderStats($('learning-stats'), [
     ['Episodes', sim.episodes.toLocaleString()],
-    ['d', env.d.toFixed(1)],
-    ['Resting level of d', env.restingLevel.toFixed(1)],
     ['Harm weight λ', harmWeight(env.d, params).toFixed(2)],
     ['Reward, last step', sim.lastOutcome ? sim.lastOutcome.reward.toFixed(2) : '–'],
-    ['Doses given', sim.dosesGiven.toLocaleString()],
     ...sim.agent.info(),
   ]);
   renderChoices($('choices'), sim.recentChoices());

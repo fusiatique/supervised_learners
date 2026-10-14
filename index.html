@@ -13,32 +13,44 @@
   </header>
 
   <main class="layout">
-    <aside class="panel controls">
-      <section>
+    <section class="panel model-panel">
         <h2>Model</h2>
+        <div class="model-options">
+        <div>
         <label class="field">
           <span>Harm trade-off</span>
           <select id="model-select"></select>
         </label>
         <p class="hint">A weighs harm the same at any <i>d</i>. B weighs it less the further <i>d</i> is below its target. C is B without the ongoing cost of accumulated harm.</p>
+        </div>
+        <div>
         <label class="check">
           <input id="dependence" type="checkbox">
           <span>Dependence mechanisms</span>
         </label>
         <p class="hint">Each drug use lowers the level <i>d</i> rests at, which heals only slowly, and a used source needs 15 steps before it can be used again. Changing either setting resets learning.</p>
-      </section>
+        </div>
+        </div>
+    </section>
 
+    <aside class="panel controls">
       <section>
         <h2>Parameters</h2>
-        <div id="params"></div>
-        <details>
-          <summary>More parameters</summary>
-          <div id="more-params"></div>
-        </details>
+        <p class="hint">Explore what shapes the agent’s behaviour. Adjust its internal state, how it learns, and what it finds rewarding.</p>
+        <ul class="parameter-guide">
+          <li><strong>Internal states</strong><span>Starting state and recovery</span></li>
+          <li><strong>Agent</strong><span>Learning and exploration</span></li>
+          <li><strong>Reward</strong><span>Benefits and harm costs</span></li>
+        </ul>
+        <button id="toggle-params" class="parameter-toggle" type="button" aria-expanded="false" aria-controls="params">Show all parameters</button>
+        <div id="params" hidden></div>
       </section>
     </aside>
 
+    <div class="simulation-content">
+    <div class="visuals">
     <section class="panel maze-panel">
+      <h2>Explore the maze</h2>
       <div class="toolbar">
         <button id="play" type="button" class="primary">Play</button>
         <button id="step" type="button">Step</button>
@@ -51,7 +63,8 @@
         </label>
       </div>
       <canvas id="maze" aria-label="Maze with the agent and the sources"></canvas>
-      <p class="hint maze-hint">The agent uses a source by standing on it and choosing to interact, once per visit; a faded source is not yet available again. Shading and arrows show what it has learned for its current <i>d</i> and <i>h</i>; a ring marks a source it would use now.</p>
+      <div id="maze-source-key" class="maze-source-key" aria-label="Maze source key"></div>
+      <p class="hint maze-hint">The face icon represents the agent, showing its location and current feeling. The coloured letter icons represent reward items: food, social interaction, rest and drugs. The agent learns from experience as it moves through the maze and chooses which items to use.</p>
     </section>
 
     <div class="side">
@@ -66,19 +79,27 @@
             <output></output>
             <span class="bar"><span class="bar-fill"></span></span>
           </div>
-          <p class="hint">The expression follows <i>d</i> and the level it rests at. The skin turns greyer and paler as harm rises.</p>
+          <p class="hint">The face shows how the agent is feeling based on its current state and resting level. Its skin becomes paler and greyer as harm builds up.</p>
         </div>
       </section>
 
-      <section class="panel">
+      <section class="panel chart-panel">
         <h2>Dopamine-related state over time</h2>
         <div id="state-legend" class="legend"></div>
-        <canvas id="state-chart" aria-label="Line chart of the agent's dopamine-related state, the level it rests at and the level it wants, by step"></canvas>
+        <canvas id="state-chart" aria-label="Line chart of the agent's dopamine-related state, resting level and neutral threshold over simulation steps"></canvas>
+        <p class="hint chart-caption">Watch how reward items raise the agent’s state and how it changes afterward. A falling resting level shows the lasting effect of drug use. The graph shows the latest 200 steps.</p>
       </section>
 
-      <section class="panel">
-        <h2>Progress</h2>
+    </div>
+    </div>
+
+      <section class="panel progress-panel">
+        <h2>Simulation progress</h2>
         <dl id="stats" class="stats"></dl>
+        <details class="learning-details">
+          <summary>Learning details</summary>
+          <dl id="learning-stats" class="stats"></dl>
+        </details>
         <h3 id="choices-title"></h3>
         <div id="choices"></div>
       </section>

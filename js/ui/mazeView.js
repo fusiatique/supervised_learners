@@ -1,46 +1,35 @@
-import { ACTIONS } from '../environment.js';
-import { INTERACT } from '../hrl/environment.js';
+import { AgentView } from './agentView.js';
 import { cssVar, prepareCanvas, CANVAS_FONT } from './theme.js';
-
-function drawDirectionCone(ctx, cx, cy, size, { dx, dy }, slotX = 0, slotY = 0, scale = 1) {
-  const centerX = cx + slotX * size;
-  const centerY = cy + slotY * size;
-  const length = size * 0.3 * scale;
-  const halfWidth = size * 0.19 * scale;
-  const tipX = centerX + dx * length / 2;
-  const tipY = centerY + dy * length / 2;
-  const baseX = centerX - dx * length / 2;
-  const baseY = centerY - dy * length / 2;
-  ctx.beginPath();
-  ctx.moveTo(tipX, tipY);
-  ctx.lineTo(baseX - dy * halfWidth, baseY + dx * halfWidth);
-  ctx.lineTo(baseX + dy * halfWidth, baseY - dx * halfWidth);
-  ctx.closePath();
-  ctx.fill();
-}
-
-const ARROW_SLOTS = [
-  [0, -0.24],
-  [0.24, 0],
-  [0, 0.24],
-  [-0.24, 0],
-];
 
 // Draws the maze, the sources, the agent and what the agent has learned.
 export class MazeView {
   constructor(canvas) {
     this.canvas = canvas;
+    this.faceView = new AgentView(null);
   }
 
-  draw(sim) {
+  draw(sim, mood, now = performance.now()) {
     const { env } = sim;
-    const { ctx, width } = prepareCanvas(this.canvas);
-    const size = width / env.cols;
-    const xOf = (cell) => (cell % env.cols) * size;
-    const yOf = (cell) => Math.floor(cell / env.cols) * size;
+    const { ctx, width, height } = prepareCanvas(this.canvas);
+    // Fit the walkable layout with a little breathing room around its edges.
+    const cells = Array.from({ length: env.numCells }, (_, cell) => cell)
+      .filter((cell) => !env.isWall(cell));
+    const cols = cells.map((cell) => cell % env.cols);
+    const rows = cells.map((cell) => Math.floor(cell / env.cols));
+    const minCol = Math.min(...cols);
+    const maxCol = Math.max(...cols);
+    const minRow = Math.min(...rows);
+    const maxRow = Math.max(...rows);
+    const padding = 0.8;
+    const size = Math.min(width / (maxCol - minCol + 1 + padding * 2),
+      height / (maxRow - minRow + 1 + padding * 2));
+    const offsetX = (width - (maxCol - minCol + 1) * size) / 2;
+    const offsetY = (height - (maxRow - minRow + 1) * size) / 2;
+    const xOf = (cell) => offsetX + (cell % env.cols - minCol) * size;
+    const yOf = (cell) => offsetY + (Math.floor(cell / env.cols) - minRow) * size;
 
-    ctx.fillStyle = cssVar('--maze-wall');
-    ctx.fillRect(0, 0, width, width);
+    ctx.fillStyle = cssVar('--maze-backdrop');
+    ctx.fillRect(0, 0, width, height);
 
     // Floor. Cells are drawn slightly oversized so no wall colour shows
     // through the seams between neighbours.
@@ -49,20 +38,29 @@ export class MazeView {
       if (!env.isWall(cell)) ctx.fillRect(xOf(cell) - 0.5, yOf(cell) - 0.5, size + 1, size + 1);
     }
 
-    this.drawValues(ctx, sim, size, xOf, yOf);
+    // Quiet outlines separate steps without colouring the learned values.
+    ctx.strokeStyle = cssVar('--maze-edge');
+    ctx.lineWidth = 0.7;
+    for (let cell = 0; cell < env.numCells; cell++) {
+      if (!env.isWall(cell)) ctx.strokeRect(xOf(cell), yOf(cell), size, size);
+    }
 
     const startCell = env.start;
     const agentCell = env.state;
 
-    // Start marker
-    ctx.strokeStyle = cssVar('--agent');
-    ctx.lineWidth = 2;
-    ctx.setLineDash([4, 3]);
-    ctx.strokeRect(xOf(startCell) + size * 0.14, yOf(startCell) + size * 0.14, size * 0.72, size * 0.72);
-    ctx.setLineDash([]);
+    // Label the starting point outside the corridor so it stays legible.
+    ctx.fillStyle = cssVar('--text-secondary');
+    ctx.font = `600 ${Math.max(10, size * 0.24)}px ${CANVAS_FONT}`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText('START', xOf(startCell) + size / 2, yOf(startCell) - size * 0.18);
+    ctx.beginPath();
+    ctx.arc(xOf(startCell) + size / 2, yOf(startCell) + size / 2, size * 0.2, 0, Math.PI * 2);
+    ctx.strokeStyle = cssVar('--maze-edge');
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
 
-    // Sources, each with its letter, faded while they cannot be used. A ring
-    // marks one the agent would use if it stood there in its current state.
+    // Sources, each with its letter, faded while they cannot be used.
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     for (const cell of env.items.keys()) {
@@ -72,7 +70,7 @@ export class MazeView {
       const cy = yOf(cell) + size / 2;
       const radius = size * 0.36;
       const available = !env.isRefractory(cell);
-      ctx.globalAlpha = available ? 1 : 0.3;
+      ctx.globalAlpha = available ? 1 : 0.45;
       ctx.beginPath();
       ctx.arc(cx, cy, radius, 0, Math.PI * 2);
       ctx.fillStyle = cssVar(source.colorVar);
@@ -82,88 +80,14 @@ export class MazeView {
       ctx.stroke();
       ctx.globalAlpha = 1;
 
-      if (available && this.preferredActions(sim, cell).includes(INTERACT)) {
-        ctx.beginPath();
-        ctx.arc(cx, cy, size * 0.44, 0, Math.PI * 2);
-        ctx.lineWidth = Math.max(2, size * 0.05);
-        ctx.strokeStyle = cssVar('--agent');
-        ctx.stroke();
-      }
-
       ctx.fillStyle = cssVar('--on-item');
       ctx.font = `700 ${Math.max(9, size * 0.3)}px ${CANVAS_FONT}`;
       ctx.fillText(source.char, cx, cy + 1);
     }
 
-    // Agent
-    const agentX = xOf(agentCell) + size / 2;
-    const agentY = yOf(agentCell) + size / 2;
-    const agentRadius = size * 0.38;
-    ctx.beginPath();
-    ctx.arc(agentX, agentY, agentRadius, 0, Math.PI * 2);
-    ctx.fillStyle = cssVar('--agent');
-    ctx.fill();
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = cssVar('--maze-floor');
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.arc(agentX, agentY, size * 0.13, 0, Math.PI * 2);
-    ctx.fillStyle = cssVar('--agent-core');
-    ctx.fill();
-
+    // Same expression and harm colouring as the state panel, at marker size.
+    this.faceView.drawFace(ctx, xOf(agentCell) + size / 2,
+      yOf(agentCell) + size / 2, size * 0.38, mood, env.h, now);
   }
 
-  // The actions the agent rates best on `cell` at its current d and h, or
-  // none while it has not learned to tell them apart there.
-  preferredActions(sim, cell) {
-    const { env, agent } = sim;
-    if (!agent.hasVisited(cell)) return [];
-    const state = env.qStateAt(cell);
-    const best = agent.bestActions(state);
-    return best.length === agent.validActions(state).length ? [] : best;
-  }
-
-  // Tint each visited cell by its learned value (relative to the other
-  // visited cells) and draw arrows for the moves the agent prefers there.
-  // Both are for the agent's current d and h, so they shift as those change.
-  drawValues(ctx, sim, size, xOf, yOf) {
-    const { env, agent } = sim;
-    const shown = (cell) => !env.isWall(cell) && agent.hasVisited(cell);
-    const valueOf = (cell) => agent.stateValue(env.qStateAt(cell));
-
-    let min = Infinity;
-    let max = -Infinity;
-    for (let cell = 0; cell < env.numCells; cell++) {
-      if (!shown(cell)) continue;
-      min = Math.min(min, valueOf(cell));
-      max = Math.max(max, valueOf(cell));
-    }
-
-    const tint = cssVar('--agent');
-    const arrow = cssVar('--text-secondary');
-    for (let cell = 0; cell < env.numCells; cell++) {
-      if (!shown(cell)) continue;
-
-      const strength = max > min ? (valueOf(cell) - min) / (max - min) : 0;
-      ctx.globalAlpha = 0.06 + 0.5 * strength;
-      ctx.fillStyle = tint;
-      ctx.fillRect(xOf(cell) - 0.5, yOf(cell) - 0.5, size + 1, size + 1);
-      ctx.globalAlpha = 1;
-
-      if (cell === env.state || env.items.has(cell)) continue;
-      const moves = this.preferredActions(sim, cell).filter((action) => action !== INTERACT);
-      const cx = xOf(cell) + size / 2;
-      const cy = yOf(cell) + size / 2;
-      ctx.fillStyle = arrow;
-      if (moves.length > 1) {
-        for (const action of moves) {
-          const [slotX, slotY] = ARROW_SLOTS[action];
-          drawDirectionCone(ctx, cx, cy, size, ACTIONS[action], slotX, slotY, 0.65);
-        }
-      } else if (moves.length === 1) {
-        drawDirectionCone(ctx, cx, cy, size, ACTIONS[moves[0]]);
-      }
-    }
-  }
 }

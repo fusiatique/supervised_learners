@@ -24,15 +24,21 @@ export class AgentView {
   draw(mood, h, now = performance.now()) {
     const { ctx, width, height } = prepareCanvas(this.canvas);
     const r = Math.min(width, height) * 0.42;
+    this.drawFace(ctx, width / 2, height / 2, r, mood, h, now);
+  }
+
+  // Shared renderer keeps the maze marker and state panel identical.
+  drawFace(ctx, x, y, r, mood, h, now = performance.now()) {
+    ctx.save();
     // In withdrawal the face trembles.
     const tremble = mood.id === 'withdrawal' ? Math.sin(now / 35) * r * 0.025 : 0;
-    ctx.translate(width / 2 + tremble, height / 2);
+    ctx.translate(x + tremble, y);
 
     ctx.beginPath();
     ctx.arc(0, 0, r, 0, Math.PI * 2);
     ctx.fillStyle = skinColor(h);
     ctx.fill();
-    ctx.lineWidth = Math.max(2, r * 0.045);
+    ctx.lineWidth = Math.max(0.8, r * 0.045);
     ctx.strokeStyle = INK;
     ctx.stroke();
 
@@ -40,6 +46,7 @@ export class AgentView {
     ctx.lineJoin = 'round';
     ctx.fillStyle = INK;
     this[mood.id](ctx, r);
+    ctx.restore();
   }
 
   // Both eyes (and anything else mirrored) are drawn through this.

@@ -1,6 +1,6 @@
 import { cssVar, prepareCanvas, CANVAS_FONT } from './theme.js';
 
-const MARGIN = { top: 22, right: 14, bottom: 26, left: 38 };
+const MARGIN = { top: 22, right: 14, bottom: 48, left: 58 };
 
 function niceStep(range, targetTicks) {
   const rough = range / targetTicks;
@@ -21,11 +21,14 @@ function compact(n) {
 // `reference` is the colour of an optional dashed horizontal line marking a
 // fixed level.
 export class LineChart {
-  constructor(canvas, { series, xLabel, reference = null }) {
+  constructor(canvas, { series, xLabel, yLabel = '', yRange = null, xWindow = null, reference = null }) {
     this.canvas = canvas;
     this.series = series;
     this.reference = reference;
     this.xLabel = xLabel;
+    this.yLabel = yLabel;
+    this.yRange = yRange;
+    this.xWindow = xWindow;
     this.hoverX = null;
 
     canvas.addEventListener('mousemove', (e) => {
@@ -55,11 +58,14 @@ export class LineChart {
         yMax = Math.max(yMax, p.y);
       }
     }
+    if (this.yRange) [yMin, yMax] = this.yRange;
     const yStep = niceStep(yMax - yMin, 4);
     yMin = Math.floor(yMin / yStep) * yStep;
     yMax = Math.ceil(yMax / yStep) * yStep;
 
-    const px = (x) => left + (x / xMax) * (right - left);
+    const xMin = this.xWindow ? Math.max(0, xMax - this.xWindow) : 0;
+    if (this.xWindow) xMax = xMin + this.xWindow;
+    const px = (x) => left + ((x - xMin) / (xMax - xMin)) * (right - left);
     const py = (y) => bottom - ((y - yMin) / (yMax - yMin)) * (bottom - top);
 
     ctx.font = `11px ${CANVAS_FONT}`;
@@ -80,11 +86,23 @@ export class LineChart {
 
     // x labels
     ctx.textBaseline = 'top';
-    const xStep = niceStep(xMax, 4);
-    for (let x = 0; x <= xMax; x += xStep) {
-      ctx.textAlign = x === 0 ? 'left' : 'center';
+    const xStep = niceStep(xMax - xMin, 4);
+    for (let x = Math.ceil(xMin / xStep) * xStep; x <= xMax; x += xStep) {
+      ctx.textAlign = x === xMin ? 'left' : x === xMax ? 'right' : 'center';
       ctx.fillText(compact(x), px(x), bottom + 7);
     }
+
+    // Axis titles sit outside the numeric tick labels.
+    ctx.save();
+    ctx.font = `12px ${CANVAS_FONT}`;
+    ctx.fillStyle = cssVar('--text-secondary');
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(this.xLabel === 'Step' ? 'Simulation steps' : this.xLabel, (left + right) / 2, height - 10);
+    ctx.translate(13, (top + bottom) / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText(this.yLabel, 0, 0);
+    ctx.restore();
 
     if (this.reference && referenceValue !== null) {
       ctx.beginPath();
@@ -97,6 +115,10 @@ export class LineChart {
       ctx.setLineDash([]);
     }
 
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(left, top, right - left, bottom - top);
+    ctx.clip();
     lines.forEach((points, i) => {
       if (points.length < 2) return;
       ctx.beginPath();
@@ -107,7 +129,11 @@ export class LineChart {
       ctx.stroke();
     });
 
-    if (this.hoverX !== null && lines[0]?.length) this.drawHover(ctx, lines, px, py, { left, right, top, bottom });
+    ctx.restore();
+    const visibleLines = lines.map((points) => points.filter((point) => point.x >= xMin && point.x <= xMax));
+    if (this.hoverX !== null && this.hoverX >= left && this.hoverX <= right && visibleLines[0]?.length) {
+      this.drawHover(ctx, visibleLines, px, py, { left, right, top, bottom });
+    }
   }
 
   // The series are sampled at the same x positions, so one index serves all.
