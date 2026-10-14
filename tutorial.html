@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Step-by-step tutorial | Maze RL Simulation</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="app-header tutorial-header">
+    <a href="index.html">Back to the simulation</a>
+    <h1>Learn how the maze agent learns</h1>
+    <p>A step-by-step guide to the mechanics, math, and experiments in the simulation.</p>
+  </header>
+
+  <main class="tutorial-content">
+    <section class="panel">
+      <h2>How to use this tutorial</h2>
+      <p>Keep the <a href="index.html">simulation</a> open in another tab. For each lesson, first make a prediction, then try the suggested activity and explain what you observed. You can read the lessons in order or open the sections that interest you.</p>
+      <p class="hint">This is reinforcement learning: the agent learns from rewards and experience, rather than from examples labelled with the correct action.</p>
+    </section>
+
+    <section class="panel lesson">
+      <h2>1. What is the simulation trying to do?</h2>
+      <h3>Learning goals</h3>
+      <ul>
+        <li>Identify the agent, environment, state, action, reward, and episode.</li>
+        <li>Explain that the agent learns from the consequences of its own actions.</li>
+      </ul>
+      <p><strong>Say:</strong> “The agent starts in a maze and chooses a direction to move. It receives a reward when it reaches an item. Through repeated attempts, it learns which moves are likely to lead to valuable outcomes.”</p>
+      <p>A <em>state</em> is the agent’s current cell. An <em>action</em> is one of four directions: up, right, down, or left. The maze and its items make up the <em>environment</em>. An <em>episode</em> is one attempt that ends when an item is reached or the step limit is reached.</p>
+      <p><strong>Ask:</strong> “Is the agent told which direction is correct?” It is not. It learns from rewards and exploration.</p>
+    </section>
+
+    <section class="panel lesson">
+      <h2>2. Meet the maze, items, and controls</h2>
+      <h3>Learning goals</h3>
+      <ul>
+        <li>Find the start, walls, and items, and distinguish an item’s value from its location.</li>
+        <li>Use Step, Play, Reset learning, and the maze-editing tools.</li>
+      </ul>
+      <p><strong>Say:</strong> “The number on an item is its reward value. A larger number means more reward when the agent reaches it, but distance and the cost of each move also matter.”</p>
+      <p>Use <strong>Step</strong> to see one transition at a time, <strong>Play</strong> to run continuously, and <strong>Reset learning</strong> to clear learned values and start the agent over. The reset keeps the current maze and item placement.</p>
+      <p><strong>Try:</strong> Locate the start and each item. Compare the item values and estimate how many moves each would take to reach.</p>
+    </section>
+
+    <section class="panel lesson">
+      <h2>3. What happens on one step?</h2>
+      <h3>Learning goals</h3>
+      <ul>
+        <li>Describe how a chosen action changes the agent’s cell.</li>
+        <li>Explain what happens when the agent tries to move into a wall.</li>
+      </ul>
+      <p><strong>Say:</strong> “The agent selects one of four actions. If the neighbouring cell is open, it moves there. If that cell is a wall or outside the maze, the agent stays where it is. Either way, one step has passed.”</p>
+      <p><strong>Try:</strong> Press <strong>Step</strong> several times. Notice where the agent goes and whether it ever stays in place.</p>
+      <p><strong>Ask:</strong> “If the agent stays still at a wall, did the action have no cost?” No: the step still counts and the step cost still applies.</p>
+    </section>
+
+    <section class="panel lesson">
+      <h2>4. How the reward is calculated</h2>
+      <h3>Learning goals</h3>
+      <ul>
+        <li>Calculate the reward for a move with and without an item.</li>
+        <li>Explain how item value and step cost can change which destination is worthwhile.</li>
+      </ul>
+      <p>The reward on a transition is:</p>
+      <p class="equation"><code>r = item value reached − step cost</code></p>
+      <p>If no item is reached, its value is zero, so the reward is just the negative step cost. With a step cost of <code>0.02</code>, an ordinary move gives <code>−0.02</code>. Reaching an item worth <code>3</code> gives <code>3 − 0.02 = 2.98</code>.</p>
+      <p><strong>Say:</strong> “A high-value item is not automatically the best destination. Getting there takes steps, and every step has a cost. The agent learns about the total consequences of a route.”</p>
+      <p><strong>Try:</strong> Change the step cost or item values. Before running, predict whether a nearer, lower-value item could become more attractive than a distant, higher-value item.</p>
+    </section>
+
+    <section class="panel lesson">
+      <h2>5. Episodes: one attempt at a time</h2>
+      <h3>Learning goals</h3>
+      <ul>
+        <li>Identify what ends an episode.</li>
+        <li>Explain what is reset between episodes and what the agent retains.</li>
+      </ul>
+      <p>An episode ends when the agent reaches an item. It also ends if it reaches the simulation’s step limit, which is twice the number of grid cells. At the end of an episode, the agent returns to the start. Its learned Q-values are retained, so it can use experience from earlier episodes.</p>
+      <p><strong>Say:</strong> “Resetting the agent’s position is not the same as resetting its learning. The agent starts a new attempt at the start cell, but it remembers its action-value estimates.”</p>
+      <p><strong>Try:</strong> Watch the episode count and the “Last episode length” statistic. Use <strong>Reset learning</strong> and notice that the maze and item placement remain.</p>
+    </section>
+
+    <section class="panel lesson">
+      <h2>6. The Q-learning formula</h2>
+      <h3>Learning goals</h3>
+      <ul>
+        <li>Interpret a Q-value as an estimate for taking an action from a state.</li>
+        <li>Explain the roles of reward, learning rate, and discount factor in an update.</li>
+      </ul>
+      <p>The agent stores a value <code>Q(s, a)</code> for each state <code>s</code> (cell) and action <code>a</code> (direction). This estimates how good it is to take that action from that cell. After an action, Q-learning updates the estimate:</p>
+      <p class="equation"><code>Q(s, a) ← Q(s, a) + α [r + γ max<sub>a′</sub> Q(s′, a′) − Q(s, a)]</code></p>
+      <ul>
+        <li><code>r</code> is the reward just received.</li>
+        <li><code>s′</code> is the new cell reached.</li>
+        <li><code>max Q(s′, a′)</code> is the best estimated value of an action from that next cell.</li>
+        <li><code>α</code> is the learning rate: how much the new information changes the existing estimate.</li>
+        <li><code>γ</code> is the discount factor: how much future estimated rewards count.</li>
+      </ul>
+      <p>The term inside the brackets is the <em>temporal-difference error</em>: the difference between the new target and the old estimate.</p>
+      <p><strong>Worked example:</strong> Suppose the old Q-value is <code>1</code>, the move reward is <code>−0.02</code>, the best next-cell value is <code>2</code>, <code>α = 0.5</code>, and <code>γ = 0.98</code>. The target is <code>−0.02 + 0.98 × 2 = 1.94</code>. The updated estimate is <code>1 + 0.5 × (1.94 − 1) = 1.47</code>.</p>
+      <p>If an item is reached, the episode ends and the update does not include a future-value term: <code>Q ← Q + α(r − Q)</code>. A step-limit timeout ends the episode after the update; that transition still uses the next-cell estimate.</p>
+      <p><strong>Try:</strong> Increase the learning rate and observe that estimates can change more sharply. Increase the discount factor and discuss why future rewards may matter more.</p>
+    </section>
+
+    <section class="panel lesson">
+      <h2>7. Exploration and exploitation</h2>
+      <h3>Learning goals</h3>
+      <ul>
+        <li>Distinguish exploring new actions from exploiting current estimates.</li>
+        <li>Explain how ε changes over episodes and recognize this simulation’s guided exploration.</li>
+      </ul>
+      <p>When the agent is not deliberately exploring, it chooses an action with the highest estimated Q-value. With probability <code>ε</code>, it instead chooses a random direction. This is called ε-greedy action selection.</p>
+      <p class="equation"><code>ε = max(ε minimum, ε start × ε decay<sup>episode number</sup>)</code></p>
+      <p>At the start, ε is based on “Initial exploration.” It shrinks by “ε decay per episode,” but never goes below “Minimum ε.” There is also a simulation-specific rule: before ordinary ε-greedy selection, the agent searches for a reachable, unvisited cell and moves toward one if it finds one. So early exploration is guided by coverage, not just random action selection.</p>
+      <p><strong>Say:</strong> “Exploration gathers information; exploitation uses information already gathered. Too little exploration can miss a good route. Too much can keep the agent trying random moves.”</p>
+      <p><strong>Try:</strong> Change the initial exploration or minimum ε, reset learning, and compare a few runs. Results can differ because random choices are involved.</p>
+    </section>
+
+    <section class="panel lesson">
+      <h2>8. Reading the displays</h2>
+      <h3>Learning goals</h3>
+      <ul>
+        <li>Interpret the recent-choice bars, maze shading, and policy arrows.</li>
+        <li>Distinguish the reward-state chart from learning rewards and Q-values.</li>
+      </ul>
+      <p>The item-choice bars count the outcomes of the most recent 50 episodes; “None (timed out)” means no item was reached. They describe recent outcomes, not a guarantee about what the agent will choose next.</p>
+      <p>Visited open cells are shaded by relative learned state value. The arrows indicate preferred actions, but before the policy is stable the displayed arrows intentionally change and should not be read as a settled policy.</p>
+      <p>The chart titled <strong>Reward state over time</strong> shows a separate decaying level:</p>
+      <p class="equation"><code>R<sub>t</sub> = (1 − d) R<sub>t−1</sub> + c<sub>t</sub></code></p>
+      <p><code>d</code> is “Reward state decay” and <code>c<sub>t</sub></code> is the item value consumed on that step (zero if none). This chart adds the item value but does not subtract the step cost. It is not the per-step learning reward and not a Q-value.</p>
+      <p><strong>Ask:</strong> “Could the reward-state chart rise even if the agent had a negative reward on that step?” Yes. The chart tracks item value and decay, while learning reward also subtracts step cost.</p>
+    </section>
+
+    <section class="panel lesson">
+      <h2>9. Run a controlled experiment</h2>
+      <h3>Learning goals</h3>
+      <ul>
+        <li>Make a testable prediction about how one setting affects behavior.</li>
+        <li>Change one factor at a time and compare observations across runs.</li>
+      </ul>
+      <p><strong>Say:</strong> “A good experiment changes one thing at a time. If we change the maze, item values, and exploration together, we will not know which change caused the result.”</p>
+      <ol>
+        <li>Choose one question, such as: “Will increasing step cost make the agent favor a nearer item?”</li>
+        <li>Record the starting settings and predict what will happen.</li>
+        <li>Change only the step cost. Keep the maze and item locations fixed.</li>
+        <li>Press <strong>Reset learning</strong>, then run for a comparable number of episodes.</li>
+        <li>Compare episode lengths and recent item choices. Repeat if possible, since actions are partly random.</li>
+      </ol>
+      <p><strong>Try:</strong> Repeat the experiment with item value or ε instead. When you edit the maze or item placement, reset learning before comparing runs so the agent’s prior estimates do not carry over.</p>
+    </section>
+
+    <section class="panel lesson">
+      <h2>10. What should we conclude?</h2>
+      <h3>Learning goals</h3>
+      <ul>
+        <li>Recognize randomness, incomplete learning, and the effects of maze design.</li>
+        <li>Support conclusions with observations rather than a single outcome.</li>
+      </ul>
+      <p><strong>Say:</strong> “One run is evidence, not proof. Actions and tie-breaking can be random, a short run may not settle on a policy, and unreachable items cannot be chosen. The maze, step cost, item values, and exploration settings all affect what happens.”</p>
+      <p>The default layout places items in dead ends, but users can edit walls and item positions. Editing items does not itself reset the agent’s learned values, and the wall editing tools do not all reset learning in the same way. For a fair comparison after changing the layout or items, use <strong>Reset learning</strong>.</p>
+      <p><strong>Final check:</strong> Can you explain what the agent knows (Q-values), what it wants (the reward signal), how it learns (the Q-update), how it tries unfamiliar routes (exploration), and what each display represents?</p>
+    </section>
+
+    <section class="panel">
+      <h2>Quick reference</h2>
+      <ul>
+        <li><strong>Step reward:</strong> item value reached − step cost.</li>
+        <li><strong>Q-learning:</strong> old estimate moves toward reward plus discounted best next estimate.</li>
+        <li><strong>α:</strong> learning rate.</li>
+        <li><strong>γ:</strong> discount factor for future estimated rewards.</li>
+        <li><strong>ε:</strong> probability of random action during ε-greedy selection, after the guided unvisited-cell search.</li>
+        <li><strong>Reward-state chart:</strong> decaying accumulation of consumed item values, not the learning reward.</li>
+      </ul>
+      <p><a href="index.html">Return to the simulation and try an experiment.</a></p>
+    </section>
+  </main>
+</body>
+</html>
