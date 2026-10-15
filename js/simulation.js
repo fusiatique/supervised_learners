@@ -66,6 +66,13 @@ export class Simulation {
     this.resetLearning();
   }
 
+  // The page controls drug-induced deficit independently of source cooldown.
+  setDependenceOnly(enabled) {
+    this.params.drugDeficit = enabled;
+    this.env = new HrlEnvironment(this.params);
+    this.resetLearning();
+  }
+
   get dependence() {
     return Object.entries(DEPENDENCE).every(([key, value]) => this.params[key] === value);
   }

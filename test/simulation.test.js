@@ -165,3 +165,22 @@ test('a copied layout reproduces the maze', () => {
   const sim = new Simulation(hrlConfig());
   assert.deepEqual(layoutOf(sim.env), MAZES[0].layout);
 });
+
+
+test('independent dependence control preserves the source cooldown and rebuilds learning', () => {
+  const params = hrlConfig({ refractorySteps: 23 });
+  const sim = new Simulation(params, seededRandom(5));
+  const plainStates = sim.env.numStates;
+  sim.setDependenceOnly(true);
+  assert.equal(params.refractorySteps, 23);
+  assert.equal(sim.env.numStates, plainStates * 6);
+  sim.administer(getSourceType('drugB'));
+  assert.equal(sim.env.restingLevel, 46);
+  sim.step();
+  sim.setDependenceOnly(false);
+  assert.equal(params.refractorySteps, 23);
+  assert.equal(sim.env.numStates, plainStates);
+  assert.equal(sim.agent.q.length, plainStates * 5);
+  assert.equal(sim.steps, 0);
+  assert.equal(sim.env.restingLevel, 50);
+});

@@ -13,39 +13,7 @@
   </header>
 
   <main class="layout">
-    <section class="panel model-panel">
-        <h2>Model</h2>
-        <div class="model-options">
-        <div>
-        <label class="field">
-          <span>Harm trade-off</span>
-          <select id="model-select"></select>
-        </label>
-        <p class="hint">A weighs harm the same at any <i>d</i>. B weighs it less the further <i>d</i> is below its target. C is B without the ongoing cost of accumulated harm.</p>
-        </div>
-        <div>
-        <label class="check">
-          <input id="dependence" type="checkbox">
-          <span>Dependence mechanisms</span>
-        </label>
-        <p class="hint">Each drug use lowers the level <i>d</i> rests at, which heals only slowly, and a used source needs 15 steps before it can be used again. Changing either setting resets learning.</p>
-        </div>
-        </div>
-    </section>
 
-    <aside class="panel controls">
-      <section>
-        <h2>Parameters</h2>
-        <p class="hint">Explore what shapes the agent’s behaviour. Adjust its internal state, how it learns, and what it finds rewarding.</p>
-        <ul class="parameter-guide">
-          <li><strong>Internal states</strong><span>Starting state and recovery</span></li>
-          <li><strong>Agent</strong><span>Learning and exploration</span></li>
-          <li><strong>Reward</strong><span>Benefits and harm costs</span></li>
-        </ul>
-        <button id="toggle-params" class="parameter-toggle" type="button" aria-expanded="false" aria-controls="params">Show all parameters</button>
-        <div id="params" hidden></div>
-      </section>
-    </aside>
 
     <div class="simulation-content">
     <div class="visuals">
@@ -109,6 +77,67 @@
         </select>
         <div id="choices"></div>
       </section>
+    <div class="parameter-panels">
+    <aside class="panel controls">
+      <section>
+        <h2>Parameters</h2>
+        <p class="hint">Model B uses an adaptive harm trade-off: harm counts less when d is low. The agent starts at d = 50.</p>
+        <button id="restore-defaults" type="button" title="Restore parameter defaults, the adaptive model and dependence, then reset learning.">Restore defaults</button>
+        <p class="hint">Restores parameter sliders and dependence ON, and resets learning.</p>
+        <div class="parameter-disclosures">
+          <div class="settings-heading">
+            <button id="toggle-dopamine-params" type="button" aria-expanded="false" aria-controls="dopamine-params">Dopamine-related state</button>
+            <span class="settings-info">
+              <button class="info-button" type="button" aria-label="About dopamine-related state" aria-describedby="info-dopamine" aria-expanded="false">i</button>
+              <span class="info-tooltip" id="info-dopamine" role="tooltip">How d changes between source uses.</span>
+            </span>
+          </div>
+          <div id="dopamine-params" hidden></div>
+          <div class="settings-heading">
+            <button id="toggle-reward-params" type="button" aria-expanded="false" aria-controls="reward-params">Reward valuation</button>
+            <span class="settings-info">
+              <button class="info-button" type="button" aria-label="About reward valuation" aria-describedby="info-reward" aria-expanded="false">i</button>
+              <span class="info-tooltip" id="info-reward" role="tooltip">How much raising d helps reward and accumulated harm reduces it.</span>
+            </span>
+          </div>
+          <div id="reward-params" hidden></div>
+          <div class="settings-heading">
+            <button id="toggle-exploration-params" type="button" aria-expanded="false" aria-controls="exploration-params">Exploration settings</button>
+            <span class="settings-info">
+              <button class="info-button" type="button" aria-label="About exploration settings" aria-describedby="info-exploration" aria-expanded="false">i</button>
+              <span class="info-tooltip" id="info-exploration" role="tooltip">How often the agent tries alternatives instead of following its learned choices.</span>
+            </span>
+          </div>
+          <div id="exploration-params" hidden></div>
+          <div class="settings-heading">
+            <button id="toggle-harm-params" type="button" aria-expanded="false" aria-controls="harm-params">Harm sensitivity settings</button>
+            <span class="settings-info">
+              <button class="info-button" type="button" aria-label="About harm sensitivity settings" aria-describedby="info-harm" aria-expanded="false">i</button>
+              <span class="info-tooltip" id="info-harm" role="tooltip">How strongly harm counts when d is low or high.</span>
+            </span>
+          </div>
+          <div id="harm-params" hidden></div>
+        </div>
+      </section>
+    </aside>
+      <div class="environment-panels">
+        <section id="dependence-control" class="panel dependence-panel">
+          <h2>Drug-induced dependence</h2>
+          <label class="check"><input id="dependence" type="checkbox" aria-controls="dependence-params"><span>Enable drug-induced dependence</span></label>
+          <p class="hint">Drug use lowers the resting level of d. Turning this on or off resets learning. Source cooldown is controlled separately.</p>
+          <div id="dependence-params" hidden></div>
+        </section>
+        <section class="panel cooldown-panel">
+          <h2>Source cooldown</h2>
+          <div id="cooldown-params"></div>
+        </section>
+        <section class="panel discount-panel">
+          <h2>Future rewards</h2>
+          <p class="hint">How much the agent values rewards it can receive later.</p>
+          <div id="discount-params"></div>
+        </section>
+      </div>
+    </div>
     </div>
   </main>
 

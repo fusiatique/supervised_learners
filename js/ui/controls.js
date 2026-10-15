@@ -11,16 +11,13 @@ export function fillSelect(select, options, onChange) {
   select.addEventListener('change', () => onChange(select.value));
 }
 
-// One slider per entry in `defs`, grouped under headings. Sliders write
+// One slider per entry in `defs`. Sliders write
 // straight into the shared `params` object, which the simulation reads live.
 // Returns a function that brings the sliders back in line with `params` after
 // something else has changed it.
 export function buildParamControls(container, params, defs) {
-  const groups = [...new Set(defs.map((p) => p.group))];
   const controls = [];
-  for (const group of groups) {
-    container.append(el('h3', { textContent: group }));
-    for (const def of defs.filter((p) => p.group === group)) {
+  for (const def of defs) {
       const output = el('output', { textContent: params[def.key] });
       const input = el('input', { id: `param-${def.key}`, type: 'range', min: def.min, max: def.max, step: def.step, value: params[def.key] });
       input.addEventListener('input', () => {
@@ -48,7 +45,6 @@ export function buildParamControls(container, params, defs) {
         row.append(help);
       }
       container.append(row);
-    }
   }
   return () => {
     for (const { def, input, output } of controls) {

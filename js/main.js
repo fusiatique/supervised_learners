@@ -1,12 +1,12 @@
 import { PARAMS } from './config.js';
-import { SOURCE_TYPES, DEPENDENCE, HRL_SLIDERS, MODELS, hrlConfig, getSourceType } from './hrl/config.js';
+import { SOURCE_TYPES, DEPENDENCE, HRL_SLIDERS, hrlConfig, getSourceType } from './hrl/config.js';
 import { harmWeight } from './hrl/reward.js';
 import { MOODS, moodOf } from './hrl/mood.js';
 import { Simulation } from './simulation.js';
 import { MazeView } from './ui/mazeView.js';
 import { AgentView } from './ui/agentView.js';
 import { LineChart } from './ui/chart.js';
-import { fillSelect, buildParamControls, renderStats, renderLegend, renderMeter, renderChoices } from './ui/controls.js';
+import { buildParamControls, renderStats, renderLegend, renderMeter, renderChoices } from './ui/controls.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -70,27 +70,58 @@ renderLegend($('state-legend'), [
 
 // --- Controls --------------------------------------------------------------
 
-// One disclosure reveals every parameter, grouped by purpose.
-const parameterGroups = ['Internal states', 'Agent', 'Reward'];
-const sliders = [...HRL_SLIDERS, ...PARAMS].sort(
-  (a, b) => parameterGroups.indexOf(a.group) - parameterGroups.indexOf(b.group),
-);
+// Group related controls; cooldown and discount remain directly visible.
+const sliders = [...HRL_SLIDERS, ...PARAMS];
+const controlGroups = {
+  dopamine: ['dBackgroundDrift', 'kD'],
+  reward: ['beta', 'omega'],
+  dependence: ['rhoA'],
+  exploration: ['epsilonStart', 'epsilonDecay', 'epsilonMin'],
+  harm: ['lambdaMin', 'lambdaMax'],
+};
 const syncParamControls = [
-  buildParamControls($('params'), params, sliders),
+  buildParamControls($('discount-params'), params, sliders.filter((def) => def.key === 'gamma')),
+  buildParamControls($('cooldown-params'), params, sliders.filter((def) => def.key === 'refractorySteps')),
 ];
-$('toggle-params').addEventListener('click', () => {
-  const expanded = $('toggle-params').getAttribute('aria-expanded') === 'true';
-  $('toggle-params').setAttribute('aria-expanded', String(!expanded));
-  $('toggle-params').textContent = expanded ? 'Show all parameters' : 'Hide parameters';
-  $('params').hidden = expanded;
+for (const [name, keys] of Object.entries(controlGroups)) {
+  syncParamControls.push(buildParamControls(
+    $(`${name}-params`), params, keys.map((key) => sliders.find((def) => def.key === key)),
+  ));
+  if (name === 'dependence') continue;
+  const button = $(`toggle-${name}-params`);
+  button.addEventListener('click', () => {
+    const expanded = button.getAttribute('aria-expanded') === 'true';
+    button.setAttribute('aria-expanded', String(!expanded));
+    $(`${name}-params`).hidden = expanded;
+  });
+}
+// Info buttons are separate from the disclosure buttons, so tips do not open sliders.
+for (const button of document.querySelectorAll('.info-button')) {
+  button.addEventListener('click', () => {
+    const expanded = button.getAttribute('aria-expanded') === 'true';
+    button.setAttribute('aria-expanded', String(!expanded));
+  });
+}
+document.addEventListener('click', (event) => {
+  for (const button of document.querySelectorAll('.info-button')) {
+    if (!button.parentElement.contains(event.target)) button.setAttribute('aria-expanded', 'false');
+  }
 });
-fillSelect($('model-select'), MODELS, (id) => {
-  sim.setModel(id);
-  for (const sync of syncParamControls) sync();
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') {
+    for (const button of document.querySelectorAll('.info-button')) button.setAttribute('aria-expanded', 'false');
+  }
 });
-$('model-select').value = sim.modelId;
-$('dependence').checked = sim.dependence;
-$('dependence').addEventListener('change', () => sim.setDependence($('dependence').checked));
+function syncDependenceControl() {
+  $('dependence').checked = params.drugDeficit;
+  $('dependence-params').hidden = !params.drugDeficit;
+}
+syncDependenceControl();
+$('dependence').addEventListener('change', () => {
+  // Rebuild the environment because dependence changes the Q-table dimensions.
+  sim.setDependenceOnly($('dependence').checked);
+  syncDependenceControl();
+});
 
 function setRunning(value) {
   running = value;
@@ -102,6 +133,15 @@ $('step').addEventListener('click', () => {
   sim.step();
 });
 $('reset').addEventListener('click', () => sim.resetLearning());
+$('restore-defaults').addEventListener('click', () => {
+  setRunning(false);
+  const defaults = hrlConfig(DEPENDENCE);
+  for (const { key } of sliders) params[key] = defaults[key];
+  sim.setModel('adaptive');
+  sim.setDependenceOnly(defaults.drugDeficit);
+  syncDependenceControl();
+  for (const sync of syncParamControls) sync();
+});
 $('dose').addEventListener('click', () => sim.administer(DOSE));
 
 // The speed slider is logarithmic: 1 to 10,000 steps per second.
