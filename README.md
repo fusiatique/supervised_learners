@@ -142,14 +142,14 @@ aNext = clip(rhoA * a + deficitGain, 0, aMax)
 dNext = clip(dAction + kD * ((dBase - aNext) - dAction) - dBackgroundDrift, dMin, dMax)
 ```
 
-with `rhoA = 0.9995` and `aMax = 50`. The deficit heals with a half-life of about 1,400 steps, far more slowly than `d` itself moves (its half-life is under 20 steps), so the high from a dose is gone long before the lowered resting level is. The reward function is unchanged: a lowered resting level matters because it leaves `d` below the target, where raising `d` is worth more and, in the adaptive model, harm weighs less.
+with `rhoA = 0.9995` and `aMax = 50`. The deficit heals with a half-life of about 1,400 steps, far more slowly than `d` itself moves (its half-life is under 20 steps), so the high from a dose is gone long before the lowered resting level is. A lowered resting level matters because it leaves `d` below the target: every step spent there costs reward (the `kappa` term below), raising `d` is worth more, and, in the adaptive model, harm weighs less.
 
 **Refractory sources** (`refractorySteps`). After a source is used it cannot be used again for that many steps (15 on the page), in addition to the agent having to leave and return. This applies to every source alike. It caps how much `d` food can supply, which is what lets a deficit actually bite: without it, steady use of food could hold `d` close to the target even at the largest deficit.
 
 ### Reward
 
 ```
-r = R0 + beta * (phi(dAction) - phi(d)) - lambda(d) * (acuteHarm + omega * hNext) - stepCost
+r = R0 + beta * (phi(dAction) - phi(d)) - lambda(d) * (acuteHarm + omega * hNext) - kappa * max(0, -phi(dNext)) - stepCost
 ```
 
 | Term | Meaning | Default |
@@ -160,6 +160,7 @@ r = R0 + beta * (phi(dAction) - phi(d)) - lambda(d) * (acuteHarm + omega * hNext
 | `lambda(d)` | harm-sensitivity weight (below) | `lambdaMin = 0.15`, `lambdaMax = 1.0`, `lambdaS = 8` |
 | `acuteHarm` | the source's acute harm cost; 0 for a move | see table above |
 | `omega` | weight of accumulated harm | 0.1 |
+| `kappa` | weight of the per-step cost of being below the target | 1.0 |
 | `stepCost` | cost of spending a step | 0.02 |
 
 **State-dependent benefit.**
@@ -170,6 +171,8 @@ phi(d) =  phiB * (1 - exp(-phiC * (d - dTarget)))   for d >= dTarget
 ```
 
 `phi` is zero and continuous at the target, rises steeply from below it and flattens above it. The benefit term uses `dAction`, the state right after the source's effect and before passive recovery, so that what is rewarded is the action's own effect and not the drift back to baseline that would have happened anyway.
+
+**Low-state cost.** `kappa * max(0, -phi(dNext))` is charged on every step that ends with `d` below the target, using the same `phi`, so it grows quadratically with the distance below. It is what makes a low state aversive in itself: without it, the benefit term only rewards jumps in `d`, and an agent whose resting level has been lowered can sit far below the target at no cost. Because it uses `dNext`, passive recovery and drift count. A small deficit costs little (at `d = 46`, 0.06 per step), a large one a lot (at `d = 20`, 3.6 per step), so only a substantial deficit pushes the agent towards the sources that raise `d` the most. `kappa = 0` restores the previous reward.
 
 **State-dependent harm sensitivity.** This is the model's central assumption:
 
@@ -229,7 +232,7 @@ A against B tests the adaptive harm-sensitivity assumption with everything else 
 
 ### Reading the metrics
 
-Per episode: `totalReward`, `length`, interactions per source (`n_food`, …), `drugInteractions`, `ordinaryInteractions`, the shares of steps spent moving, on ordinary sources and on drugs, the mean, final and minimum `d`, the mean and final `h`, the mean harm weight, and the summed reward components (`sum_sourceReward`, `sum_stateBenefit`, `sum_acuteHarmCost`, `sum_accumulatedHarmCost`, `sum_stepCost`). Columns ending in `_lowD`, `_midD`, `_highD` count interactions by the level of `d` just before them, and `steps_lowD` etc. say how long the agent spent at each level.
+Per episode: `totalReward`, `length`, interactions per source (`n_food`, …), `drugInteractions`, `ordinaryInteractions`, the shares of steps spent moving, on ordinary sources and on drugs, the mean, final and minimum `d`, the mean and final `h`, the mean harm weight, and the summed reward components (`sum_sourceReward`, `sum_stateBenefit`, `sum_acuteHarmCost`, `sum_accumulatedHarmCost`, `sum_lowStateCost`, `sum_stepCost`). Columns ending in `_lowD`, `_midD`, `_highD` count interactions by the level of `d` just before them, and `steps_lowD` etc. say how long the agent spent at each level.
 
 Things to keep in mind:
 

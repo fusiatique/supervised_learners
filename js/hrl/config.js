@@ -58,9 +58,11 @@ export const HRL_DEFAULTS = {
   hBinWidth: 10,
   aBinWidth: 10,
 
-  // Reward: r = R0 + beta * Δphi - lambda(d) * (acuteHarm + omega * hNext) - stepCost
+  // Reward: r = R0 + beta * Δphi - lambda(d) * (acuteHarm + omega * hNext)
+  //             - kappa * max(0, -phi(dNext)) - stepCost
   beta: 1.0,
   omega: 0.1,
+  kappa: 1.0, // weight of the per-step cost of being below the target
   phiA: 10,
   phiB: 3,
   phiC: 0.05,
@@ -79,6 +81,7 @@ export const HRL_SLIDERS = [
   { key: 'rhoA', description: 'Drug use can lower the agent’s resting level below 50. This controls how long that effect lasts. Only applies when dependence mechanisms are enabled.', tryIt: 'Lower it for faster recovery. Increase it to make the effect last longer. At 1, the resting level does not recover.', group: 'Drug-induced dependence', label: 'Dependence persistence (ρ_a)', min: 0.99, max: 1, step: 0.0005 },
   { key: 'beta', description: "Controls how much the agent values an increase in d, its dopamine-related state. Higher values make that increase more rewarding, without changing how much d rises.", tryIt: "Increase it to make raising d more important to the agent. Set it to 0 to remove this extra reward; food and Drug B still have their own rewards.", group: 'Addiction experiment', label: 'Importance of raising d (β)', min: 0, max: 3, step: 0.1 },
   { key: 'omega', description: "Harm from drug use can stay with the agent over time. This controls how much that lasting harm lowers the reward, the score the agent learns to increase. It changes how much harm matters in its decisions, not how much harm it has.", tryIt: "Increase it to make lasting harm more costly to the agent. At 0, lasting harm no longer lowers its reward, even though the harm is still there.", group: 'Addiction experiment', label: 'Accumulated harm weight (ω)', min: 0, max: 0.5, step: 0.01 },
+  { key: 'kappa', description: "Makes every step the agent spends with d below its target cost reward points, more the further below it is. When drug use has lowered the level d rests at, d stays below the target, and this cost keeps being paid until something raises d again.", tryIt: "Set it to 0 to make a low d cost nothing in itself. Increase it to make the agent work harder to get out of a low state.", group: 'Addiction experiment', label: 'Low-state cost weight (κ)', min: 0, max: 3, step: 0.1 },
   { key: 'lambdaMin', description: "Controls how much harm matters to the agent when its dopamine-related state, d, is low. A higher value means harm reduces its reward more.", tryIt: "Increase it to make harm matter more even when d is low. Keep it below the highest harm weight.", group: 'Reward and harm trade-off', label: 'Lowest harm weight (λ min)', min: 0.01, max: 1, step: 0.01 },
   { key: 'lambdaMax', description: "Controls how much harm matters to the agent when its dopamine-related state, d, is high. A higher value means harm reduces its reward more.", tryIt: "Increase it to make harm matter more when d is high. Keep it above the lowest harm weight.", group: 'Reward and harm trade-off', label: 'Highest harm weight (λ max)', min: 0.01, max: 2, step: 0.01 },
 ];
