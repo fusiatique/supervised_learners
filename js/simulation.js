@@ -132,9 +132,9 @@ export class Simulation {
 
   // Interactions with each source over the recent episodes and the one in
   // progress, as a Map of source id -> count.
-  recentChoices() {
+  recentChoices(window = 100) {
     const counts = new Map(SOURCE_TYPES.map((s) => [s.id, 0]));
-    for (const episode of [...this.recent, this.episodeInteractions]) {
+    for (const episode of [...this.recent.slice(-(window - 1)), this.episodeInteractions]) {
       for (const [id, n] of Object.entries(episode)) counts.set(id, counts.get(id) + n);
     }
     return counts;

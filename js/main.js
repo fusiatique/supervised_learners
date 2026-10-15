@@ -1,4 +1,4 @@
-import { PARAMS, RECENT_EPISODES } from './config.js';
+import { PARAMS } from './config.js';
 import { SOURCE_TYPES, DEPENDENCE, HRL_SLIDERS, MODELS, hrlConfig, getSourceType } from './hrl/config.js';
 import { harmWeight } from './hrl/reward.js';
 import { MOODS, moodOf } from './hrl/mood.js';
@@ -28,7 +28,7 @@ for (const [id, field] of [['mood-name', 'name'], ['mood-text', 'description']])
 }
 
 // Keep the letter key aligned with the source colours used in the maze.
-for (const source of SOURCE_TYPES) {
+for (const source of SOURCE_TYPES.filter((source) => source.id === 'food' || source.id === 'drugB')) {
   const entry = document.createElement('span');
   const marker = document.createElement('span');
   marker.className = 'swatch';
@@ -152,8 +152,8 @@ function frame(now) {
     ['Reward, last step', sim.lastOutcome ? sim.lastOutcome.reward.toFixed(2) : '–'],
     ...sim.agent.info(),
   ]);
-  renderChoices($('choices'), sim.recentChoices());
-  $('choices-title').textContent = `Sources the agent chose, last ${Math.min(sim.episodes + 1, RECENT_EPISODES + 1)} episodes`;
+  const choicesWindow = Number($('choices-window').value);
+  renderChoices($('choices'), sim.recentChoices(choicesWindow));
 
   requestAnimationFrame(frame);
 }

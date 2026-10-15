@@ -11,6 +11,17 @@ import { seededRandom } from '../js/hrl/rng.js';
 
 const total = (counts) => [...counts.values()].reduce((sum, n) => sum + n, 0);
 
+test('source-choice windows include the current episode and the most recent completed episodes', () => {
+  const sim = new Simulation(hrlConfig(), seededRandom(1));
+  sim.recent = Array.from({ length: 10000 }, () => ({ food: 1 }));
+  sim.episodeInteractions = { food: 2 };
+  for (const window of [100, 1000, 10000]) {
+    assert.equal(sim.recentChoices(window).get('food'), window + 1);
+  }
+  sim.recent = [{ food: 3 }];
+  assert.equal(sim.recentChoices(10000).get('food'), 5);
+});
+
 test('the simulation learns to use sources, step by step', () => {
   const sim = new Simulation(hrlConfig(), seededRandom(1));
   assert.equal(sim.modelId, 'adaptive');
@@ -19,7 +30,7 @@ test('the simulation learns to use sources, step by step', () => {
 
   assert.equal(sim.episodes, 60);
   assert.equal(sim.episodeSteps, 10);
-  assert.equal(sim.recent.length, 50);
+  assert.equal(sim.recent.length, 60);
   assert.ok(sim.agent.q.every(Number.isFinite));
   assert.ok(sim.history.d.points.length > 0 && sim.history.d.points.length === sim.history.rest.points.length);
   assert.ok(Number.isFinite(sim.lastOutcome.reward));

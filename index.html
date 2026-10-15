@@ -100,7 +100,13 @@
           <summary>Learning details</summary>
           <dl id="learning-stats" class="stats"></dl>
         </details>
-        <h3 id="choices-title"></h3>
+        <h3 id="choices-title">Sources the agent chose</h3>
+        <label for="choices-window">Show episodes</label>
+        <select id="choices-window">
+          <option value="100">Last 100</option>
+          <option value="1000">Last 1,000</option>
+          <option value="10000">Last 10,000</option>
+        </select>
         <div id="choices"></div>
       </section>
     </div>

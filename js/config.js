@@ -10,8 +10,8 @@ export const PARAMS = [
   { key: 'stepCost', description: "Makes every step cost the agent some reward points. The more steps it takes, the more points it loses, so taking longer to reach something rewarding becomes less worthwhile.", tryIt: "Increase it to give the agent a stronger reason to avoid unnecessary steps. At 0, taking extra steps has no direct reward penalty.", group: 'Reward', label: 'Cost per step', min: 0, max: 0.5, step: 0.01, value: 0.02 },
 ];
 
-// Number of most recent episodes used for the "which sources did it use" tally.
-export const RECENT_EPISODES = 50;
+// Maximum completed-episode history retained for the source-choice tally.
+export const RECENT_EPISODES = 10000;
 
 export function defaultParams() {
   return Object.fromEntries(PARAMS.map((p) => [p.key, p.value]));

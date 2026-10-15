@@ -8,19 +8,17 @@ import { SOURCE_TYPES } from './hrl/config.js';
 // `R`, `A`, `B`, see hrl/config.js) that source. The "Copy layout" button in
 // the UI produces one from whatever is currently on screen.
 export const MAZES = [
-  // Five dead-end arms whose ends are all six steps from the start, one per
-  // source, so that no source is favoured by being closer: food, social
-  // interaction and rest on the left and in the middle, the drugs on the right.
-  { id: 'arms', name: 'Five arms (13 × 13)', cols: 13, rows: 13, layout: [
+  // Two symmetric paths, with food and Drug B both six steps from the start.
+  { id: 'arms', name: 'Food and Drug B (two paths)', cols: 13, rows: 13, layout: [
       '#############',
       '#############',
       '##....S....##',
-      '##.#.#.#.#.##',
-      '##F#.#.#.#B##',
-      '####.#.#.####',
-      '####C#.#A####',
-      '######.######',
-      '######R######',
+      '##.#######.##',
+      '##F#######B##',
+      '#############',
+      '#############',
+      '#############',
+      '#############',
       '#############',
       '#############',
       '#############',

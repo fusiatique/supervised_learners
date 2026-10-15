@@ -88,9 +88,10 @@ export function renderMeter(meter, value, max) {
 // and colour the source has on the maze. `counts` maps source id -> number of
 // interactions.
 export function renderChoices(container, counts) {
-  const total = [...counts.values()].reduce((sum, n) => sum + n, 0);
+  const sources = SOURCE_TYPES.filter((source) => source.id === 'food' || source.id === 'drugB');
+  const total = sources.reduce((sum, source) => sum + (counts.get(source.id) ?? 0), 0);
   container.replaceChildren(
-    ...SOURCE_TYPES.map((source) => {
+    ...sources.map((source) => {
       const count = counts.get(source.id) ?? 0;
       const share = total ? count / total : 0;
       const fill = el('span', { className: 'bar-fill' });
