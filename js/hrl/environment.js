@@ -139,7 +139,7 @@ export class HrlEnvironment extends Environment {
     this.d = dNext;
     this.h = hNext;
     this.a = aNext;
-    const reward = computeReward({ d, dAction, hNext, source }, this.config);
+    const reward = computeReward({ d, dAction, dNext, hNext, source }, this.config);
     return { state: this.qState(), cell: this.state, source, rejected, done: false, d, dAction, dNext, hNext, aNext, ...reward };
   }
 }

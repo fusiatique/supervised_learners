@@ -195,8 +195,8 @@ test('a short training run of every model is sound and repeatable', () => {
       assert.ok(Number.isFinite(episode.totalReward));
       assert.ok(Math.abs(episode.moveShare + episode.ordinaryShare + episode.drugShare - 1) < 1e-12);
       assert.ok(episode.minD >= 0 && episode.finalH <= 100);
-      const { sourceReward, stateBenefit, acuteHarmCost, accumulatedHarmCost, stepCost } = episode.components;
-      const fromParts = sourceReward + stateBenefit - acuteHarmCost - accumulatedHarmCost - stepCost;
+      const { sourceReward, stateBenefit, acuteHarmCost, accumulatedHarmCost, lowStateCost, stepCost } = episode.components;
+      const fromParts = sourceReward + stateBenefit - acuteHarmCost - accumulatedHarmCost - lowStateCost - stepCost;
       assert.ok(Math.abs(fromParts - episode.totalReward) < 1e-6);
       if (modelId === 'noAccumulated') assert.equal(accumulatedHarmCost, 0);
     }
