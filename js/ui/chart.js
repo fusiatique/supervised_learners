@@ -30,6 +30,44 @@ export class LineChart {
     this.yRange = yRange;
     this.xWindow = xWindow;
     this.hoverX = null;
+    this.viewStart = null;
+    this.latestStart = 0;
+    this.drag = null;
+
+    const pan = (start) => {
+      const clamped = Math.max(0, Math.min(this.latestStart, start));
+      this.viewStart = clamped >= this.latestStart ? null : clamped;
+    };
+    canvas.addEventListener('pointerdown', (e) => {
+      if (!this.xWindow || e.button !== 0) return;
+      this.drag = { x: e.clientX, start: this.viewStart ?? this.latestStart };
+      canvas.setPointerCapture(e.pointerId);
+      canvas.style.cursor = 'grabbing';
+    });
+    canvas.addEventListener('pointermove', (e) => {
+      if (!this.drag) return;
+      const plotWidth = canvas.clientWidth - MARGIN.left - MARGIN.right;
+      if (plotWidth > 0) pan(this.drag.start - (e.clientX - this.drag.x) * this.xWindow / plotWidth);
+    });
+    const endDrag = () => {
+      this.drag = null;
+      canvas.style.cursor = this.xWindow ? 'grab' : '';
+    };
+    canvas.addEventListener('pointerup', endDrag);
+    canvas.addEventListener('pointercancel', endDrag);
+    canvas.addEventListener('lostpointercapture', endDrag);
+    canvas.addEventListener('wheel', (e) => {
+      if (!this.xWindow || !e.deltaX) return;
+      e.preventDefault();
+      const plotWidth = canvas.clientWidth - MARGIN.left - MARGIN.right;
+      const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? plotWidth : 1;
+      if (plotWidth > 0) pan((this.viewStart ?? this.latestStart) + e.deltaX * unit * this.xWindow / plotWidth);
+    }, { passive: false });
+    canvas.addEventListener('dblclick', () => { this.viewStart = null; });
+    if (this.xWindow) {
+      canvas.style.cursor = 'grab';
+      canvas.style.touchAction = 'pan-y';
+    }
 
     canvas.addEventListener('mousemove', (e) => {
       this.hoverX = e.clientX - canvas.getBoundingClientRect().left;
@@ -63,7 +101,12 @@ export class LineChart {
     yMin = Math.floor(yMin / yStep) * yStep;
     yMax = Math.ceil(yMax / yStep) * yStep;
 
-    const xMin = this.xWindow ? Math.max(0, xMax - this.xWindow) : 0;
+    // A reset replaces the history; resume following the new run.
+    if (this.previousMax !== undefined && xMax < this.previousMax) this.viewStart = null;
+    this.previousMax = xMax;
+    this.latestStart = this.xWindow ? Math.max(0, xMax - this.xWindow) : 0;
+    if (this.viewStart !== null) this.viewStart = Math.min(this.viewStart, this.latestStart);
+    const xMin = this.xWindow ? (this.viewStart ?? this.latestStart) : 0;
     if (this.xWindow) xMax = xMin + this.xWindow;
     const px = (x) => left + ((x - xMin) / (xMax - xMin)) * (right - left);
     const py = (y) => bottom - ((y - yMin) / (yMax - yMin)) * (bottom - top);
