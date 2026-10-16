@@ -74,7 +74,7 @@ renderLegend($('state-legend'), [
 const sliders = [...HRL_SLIDERS, ...PARAMS];
 const controlGroups = {
   dopamine: ['dBackgroundDrift', 'kD'],
-  reward: ['beta', 'omega'],
+  reward: ['beta', 'omega', 'kappa'],
   dependence: ['rhoA'],
   exploration: ['epsilonStart', 'epsilonDecay', 'epsilonMin'],
   harm: ['lambdaMin', 'lambdaMax'],

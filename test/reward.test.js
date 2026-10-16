@@ -11,8 +11,8 @@ const close = (actual, expected, tolerance = 1e-9) =>
 
 // Reward of using `source` (or just moving, for null) from d and h.
 function rewardOf(d, h, source, cfg = config) {
-  const { dAction, hNext } = transition(d, h, source, cfg);
-  return computeReward({ d, dAction, hNext, source }, cfg);
+  const { dAction, dNext, hNext } = transition(d, h, source, cfg);
+  return computeReward({ d, dAction, dNext, hNext, source }, cfg);
 }
 
 test('each source pays its configured immediate reward', () => {
@@ -25,7 +25,7 @@ test('a move earns no source reward and no acute harm', () => {
     assert.equal(r.sourceReward, 0);
     assert.equal(r.acuteHarmCost, 0);
     assert.equal(r.stateBenefit, 0);
-    close(r.reward, -r.accumulatedHarmCost - config.stepCost);
+    close(r.reward, -r.accumulatedHarmCost - r.lowStateCost - config.stepCost);
   }
   assert.equal(rewardOf(50, 0, null).reward, -config.stepCost);
 });
@@ -87,7 +87,7 @@ test('drugs carry their acute harm, scaled by the harm weight', () => {
   const r = rewardOf(50, 0, drugB);
   close(r.acuteHarmCost, 0.575 * 5);
   close(r.accumulatedHarmCost, 0.575 * 0.1 * 3);
-  close(r.reward, r.sourceReward + r.stateBenefit - r.acuteHarmCost - r.accumulatedHarmCost - r.stepCost);
+  close(r.reward, r.sourceReward + r.stateBenefit - r.acuteHarmCost - r.accumulatedHarmCost - r.lowStateCost - r.stepCost);
   // The weight comes from d before the action, so the same drug costs less
   // at low d in the adaptive model and the same at any d in the fixed one.
   assert.ok(rewardOf(20, 0, drugB).acuteHarmCost < rewardOf(80, 0, drugB).acuteHarmCost);
@@ -126,4 +126,17 @@ test('invalid configurations are refused', () => {
   assert.throws(() => hrlConfig({ lambdaS: 0 }));
   assert.throws(() => hrlConfig({ dTarget: 0 }));
   assert.throws(() => hrlConfig({ harmWeightMode: 'sometimes' }));
+});
+
+test('every step spent below the target costs, more the further below', () => {
+  // At or above the target there is no cost.
+  for (const d of [50, 60, 90]) assert.equal(computeReward({ d, dAction: d, dNext: d, hNext: 0, source: null }, config).lowStateCost, 0);
+  const at = (dNext) => computeReward({ d: dNext, dAction: dNext, dNext, hNext: 0, source: null }, config).lowStateCost;
+  close(at(25), config.kappa * 2.5);
+  assert.ok(at(10) > at(30) && at(30) > at(45) && at(45) > 0);
+  // It is charged on where d ends up, so passive recovery and drift count.
+  const r = rewardOf(20, 0, null);
+  assert.equal(r.stateBenefit, 0);
+  assert.ok(r.lowStateCost > 0);
+  assert.equal(rewardOf(20, 0, null, { ...config, kappa: 0 }).lowStateCost, 0);
 });

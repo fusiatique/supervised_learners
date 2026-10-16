@@ -16,7 +16,7 @@ export function dBand(d, config) {
   return 'mid';
 }
 
-const REWARD_COMPONENTS = ['sourceReward', 'stateBenefit', 'acuteHarmCost', 'accumulatedHarmCost', 'stepCost'];
+const REWARD_COMPONENTS = ['sourceReward', 'stateBenefit', 'acuteHarmCost', 'accumulatedHarmCost', 'lowStateCost', 'stepCost'];
 const zeroPerSource = () => Object.fromEntries(SOURCE_TYPES.map((s) => [s.id, 0]));
 
 // Runs one episode from the environment's start. With `learn` the agent
@@ -80,6 +80,7 @@ export function runEpisode(env, agent, { learn = true, trace = null, start } = {
         harmWeight: outcome.harmWeight,
         acuteHarmCost: outcome.acuteHarmCost,
         accumulatedHarmCost: outcome.accumulatedHarmCost,
+        lowStateCost: outcome.lowStateCost,
         stepCost: outcome.stepCost,
       });
     }
