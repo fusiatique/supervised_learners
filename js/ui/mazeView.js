@@ -6,9 +6,15 @@ export class MazeView {
   constructor(canvas) {
     this.canvas = canvas;
     this.faceView = new AgentView(null);
+    this.consumption = null;
+    this.consumedAt = 0;
   }
 
   draw(sim, mood, now = performance.now()) {
+    if (this.consumption !== sim.lastConsumption) {
+      this.consumption = sim.lastConsumption;
+      this.consumedAt = now;
+    }
     const { env } = sim;
     const { ctx, width, height } = prepareCanvas(this.canvas);
     // Fit the walkable layout with a little breathing room around its edges.
@@ -88,6 +94,44 @@ export class MazeView {
     // Same expression and harm colouring as the state panel, at marker size.
     this.faceView.drawFace(ctx, xOf(agentCell) + size / 2,
       yOf(agentCell) + size / 2, size * 0.38, mood, env.h, now);
+
+    // Persist the cue across frames even when many simulation steps run at once.
+    const age = (now - this.consumedAt) / 1400;
+    if (this.consumption && age < 1) {
+      const { cell, source } = this.consumption;
+      const cx = xOf(cell) + size / 2;
+      const cy = yOf(cell) + size / 2;
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const progress = reducedMotion ? 0.3 : age;
+      ctx.save();
+      ctx.globalAlpha = Math.min(1, (1 - age) * 3);
+      ctx.strokeStyle = cssVar(source.colorVar);
+      ctx.lineWidth = Math.max(2, size * 0.07);
+      ctx.beginPath();
+      ctx.arc(cx, cy, size * (0.45 + progress * 0.6), 0, Math.PI * 2);
+      ctx.stroke();
+      for (let i = 0; i < 10; i++) {
+        const angle = i * Math.PI / 5;
+        const radius = size * (0.65 + progress * 0.8);
+        ctx.beginPath();
+        ctx.moveTo(cx + Math.cos(angle) * radius, cy + Math.sin(angle) * radius);
+        ctx.lineTo(cx + Math.cos(angle) * (radius + size * 0.18), cy + Math.sin(angle) * (radius + size * 0.18));
+        ctx.stroke();
+      }
+      ctx.font = `700 ${Math.max(14, size * 0.32)}px ${CANVAS_FONT}`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const text = source.id === 'drugB' ? 'Took Drug B!' : 'Ate food!';
+      const labelX = Math.max(ctx.measureText(text).width / 2 + 8,
+        Math.min(width - ctx.measureText(text).width / 2 - 8, cx));
+      const labelY = cy - size * 1.25;
+      ctx.strokeStyle = cssVar('--maze-backdrop');
+      ctx.lineWidth = 5;
+      ctx.strokeText(text, labelX, labelY);
+      ctx.fillStyle = cssVar(source.colorVar);
+      ctx.fillText(text, labelX, labelY);
+      ctx.restore();
+    }
   }
 
 }

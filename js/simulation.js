@@ -84,6 +84,7 @@ export class Simulation {
     this.steps = 0;
     this.episodes = 0;
     this.lastOutcome = null;
+    this.lastConsumption = null;
     this.dosesGiven = 0;
     this.recent = []; // interactions per source in each of the recent episodes
     this.beginEpisode(true);
@@ -124,7 +125,10 @@ export class Simulation {
     this.steps++;
     this.episodeSteps++;
     this.lastOutcome = outcome;
-    if (outcome.source) this.episodeInteractions[outcome.source.id]++;
+    if (outcome.source) {
+      this.episodeInteractions[outcome.source.id]++;
+      this.lastConsumption = { source: outcome.source, cell: outcome.cell, step: this.steps };
+    }
     this.history.d.add(this.steps, this.env.d);
     this.history.rest.add(this.steps, this.env.restingLevel);
 
