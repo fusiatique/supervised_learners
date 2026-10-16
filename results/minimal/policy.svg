@@ -1,0 +1,201 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 430" width="760" height="430" font-family='system-ui, sans-serif' font-size="11">
+<rect width="760" height="430" fill="#fcfcfb"/>
+<text x="60" y="22" font-size="14" font-weight="600" fill="#0b0b0b">What the agent chooses in each internal state</text>
+<text x="60" y="39" fill="#52514e">Greedy action per (H, B) bin after 60,000 steps. Pale: visited fewer than 50 times. Dashed: setpoint S and tipping point.</text>
+<rect x="60" y="50" width="12" height="12" rx="2" fill="#d9d7d0"/><text x="77" y="60" fill="#52514e">Nothing</text>
+<rect x="180" y="50" width="12" height="12" rx="2" fill="#1baf7a"/><text x="197" y="60" fill="#52514e">Natural reward</text>
+<rect x="300" y="50" width="12" height="12" rx="2" fill="#e34948"/><text x="317" y="60" fill="#52514e">Drug</text>
+<text x="60" y="94" font-weight="600" fill="#0b0b0b">Not dosed</text>
+<rect x="60" y="334" width="25" height="25" fill="#f3f2ee"><title>H 0–10, B 0–5: too few visits</title></rect>
+<rect x="86" y="334" width="25" height="25" fill="#f3f2ee"><title>H 0–10, B 5–10: too few visits</title></rect>
+<rect x="112" y="334" width="25" height="25" fill="#f3f2ee"><title>H 0–10, B 10–15: too few visits</title></rect>
+<rect x="138" y="334" width="25" height="25" fill="#f3f2ee"><title>H 0–10, B 15–20: too few visits</title></rect>
+<rect x="164" y="334" width="25" height="25" fill="#f3f2ee"><title>H 0–10, B 20–25: too few visits</title></rect>
+<rect x="190" y="334" width="25" height="25" fill="#f3f2ee"><title>H 0–10, B 25–30: too few visits</title></rect>
+<rect x="216" y="334" width="25" height="25" fill="#f3f2ee"><title>H 0–10, B 30–35: too few visits</title></rect>
+<rect x="242" y="334" width="25" height="25" fill="#f3f2ee"><title>H 0–10, B 35–40: too few visits</title></rect>
+<rect x="60" y="308" width="25" height="25" fill="#f3f2ee"><title>H 10–20, B 0–5: too few visits</title></rect>
+<rect x="86" y="308" width="25" height="25" fill="#f3f2ee"><title>H 10–20, B 5–10: too few visits</title></rect>
+<rect x="112" y="308" width="25" height="25" fill="#f3f2ee"><title>H 10–20, B 10–15: too few visits</title></rect>
+<rect x="138" y="308" width="25" height="25" fill="#f3f2ee"><title>H 10–20, B 15–20: too few visits</title></rect>
+<rect x="164" y="308" width="25" height="25" fill="#f3f2ee"><title>H 10–20, B 20–25: too few visits</title></rect>
+<rect x="190" y="308" width="25" height="25" fill="#f3f2ee"><title>H 10–20, B 25–30: too few visits</title></rect>
+<rect x="216" y="308" width="25" height="25" fill="#f3f2ee"><title>H 10–20, B 30–35: too few visits</title></rect>
+<rect x="242" y="308" width="25" height="25" fill="#f3f2ee"><title>H 10–20, B 35–40: too few visits</title></rect>
+<rect x="60" y="282" width="25" height="25" fill="#f3f2ee"><title>H 20–30, B 0–5: too few visits</title></rect>
+<rect x="86" y="282" width="25" height="25" fill="#f3f2ee"><title>H 20–30, B 5–10: too few visits</title></rect>
+<rect x="112" y="282" width="25" height="25" fill="#f3f2ee"><title>H 20–30, B 10–15: too few visits</title></rect>
+<rect x="138" y="282" width="25" height="25" fill="#f3f2ee"><title>H 20–30, B 15–20: too few visits</title></rect>
+<rect x="164" y="282" width="25" height="25" fill="#f3f2ee"><title>H 20–30, B 20–25: too few visits</title></rect>
+<rect x="190" y="282" width="25" height="25" fill="#f3f2ee"><title>H 20–30, B 25–30: too few visits</title></rect>
+<rect x="216" y="282" width="25" height="25" fill="#f3f2ee"><title>H 20–30, B 30–35: too few visits</title></rect>
+<rect x="242" y="282" width="25" height="25" fill="#f3f2ee"><title>H 20–30, B 35–40: too few visits</title></rect>
+<rect x="60" y="256" width="25" height="25" fill="#f3f2ee"><title>H 30–40, B 0–5: too few visits</title></rect>
+<rect x="86" y="256" width="25" height="25" fill="#f3f2ee"><title>H 30–40, B 5–10: too few visits</title></rect>
+<rect x="112" y="256" width="25" height="25" fill="#f3f2ee"><title>H 30–40, B 10–15: too few visits</title></rect>
+<rect x="138" y="256" width="25" height="25" fill="#f3f2ee"><title>H 30–40, B 15–20: too few visits</title></rect>
+<rect x="164" y="256" width="25" height="25" fill="#f3f2ee"><title>H 30–40, B 20–25: too few visits</title></rect>
+<rect x="190" y="256" width="25" height="25" fill="#f3f2ee"><title>H 30–40, B 25–30: too few visits</title></rect>
+<rect x="216" y="256" width="25" height="25" fill="#f3f2ee"><title>H 30–40, B 30–35: too few visits</title></rect>
+<rect x="242" y="256" width="25" height="25" fill="#f3f2ee"><title>H 30–40, B 35–40: too few visits</title></rect>
+<rect x="60" y="230" width="25" height="25" fill="#f3f2ee"><title>H 40–50, B 0–5: too few visits</title></rect>
+<rect x="86" y="230" width="25" height="25" fill="#f3f2ee"><title>H 40–50, B 5–10: too few visits</title></rect>
+<rect x="112" y="230" width="25" height="25" fill="#f3f2ee"><title>H 40–50, B 10–15: too few visits</title></rect>
+<rect x="138" y="230" width="25" height="25" fill="#f3f2ee"><title>H 40–50, B 15–20: too few visits</title></rect>
+<rect x="164" y="230" width="25" height="25" fill="#f3f2ee"><title>H 40–50, B 20–25: too few visits</title></rect>
+<rect x="190" y="230" width="25" height="25" fill="#1baf7a"><title>H 40–50, B 25–30: Natural reward</title></rect>
+<rect x="216" y="230" width="25" height="25" fill="#1baf7a"><title>H 40–50, B 30–35: Natural reward</title></rect>
+<rect x="242" y="230" width="25" height="25" fill="#1baf7a"><title>H 40–50, B 35–40: Natural reward</title></rect>
+<rect x="60" y="204" width="25" height="25" fill="#f3f2ee"><title>H 50–60, B 0–5: too few visits</title></rect>
+<rect x="86" y="204" width="25" height="25" fill="#f3f2ee"><title>H 50–60, B 5–10: too few visits</title></rect>
+<rect x="112" y="204" width="25" height="25" fill="#f3f2ee"><title>H 50–60, B 10–15: too few visits</title></rect>
+<rect x="138" y="204" width="25" height="25" fill="#f3f2ee"><title>H 50–60, B 15–20: too few visits</title></rect>
+<rect x="164" y="204" width="25" height="25" fill="#f3f2ee"><title>H 50–60, B 20–25: too few visits</title></rect>
+<rect x="190" y="204" width="25" height="25" fill="#d9d7d0"><title>H 50–60, B 25–30: Nothing</title></rect>
+<rect x="216" y="204" width="25" height="25" fill="#d9d7d0"><title>H 50–60, B 30–35: Nothing</title></rect>
+<rect x="242" y="204" width="25" height="25" fill="#d9d7d0"><title>H 50–60, B 35–40: Nothing</title></rect>
+<rect x="60" y="178" width="25" height="25" fill="#f3f2ee"><title>H 60–70, B 0–5: too few visits</title></rect>
+<rect x="86" y="178" width="25" height="25" fill="#f3f2ee"><title>H 60–70, B 5–10: too few visits</title></rect>
+<rect x="112" y="178" width="25" height="25" fill="#f3f2ee"><title>H 60–70, B 10–15: too few visits</title></rect>
+<rect x="138" y="178" width="25" height="25" fill="#f3f2ee"><title>H 60–70, B 15–20: too few visits</title></rect>
+<rect x="164" y="178" width="25" height="25" fill="#f3f2ee"><title>H 60–70, B 20–25: too few visits</title></rect>
+<rect x="190" y="178" width="25" height="25" fill="#d9d7d0"><title>H 60–70, B 25–30: Nothing</title></rect>
+<rect x="216" y="178" width="25" height="25" fill="#1baf7a"><title>H 60–70, B 30–35: Natural reward</title></rect>
+<rect x="242" y="178" width="25" height="25" fill="#d9d7d0"><title>H 60–70, B 35–40: Nothing</title></rect>
+<rect x="60" y="152" width="25" height="25" fill="#f3f2ee"><title>H 70–80, B 0–5: too few visits</title></rect>
+<rect x="86" y="152" width="25" height="25" fill="#f3f2ee"><title>H 70–80, B 5–10: too few visits</title></rect>
+<rect x="112" y="152" width="25" height="25" fill="#f3f2ee"><title>H 70–80, B 10–15: too few visits</title></rect>
+<rect x="138" y="152" width="25" height="25" fill="#f3f2ee"><title>H 70–80, B 15–20: too few visits</title></rect>
+<rect x="164" y="152" width="25" height="25" fill="#f3f2ee"><title>H 70–80, B 20–25: too few visits</title></rect>
+<rect x="190" y="152" width="25" height="25" fill="#f3f2ee"><title>H 70–80, B 25–30: too few visits</title></rect>
+<rect x="216" y="152" width="25" height="25" fill="#1baf7a"><title>H 70–80, B 30–35: Natural reward</title></rect>
+<rect x="242" y="152" width="25" height="25" fill="#d9d7d0"><title>H 70–80, B 35–40: Nothing</title></rect>
+<rect x="60" y="126" width="25" height="25" fill="#f3f2ee"><title>H 80–90, B 0–5: too few visits</title></rect>
+<rect x="86" y="126" width="25" height="25" fill="#f3f2ee"><title>H 80–90, B 5–10: too few visits</title></rect>
+<rect x="112" y="126" width="25" height="25" fill="#f3f2ee"><title>H 80–90, B 10–15: too few visits</title></rect>
+<rect x="138" y="126" width="25" height="25" fill="#f3f2ee"><title>H 80–90, B 15–20: too few visits</title></rect>
+<rect x="164" y="126" width="25" height="25" fill="#f3f2ee"><title>H 80–90, B 20–25: too few visits</title></rect>
+<rect x="190" y="126" width="25" height="25" fill="#f3f2ee"><title>H 80–90, B 25–30: too few visits</title></rect>
+<rect x="216" y="126" width="25" height="25" fill="#f3f2ee"><title>H 80–90, B 30–35: too few visits</title></rect>
+<rect x="242" y="126" width="25" height="25" fill="#f3f2ee"><title>H 80–90, B 35–40: too few visits</title></rect>
+<rect x="60" y="100" width="25" height="25" fill="#f3f2ee"><title>H 90–100, B 0–5: too few visits</title></rect>
+<rect x="86" y="100" width="25" height="25" fill="#f3f2ee"><title>H 90–100, B 5–10: too few visits</title></rect>
+<rect x="112" y="100" width="25" height="25" fill="#f3f2ee"><title>H 90–100, B 10–15: too few visits</title></rect>
+<rect x="138" y="100" width="25" height="25" fill="#f3f2ee"><title>H 90–100, B 15–20: too few visits</title></rect>
+<rect x="164" y="100" width="25" height="25" fill="#f3f2ee"><title>H 90–100, B 20–25: too few visits</title></rect>
+<rect x="190" y="100" width="25" height="25" fill="#f3f2ee"><title>H 90–100, B 25–30: too few visits</title></rect>
+<rect x="216" y="100" width="25" height="25" fill="#f3f2ee"><title>H 90–100, B 30–35: too few visits</title></rect>
+<rect x="242" y="100" width="25" height="25" fill="#f3f2ee"><title>H 90–100, B 35–40: too few visits</title></rect>
+<line x1="60" x2="268" y1="230" y2="230" stroke="#0b0b0b" stroke-dasharray="4 3"/>
+<line x1="216" x2="216" y1="100" y2="360" stroke="#0b0b0b" stroke-dasharray="4 3"/>
+<text x="60" y="374" fill="#898781" text-anchor="middle">0</text>
+<text x="112" y="374" fill="#898781" text-anchor="middle">10</text>
+<text x="164" y="374" fill="#898781" text-anchor="middle">20</text>
+<text x="216" y="374" fill="#898781" text-anchor="middle">30</text>
+<text x="268" y="374" fill="#898781" text-anchor="middle">40</text>
+<text x="54" y="364" fill="#898781" text-anchor="end">0</text>
+<text x="54" y="312" fill="#898781" text-anchor="end">20</text>
+<text x="54" y="260" fill="#898781" text-anchor="end">40</text>
+<text x="54" y="208" fill="#898781" text-anchor="end">60</text>
+<text x="54" y="156" fill="#898781" text-anchor="end">80</text>
+<text x="54" y="104" fill="#898781" text-anchor="end">100</text>
+<text x="164" y="392" fill="#898781" text-anchor="middle">Baseline B</text>
+<text x="164" y="408" fill="#52514e" text-anchor="middle">ends at B = 33</text>
+<text x="338" y="94" font-weight="600" fill="#0b0b0b">After 20 forced doses</text>
+<rect x="338" y="334" width="25" height="25" fill="#f3f2ee"><title>H 0–10, B 0–5: too few visits</title></rect>
+<rect x="364" y="334" width="25" height="25" fill="#f3f2ee"><title>H 0–10, B 5–10: too few visits</title></rect>
+<rect x="390" y="334" width="25" height="25" fill="#f3f2ee"><title>H 0–10, B 10–15: too few visits</title></rect>
+<rect x="416" y="334" width="25" height="25" fill="#f3f2ee"><title>H 0–10, B 15–20: too few visits</title></rect>
+<rect x="442" y="334" width="25" height="25" fill="#f3f2ee"><title>H 0–10, B 20–25: too few visits</title></rect>
+<rect x="468" y="334" width="25" height="25" fill="#f3f2ee"><title>H 0–10, B 25–30: too few visits</title></rect>
+<rect x="494" y="334" width="25" height="25" fill="#f3f2ee"><title>H 0–10, B 30–35: too few visits</title></rect>
+<rect x="520" y="334" width="25" height="25" fill="#f3f2ee"><title>H 0–10, B 35–40: too few visits</title></rect>
+<rect x="338" y="308" width="25" height="25" fill="#f3f2ee"><title>H 10–20, B 0–5: too few visits</title></rect>
+<rect x="364" y="308" width="25" height="25" fill="#f3f2ee"><title>H 10–20, B 5–10: too few visits</title></rect>
+<rect x="390" y="308" width="25" height="25" fill="#f3f2ee"><title>H 10–20, B 10–15: too few visits</title></rect>
+<rect x="416" y="308" width="25" height="25" fill="#f3f2ee"><title>H 10–20, B 15–20: too few visits</title></rect>
+<rect x="442" y="308" width="25" height="25" fill="#f3f2ee"><title>H 10–20, B 20–25: too few visits</title></rect>
+<rect x="468" y="308" width="25" height="25" fill="#f3f2ee"><title>H 10–20, B 25–30: too few visits</title></rect>
+<rect x="494" y="308" width="25" height="25" fill="#f3f2ee"><title>H 10–20, B 30–35: too few visits</title></rect>
+<rect x="520" y="308" width="25" height="25" fill="#f3f2ee"><title>H 10–20, B 35–40: too few visits</title></rect>
+<rect x="338" y="282" width="25" height="25" fill="#f3f2ee"><title>H 20–30, B 0–5: too few visits</title></rect>
+<rect x="364" y="282" width="25" height="25" fill="#f3f2ee"><title>H 20–30, B 5–10: too few visits</title></rect>
+<rect x="390" y="282" width="25" height="25" fill="#f3f2ee"><title>H 20–30, B 10–15: too few visits</title></rect>
+<rect x="416" y="282" width="25" height="25" fill="#f3f2ee"><title>H 20–30, B 15–20: too few visits</title></rect>
+<rect x="442" y="282" width="25" height="25" fill="#f3f2ee"><title>H 20–30, B 20–25: too few visits</title></rect>
+<rect x="468" y="282" width="25" height="25" fill="#f3f2ee"><title>H 20–30, B 25–30: too few visits</title></rect>
+<rect x="494" y="282" width="25" height="25" fill="#f3f2ee"><title>H 20–30, B 30–35: too few visits</title></rect>
+<rect x="520" y="282" width="25" height="25" fill="#f3f2ee"><title>H 20–30, B 35–40: too few visits</title></rect>
+<rect x="338" y="256" width="25" height="25" fill="#e34948"><title>H 30–40, B 0–5: Drug</title></rect>
+<rect x="364" y="256" width="25" height="25" fill="#f3f2ee"><title>H 30–40, B 5–10: too few visits</title></rect>
+<rect x="390" y="256" width="25" height="25" fill="#f3f2ee"><title>H 30–40, B 10–15: too few visits</title></rect>
+<rect x="416" y="256" width="25" height="25" fill="#f3f2ee"><title>H 30–40, B 15–20: too few visits</title></rect>
+<rect x="442" y="256" width="25" height="25" fill="#f3f2ee"><title>H 30–40, B 20–25: too few visits</title></rect>
+<rect x="468" y="256" width="25" height="25" fill="#f3f2ee"><title>H 30–40, B 25–30: too few visits</title></rect>
+<rect x="494" y="256" width="25" height="25" fill="#f3f2ee"><title>H 30–40, B 30–35: too few visits</title></rect>
+<rect x="520" y="256" width="25" height="25" fill="#f3f2ee"><title>H 30–40, B 35–40: too few visits</title></rect>
+<rect x="338" y="230" width="25" height="25" fill="#d9d7d0"><title>H 40–50, B 0–5: Nothing</title></rect>
+<rect x="364" y="230" width="25" height="25" fill="#f3f2ee"><title>H 40–50, B 5–10: too few visits</title></rect>
+<rect x="390" y="230" width="25" height="25" fill="#f3f2ee"><title>H 40–50, B 10–15: too few visits</title></rect>
+<rect x="416" y="230" width="25" height="25" fill="#f3f2ee"><title>H 40–50, B 15–20: too few visits</title></rect>
+<rect x="442" y="230" width="25" height="25" fill="#f3f2ee"><title>H 40–50, B 20–25: too few visits</title></rect>
+<rect x="468" y="230" width="25" height="25" fill="#1baf7a"><title>H 40–50, B 25–30: Natural reward</title></rect>
+<rect x="494" y="230" width="25" height="25" fill="#1baf7a"><title>H 40–50, B 30–35: Natural reward</title></rect>
+<rect x="520" y="230" width="25" height="25" fill="#1baf7a"><title>H 40–50, B 35–40: Natural reward</title></rect>
+<rect x="338" y="204" width="25" height="25" fill="#1baf7a"><title>H 50–60, B 0–5: Natural reward</title></rect>
+<rect x="364" y="204" width="25" height="25" fill="#f3f2ee"><title>H 50–60, B 5–10: too few visits</title></rect>
+<rect x="390" y="204" width="25" height="25" fill="#f3f2ee"><title>H 50–60, B 10–15: too few visits</title></rect>
+<rect x="416" y="204" width="25" height="25" fill="#f3f2ee"><title>H 50–60, B 15–20: too few visits</title></rect>
+<rect x="442" y="204" width="25" height="25" fill="#f3f2ee"><title>H 50–60, B 20–25: too few visits</title></rect>
+<rect x="468" y="204" width="25" height="25" fill="#d9d7d0"><title>H 50–60, B 25–30: Nothing</title></rect>
+<rect x="494" y="204" width="25" height="25" fill="#d9d7d0"><title>H 50–60, B 30–35: Nothing</title></rect>
+<rect x="520" y="204" width="25" height="25" fill="#d9d7d0"><title>H 50–60, B 35–40: Nothing</title></rect>
+<rect x="338" y="178" width="25" height="25" fill="#1baf7a"><title>H 60–70, B 0–5: Natural reward</title></rect>
+<rect x="364" y="178" width="25" height="25" fill="#f3f2ee"><title>H 60–70, B 5–10: too few visits</title></rect>
+<rect x="390" y="178" width="25" height="25" fill="#f3f2ee"><title>H 60–70, B 10–15: too few visits</title></rect>
+<rect x="416" y="178" width="25" height="25" fill="#f3f2ee"><title>H 60–70, B 15–20: too few visits</title></rect>
+<rect x="442" y="178" width="25" height="25" fill="#f3f2ee"><title>H 60–70, B 20–25: too few visits</title></rect>
+<rect x="468" y="178" width="25" height="25" fill="#f3f2ee"><title>H 60–70, B 25–30: too few visits</title></rect>
+<rect x="494" y="178" width="25" height="25" fill="#1baf7a"><title>H 60–70, B 30–35: Natural reward</title></rect>
+<rect x="520" y="178" width="25" height="25" fill="#d9d7d0"><title>H 60–70, B 35–40: Nothing</title></rect>
+<rect x="338" y="152" width="25" height="25" fill="#d9d7d0"><title>H 70–80, B 0–5: Nothing</title></rect>
+<rect x="364" y="152" width="25" height="25" fill="#f3f2ee"><title>H 70–80, B 5–10: too few visits</title></rect>
+<rect x="390" y="152" width="25" height="25" fill="#f3f2ee"><title>H 70–80, B 10–15: too few visits</title></rect>
+<rect x="416" y="152" width="25" height="25" fill="#f3f2ee"><title>H 70–80, B 15–20: too few visits</title></rect>
+<rect x="442" y="152" width="25" height="25" fill="#f3f2ee"><title>H 70–80, B 20–25: too few visits</title></rect>
+<rect x="468" y="152" width="25" height="25" fill="#f3f2ee"><title>H 70–80, B 25–30: too few visits</title></rect>
+<rect x="494" y="152" width="25" height="25" fill="#1baf7a"><title>H 70–80, B 30–35: Natural reward</title></rect>
+<rect x="520" y="152" width="25" height="25" fill="#d9d7d0"><title>H 70–80, B 35–40: Nothing</title></rect>
+<rect x="338" y="126" width="25" height="25" fill="#f3f2ee"><title>H 80–90, B 0–5: too few visits</title></rect>
+<rect x="364" y="126" width="25" height="25" fill="#f3f2ee"><title>H 80–90, B 5–10: too few visits</title></rect>
+<rect x="390" y="126" width="25" height="25" fill="#f3f2ee"><title>H 80–90, B 10–15: too few visits</title></rect>
+<rect x="416" y="126" width="25" height="25" fill="#f3f2ee"><title>H 80–90, B 15–20: too few visits</title></rect>
+<rect x="442" y="126" width="25" height="25" fill="#f3f2ee"><title>H 80–90, B 20–25: too few visits</title></rect>
+<rect x="468" y="126" width="25" height="25" fill="#f3f2ee"><title>H 80–90, B 25–30: too few visits</title></rect>
+<rect x="494" y="126" width="25" height="25" fill="#f3f2ee"><title>H 80–90, B 30–35: too few visits</title></rect>
+<rect x="520" y="126" width="25" height="25" fill="#f3f2ee"><title>H 80–90, B 35–40: too few visits</title></rect>
+<rect x="338" y="100" width="25" height="25" fill="#f3f2ee"><title>H 90–100, B 0–5: too few visits</title></rect>
+<rect x="364" y="100" width="25" height="25" fill="#f3f2ee"><title>H 90–100, B 5–10: too few visits</title></rect>
+<rect x="390" y="100" width="25" height="25" fill="#f3f2ee"><title>H 90–100, B 10–15: too few visits</title></rect>
+<rect x="416" y="100" width="25" height="25" fill="#f3f2ee"><title>H 90–100, B 15–20: too few visits</title></rect>
+<rect x="442" y="100" width="25" height="25" fill="#f3f2ee"><title>H 90–100, B 20–25: too few visits</title></rect>
+<rect x="468" y="100" width="25" height="25" fill="#f3f2ee"><title>H 90–100, B 25–30: too few visits</title></rect>
+<rect x="494" y="100" width="25" height="25" fill="#f3f2ee"><title>H 90–100, B 30–35: too few visits</title></rect>
+<rect x="520" y="100" width="25" height="25" fill="#f3f2ee"><title>H 90–100, B 35–40: too few visits</title></rect>
+<line x1="338" x2="546" y1="230" y2="230" stroke="#0b0b0b" stroke-dasharray="4 3"/>
+<line x1="494" x2="494" y1="100" y2="360" stroke="#0b0b0b" stroke-dasharray="4 3"/>
+<text x="338" y="374" fill="#898781" text-anchor="middle">0</text>
+<text x="390" y="374" fill="#898781" text-anchor="middle">10</text>
+<text x="442" y="374" fill="#898781" text-anchor="middle">20</text>
+<text x="494" y="374" fill="#898781" text-anchor="middle">30</text>
+<text x="546" y="374" fill="#898781" text-anchor="middle">40</text>
+<text x="332" y="364" fill="#898781" text-anchor="end">0</text>
+<text x="332" y="312" fill="#898781" text-anchor="end">20</text>
+<text x="332" y="260" fill="#898781" text-anchor="end">40</text>
+<text x="332" y="208" fill="#898781" text-anchor="end">60</text>
+<text x="332" y="156" fill="#898781" text-anchor="end">80</text>
+<text x="332" y="104" fill="#898781" text-anchor="end">100</text>
+<text x="442" y="392" fill="#898781" text-anchor="middle">Baseline B</text>
+<text x="442" y="408" fill="#52514e" text-anchor="middle">ends at B = 0</text>
+<text transform="translate(16 230) rotate(-90)" fill="#898781" text-anchor="middle">Internal level H</text>
+</svg>

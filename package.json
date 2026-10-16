@@ -2,14 +2,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "esbuild js/main.js --bundle --format=iife --outfile=dist/app.js",
     "test": "node --test \"test/*.test.js\"",
     "hrl:train": "node scripts/hrl.js train",
     "hrl:evaluate": "node scripts/hrl.js evaluate",
     "hrl:compare": "node scripts/hrl.js compare",
-    "hrl:sensitivity": "node scripts/hrl.js sensitivity"
-  },
-  "devDependencies": {
-    "esbuild": "^0.25.0"
+    "hrl:sensitivity": "node scripts/hrl.js sensitivity",
+    "minimal": "node scripts/minimal.js"
   }
 }
