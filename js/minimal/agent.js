@@ -27,6 +27,7 @@ export class Agent {
     this.q = new Float64Array(this.numStates * ACTIONS.length);
     this.visits = new Uint32Array(this.numStates);
     this.steps = 0;
+    this.explored = false;
   }
 
   get epsilon() {
@@ -66,9 +67,11 @@ export class Agent {
     return best.length === 1 ? best[0] : null;
   }
 
+  // Also records in `explored` whether the action was a random pick.
   act(s) {
     const valid = this.validActions();
-    if (this.random() < this.epsilon) return valid[Math.floor(this.random() * valid.length)];
+    this.explored = this.random() < this.epsilon;
+    if (this.explored) return valid[Math.floor(this.random() * valid.length)];
     const best = this.bestActions(s);
     return best[Math.floor(this.random() * best.length)];
   }

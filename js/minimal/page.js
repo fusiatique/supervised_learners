@@ -1,13 +1,17 @@
-import { DRUG, NATURAL, config, naturalCeiling, tippingPoint } from './model.js';
+import { ACTIONS, DRUG, NATURAL, NOTHING, config, naturalCeiling, tippingPoint } from './model.js';
 import { stateShape } from './agent.js';
 import { Life } from './life.js';
 import { DEPENDENT_SHARE, WINDOW } from './experiments.js';
+import { drawEnvironment } from './environmentView.js';
 import { cssVar, prepareCanvas, CANVAS_FONT } from '../ui/theme.js';
 
 // The interactive page for the minimal model: one life, stepped in real time.
 
 const HISTORY = 50000; // steps kept for the time plot; the window select picks how many are shown
 const MIN_VISITS = 20; // states visited less often are drawn as not learned
+const TRAIL = 100; // recent steps drawn as a fading trail on the policy map
+const Y_MIN_SPAN = 2; // the time plot's y-axis zooms in no further than this
+const X_MIN_SPAN = 20; // nor its time axis further than this many steps
 
 const SLIDERS = [
   { key: 'c', label: 'Drug harm cost (c)', min: 0, max: 20, step: 0.5 },
@@ -25,16 +29,36 @@ let recent; // the last WINDOW actions, as a ring buffer
 const history = { H: new Float32Array(HISTORY), B: new Float32Array(HISTORY), event: new Uint8Array(HISTORY) };
 let playing = false;
 let carry = 0;
+// The agent's last decision and its walk to that station, for the environment
+// panel. `s` is the state it chose in, null before the first step.
+let view;
+let walking = false;
+// The time plot's y-axis: shown range, and whether it follows the data. The
+// last drawn geometry is kept for the mouse handlers.
+let yRange = [0, 100];
+let yFit = false;
+// The time axis: how many steps are shown, and the last one shown, or null to
+// follow the newest step.
+let xSpan = HISTORY;
+let xEnd = null;
+let traceGeometry = null;
 
 function reset() {
   const overrides = Object.fromEntries(SLIDERS.map(({ key }) => [key, Number($(`param-${key}`).value)]));
   life = new Life({ ...overrides, drugAvailable: $('drug-available').checked }, Date.now() >>> 0);
   recent = new Int8Array(WINDOW).fill(-1);
+  xEnd = null;
+  view = { s: null, action: NOTHING, explored: false, reward: 0, from: NOTHING, to: NOTHING, at: 0, duration: 0, forcedAt: -Infinity };
   render();
 }
 
 function tick() {
-  const { action, forced } = life.tick();
+  const { action, reward, forced, s, explored } = life.tick();
+  const now = performance.now();
+  // Walk for most of the time until the next step; too fast to follow, snap.
+  const duration = Math.min(450, 800 / stepsPerSecond());
+  view = { ...view, s, action, explored, reward, from: view.to, to: action, at: now, duration: duration < 40 ? 0 : duration };
+  if (forced) view.forcedAt = now;
   recent[life.t % WINDOW] = action;
   const i = (life.t - 1) % HISTORY;
   history.H[i] = life.state.H;
@@ -49,15 +73,39 @@ function share(action) {
 
 // --- Drawing ------------------------------------------------------------------
 
+// The steps the time plot shows, [first, last). Before the plot has filled,
+// the steps before 0 are left empty.
+function xView() {
+  const oldest = Math.max(0, life.t - HISTORY);
+  const span = Math.min(xSpan, HISTORY);
+  const last = xEnd === null ? life.t : Math.min(life.t, Math.max(xEnd, oldest + span));
+  return { first: last - span, last, live: last === life.t };
+}
+
+// Sets the time axis, snapping back to following the newest step at the end.
+function setX(span, last) {
+  xSpan = Math.round(Math.min(HISTORY, Math.max(X_MIN_SPAN, span)));
+  xEnd = Math.round(last) >= life.t ? null : Math.round(last);
+  render();
+}
+
+// Zooms the time axis by `factor` (below 1 zooms in) keeping step `at` in place.
+function zoomX(factor, at) {
+  const { first, last } = xView();
+  at ??= (first + last) / 2;
+  const span = Math.min(HISTORY, Math.max(X_MIN_SPAN, (last - first) * factor));
+  setX(span, at + (last - at) * (span / (last - first)));
+}
+
 // Summarises the shown steps per pixel column: the range and mean of H, the
 // mean of B, and whether a drug was chosen or a dose forced.
-function columns(count) {
-  const span = Math.min(Number($('window').value), HISTORY);
-  const first = life.t - span;
+function columns(count, { first, last }) {
+  const span = last - first;
+  const oldest = Math.max(0, life.t - HISTORY);
   const cols = [];
   for (let c = 0; c < count; c++) {
-    const from = Math.max(0, first + Math.floor((c * span) / count));
-    const to = Math.min(life.t, first + Math.floor(((c + 1) * span) / count));
+    const from = Math.max(oldest, first + Math.floor((c * span) / count));
+    const to = Math.min(last, first + Math.floor(((c + 1) * span) / count));
     if (to <= from) { cols.push(null); continue; }
     let hMin = Infinity, hMax = -Infinity, hSum = 0, bSum = 0, drug = false, forced = false;
     for (let t = from; t < to; t++) {
@@ -74,27 +122,73 @@ function columns(count) {
   return cols;
 }
 
+// Keeps a y range inside 0 to 100 and at least Y_MIN_SPAN wide.
+function clampRange([lo, hi]) {
+  const span = Math.min(100, Math.max(Y_MIN_SPAN, hi - lo));
+  const mid = (lo + hi) / 2;
+  lo = Math.min(100 - span, Math.max(0, mid - span / 2));
+  return [lo, lo + span];
+}
+
+// The range of H and B in the shown columns, with a margin.
+function fitRange(cols) {
+  let lo = Infinity, hi = -Infinity;
+  for (const col of cols) {
+    if (!col) continue;
+    lo = Math.min(lo, col.hMin, col.bMean);
+    hi = Math.max(hi, col.hMax, col.bMean);
+  }
+  if (lo > hi) return [0, 100];
+  const margin = Math.max(1, (hi - lo) * 0.1);
+  return clampRange([lo - margin, hi + margin]);
+}
+
+// Zooms the y-axis by `factor` (below 1 zooms in) keeping `at` in place.
+function zoomY(factor, at = (yRange[0] + yRange[1]) / 2) {
+  yFit = false;
+  yRange = clampRange([at - (at - yRange[0]) * factor, at + (yRange[1] - at) * factor]);
+  updateYControls();
+  render();
+}
+
+function updateYControls() {
+  $('y-fit').setAttribute('aria-pressed', String(yFit));
+}
+
 function drawTrace() {
   const { ctx, width, height } = prepareCanvas($('trace'));
   const pad = { left: 30, right: 84, top: 8, bottom: 26 };
   const plotW = width - pad.left - pad.right;
   const plotH = height - pad.top - pad.bottom;
-  const cols = columns(Math.max(1, Math.floor(plotW)));
+  const view = xView();
+  const cols = columns(Math.max(1, Math.floor(plotW)), view);
+  if (yFit) yRange = fitRange(cols);
+  const [lo, hi] = yRange;
+  traceGeometry = { top: pad.top, plotH, lo, hi, left: pad.left, plotW, ...view };
+  const steps = (n) => Math.max(0, n).toLocaleString('en');
+  $('trace-range').textContent = `Steps ${steps(view.first)} to ${steps(view.last)}${view.live ? ', following the newest step' : ''}.`;
   const x = (c) => pad.left + c + 0.5;
-  const y = (v) => pad.top + (1 - v / 100) * plotH;
+  const y = (v) => pad.top + (1 - (v - lo) / (hi - lo)) * plotH;
+  const inRange = (v) => v >= lo && v <= hi;
   ctx.font = `11px ${CANVAS_FONT}`;
 
+  // About four to five gridlines whatever the zoom.
+  const tick = [0.5, 1, 2, 5, 10, 25, 50].find((s) => (hi - lo) / s <= 5);
   ctx.fillStyle = cssVar('--text-muted');
   ctx.textAlign = 'right';
-  for (let v = 0; v <= 100; v += 25) {
+  for (let v = Math.ceil(lo / tick) * tick; v <= hi + 1e-9; v += tick) {
     ctx.strokeStyle = cssVar('--grid');
     ctx.beginPath();
     ctx.moveTo(pad.left, Math.round(y(v)) + 0.5);
     ctx.lineTo(width - pad.right, Math.round(y(v)) + 0.5);
     ctx.stroke();
-    ctx.fillText(String(v), pad.left - 6, y(v) + 4);
+    ctx.fillText(tick < 1 ? v.toFixed(1) : String(Math.round(v)), pad.left - 6, y(v) + 4);
   }
 
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(pad.left, pad.top, plotW, plotH);
+  ctx.clip();
   ctx.setLineDash([5, 4]);
   ctx.strokeStyle = cssVar('--text-secondary');
   for (const v of [life.p.S, tippingPoint(life.p)]) {
@@ -104,10 +198,11 @@ function drawTrace() {
     ctx.stroke();
   }
   ctx.setLineDash([]);
+  ctx.restore();
   ctx.textAlign = 'left';
   ctx.fillStyle = cssVar('--text-secondary');
-  ctx.fillText('setpoint S', width - pad.right + 6, y(life.p.S) + 4);
-  ctx.fillText('tipping point', width - pad.right + 6, y(tippingPoint(life.p)) + 4);
+  if (inRange(life.p.S)) ctx.fillText('setpoint S', width - pad.right + 6, y(life.p.S) + 4);
+  if (inRange(tippingPoint(life.p))) ctx.fillText('tipping point', width - pad.right + 6, y(tippingPoint(life.p)) + 4);
 
   // Drug uses and forced doses as ticks along the bottom.
   cols.forEach((col, c) => {
@@ -122,6 +217,10 @@ function drawTrace() {
   });
 
   // H swings within a column: draw its range faintly, its mean on top.
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(pad.left, pad.top, plotW, plotH);
+  ctx.clip();
   ctx.strokeStyle = cssVar('--line-h');
   ctx.globalAlpha = 0.3;
   ctx.beginPath();
@@ -145,6 +244,7 @@ function drawTrace() {
     });
     ctx.stroke();
   }
+  ctx.restore();
   ctx.lineWidth = 1;
 }
 
@@ -152,7 +252,7 @@ function drawPolicy() {
   const { ctx, width, height } = prepareCanvas($('policy'));
   const p = life.p;
   const { hBins, bBins } = stateShape(p);
-  const pad = { left: 34, right: 6, top: 6, bottom: 34 };
+  const pad = { left: 50, right: 6, top: 6, bottom: 34 };
   const cellW = (width - pad.left - pad.right) / bBins;
   const cellH = (height - pad.top - pad.bottom) / hBins;
   const colors = [cssVar('--act-nothing'), cssVar('--act-natural'), cssVar('--act-drug')];
@@ -185,6 +285,28 @@ function drawPolicy() {
   ctx.fillText('Baseline B', pad.left + (bBins * cellW) / 2, height - 4);
   ctx.textAlign = 'right';
   for (let h = 0; h <= hBins; h += 2) ctx.fillText(String(h * p.hBinWidth), pad.left - 6, yOfH(h * p.hBinWidth) + 4);
+  ctx.save();
+  ctx.translate(12, pad.top + (hBins * cellH) / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.textAlign = 'center';
+  ctx.fillText('Current State (D)', 0, 0);
+  ctx.restore();
+
+  // The last TRAIL states, oldest faintest, ending at the dot.
+  const n = Math.min(life.t, TRAIL);
+  ctx.strokeStyle = cssVar('--text-primary');
+  ctx.lineWidth = 1.5;
+  ctx.lineJoin = 'round';
+  for (let j = 1; j < n; j++) {
+    const a = (life.t - n + j - 1) % HISTORY;
+    const b = (life.t - n + j) % HISTORY;
+    ctx.globalAlpha = 0.8 * (j / n);
+    ctx.beginPath();
+    ctx.moveTo(xOfB(history.B[a]), yOfH(history.H[a]));
+    ctx.lineTo(xOfB(history.B[b]), yOfH(history.H[b]));
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
 
   ctx.fillStyle = cssVar('--text-primary');
   ctx.strokeStyle = cssVar('--surface');
@@ -194,6 +316,29 @@ function drawPolicy() {
   ctx.fill();
   ctx.stroke();
   ctx.lineWidth = 1;
+}
+
+function drawEnvironmentPanel() {
+  const shares = ACTIONS.map((_, a) => share(a));
+  walking = drawEnvironment($('environment'), life, view, shares, performance.now());
+  let caption = 'Press Play or Step. Each step the agent picks one station.';
+  if (view.s !== null) {
+    const name = ACTIONS[view.action].name.toLowerCase();
+    const why = view.explored ? 'a random pick while exploring' : 'its highest-valued option';
+    const sign = view.reward >= 0 ? '+' : '−';
+    caption = `Chose ${name}, ${why}. Reward ${sign}${Math.abs(view.reward).toFixed(2)}.`;
+  }
+  const best = life.agent.bestActions(life.nextChoiceState());
+  const next = best.length === 1 ? ACTIONS[best[0]].name.toLowerCase() : 'a tie, broken at random';
+  caption += ` Next step: ${next} (${(life.agent.epsilon * 100).toFixed(0)}% chance of exploring instead).`;
+  $('env-caption').textContent = caption;
+}
+
+// Keeps drawing the environment while the agent walks and the page is paused.
+function animateWalk() {
+  if (playing) return;
+  drawEnvironmentPanel();
+  if (walking) requestAnimationFrame(animateWalk);
 }
 
 function renderReadouts() {
@@ -226,6 +371,7 @@ function renderReadouts() {
 }
 
 function render() {
+  drawEnvironmentPanel();
   drawTrace();
   drawPolicy();
   renderReadouts();
@@ -274,18 +420,72 @@ function buildSliders() {
 }
 
 buildSliders();
+xSpan = Number($('window').value);
 reset();
 updateSpeedLabel();
 
 $('play').addEventListener('click', () => {
   playing = !playing;
   $('play').textContent = playing ? 'Pause' : 'Play';
-  if (playing) requestAnimationFrame(frame);
+  requestAnimationFrame(playing ? frame : animateWalk);
 });
-$('step').addEventListener('click', () => { tick(); render(); });
+$('step').addEventListener('click', () => { tick(); render(); requestAnimationFrame(animateWalk); });
 $('reset').addEventListener('click', reset);
 $('speed').addEventListener('input', updateSpeedLabel);
-$('window').addEventListener('change', render);
+$('window').addEventListener('change', () => setX(Number($('window').value), life.t));
+
+// Time plot zoom: buttons; pinch or Ctrl/⌘ + scroll zooms the y-axis and
+// Alt/Option + scroll the time axis, at the pointer; drag to pan; double-click
+// to show 0 to 100 over the chosen window.
+$('x-in').addEventListener('click', () => zoomX(1 / 2));
+$('x-out').addEventListener('click', () => zoomX(2));
+$('x-now').addEventListener('click', () => setX(xSpan, life.t));
+$('y-in').addEventListener('click', () => zoomY(1 / 1.5));
+$('y-out').addEventListener('click', () => zoomY(1.5));
+$('y-fit').addEventListener('click', () => { yFit = !yFit; updateYControls(); render(); });
+$('y-full').addEventListener('click', () => { yFit = false; yRange = [0, 100]; updateYControls(); render(); });
+const valueAt = (clientY) => {
+  const { top, plotH, lo, hi } = traceGeometry;
+  const fraction = (clientY - $('trace').getBoundingClientRect().top - top) / plotH;
+  return hi - Math.min(1, Math.max(0, fraction)) * (hi - lo);
+};
+const stepAt = (clientX) => {
+  const { left, plotW, first, last } = traceGeometry;
+  const fraction = (clientX - $('trace').getBoundingClientRect().left - left) / plotW;
+  return first + Math.min(1, Math.max(0, fraction)) * (last - first);
+};
+$('trace').addEventListener('wheel', (e) => {
+  if (e.altKey) {
+    e.preventDefault();
+    zoomX(Math.exp((e.deltaY || e.deltaX) * 0.01), stepAt(e.clientX));
+  } else if (e.ctrlKey || e.metaKey) {
+    e.preventDefault();
+    zoomY(Math.exp(e.deltaY * 0.01), valueAt(e.clientY));
+  }
+}, { passive: false });
+let drag = null;
+$('trace').addEventListener('pointerdown', (e) => {
+  if (e.pointerType !== 'mouse') return; // leave touch for scrolling the page
+  const { lo, hi, plotH, first, last, plotW } = traceGeometry;
+  drag = { x: e.clientX, y: e.clientY, range: yRange, perPixel: (hi - lo) / plotH, last, stepsPerPixel: (last - first) / plotW };
+  $('trace').setPointerCapture(e.pointerId);
+});
+$('trace').addEventListener('pointermove', (e) => {
+  if (!drag) return;
+  const shift = (e.clientY - drag.y) * drag.perPixel;
+  if (shift !== 0) {
+    yFit = false;
+    yRange = clampRange([drag.range[0] + shift, drag.range[1] + shift]);
+    updateYControls();
+  }
+  setX(xSpan, drag.last - (e.clientX - drag.x) * drag.stepsPerPixel);
+});
+$('trace').addEventListener('pointerup', () => { drag = null; });
+$('trace').addEventListener('pointercancel', () => { drag = null; });
+$('trace').addEventListener('dblclick', () => {
+  $('y-full').click();
+  setX(Number($('window').value), life.t);
+});
 $('drug-available').addEventListener('change', (e) => { life.p.drugAvailable = e.target.checked; render(); });
 $('dose').addEventListener('click', () => { life.dose(1); render(); });
 $('dose10').addEventListener('click', () => { life.dose(10); render(); });
