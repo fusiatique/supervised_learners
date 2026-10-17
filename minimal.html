@@ -26,7 +26,9 @@
     }
     .minimal-content { display: grid; gap: 18px; min-width: 0; }
     .minimal-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
-    #trace { display: block; width: 100%; height: 280px; }
+    #environment { display: block; width: 100%; height: 248px; }
+    #trace { display: block; width: 100%; height: 280px; cursor: move; }
+    #y-fit[aria-pressed="true"] { background: var(--text-primary); color: var(--surface); }
     #policy { display: block; width: 100%; max-width: 320px; aspect-ratio: 1; margin: 0 auto; }
     .key { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: var(--text-secondary); margin-top: 10px; }
     .key span { display: inline-flex; align-items: center; gap: 6px; }
@@ -79,6 +81,19 @@ r  = D(H) − D(H')
 
     <div class="minimal-content">
       <section class="panel">
+        <h2>Environment</h2>
+        <p class="hint">Each step the agent goes to one station. The bars show the value it has learned for each choice in the state (<i>D</i>, <i>B</i>) it chose in. The “next” line shows the values in the state it will choose in on the next step; the bold one is what it will pick unless it explores. It usually takes the highest value and sometimes explores at random. The green band on the meter is how high natural rewards alone can lift <i>D</i>. Once that band stops short of the setpoint, only the drug gets <i>D</i> there.</p>
+        <canvas id="environment" aria-label="The agent choosing between a natural reward, nothing and the drug"></canvas>
+        <p id="env-caption" class="hint" aria-live="polite"></p>
+        <div class="key">
+          <span><i class="line" style="background: var(--line-h)"></i>D now</span>
+          <span><i style="background: var(--line-b); width: 3px"></i>Baseline B</span>
+          <span><i class="dash"></i>Setpoint S</span>
+          <span><i style="background: var(--act-natural); opacity: 0.35"></i>Reachable with natural rewards</span>
+        </div>
+      </section>
+
+      <section class="panel">
         <h2>Internal states over time</h2>
         <div class="toolbar">
           <button id="play" type="button" class="primary">Play</button>
@@ -92,15 +107,30 @@ r  = D(H) − D(H')
           <label class="speed">
             <span>Show last</span>
             <select id="window">
+              <option value="200">200 steps</option>
               <option value="500">500 steps</option>
               <option value="5000">5,000 steps</option>
               <option value="50000" selected>50,000 steps</option>
             </select>
           </label>
+          <span class="speed" role="group" aria-label="Y-axis zoom">
+            <span>Y axis</span>
+            <button id="y-out" type="button" aria-label="Zoom out">−</button>
+            <button id="y-in" type="button" aria-label="Zoom in">+</button>
+            <button id="y-fit" type="button" aria-pressed="false" title="Keep the y-axis fitted to the shown data">Fit</button>
+            <button id="y-full" type="button" title="Show 0 to 100">0–100</button>
+          </span>
+          <span class="speed" role="group" aria-label="Time-axis zoom">
+            <span>Time</span>
+            <button id="x-out" type="button" aria-label="Zoom out in time">−</button>
+            <button id="x-in" type="button" aria-label="Zoom in in time">+</button>
+            <button id="x-now" type="button" title="Jump to the newest step and follow it">Now</button>
+          </span>
         </div>
-        <canvas id="trace" aria-label="Internal level H and baseline B over the last steps"></canvas>
+        <canvas id="trace" title="Drag to move, pinch or Ctrl/⌘ + scroll to zoom the y-axis, Alt/Option + scroll to zoom time, double-click to reset" aria-label="Current state D and baseline B over the last steps"></canvas>
+        <p id="trace-range" class="hint" aria-live="off"></p>
         <div class="key">
-          <span><i class="line" style="background: var(--line-h)"></i>Internal level H (line: mean, shading: range)</span>
+          <span><i class="line" style="background: var(--line-h)"></i>Current State (D), line: mean, shading: range</span>
           <span><i class="line" style="background: var(--line-b)"></i>Baseline B</span>
           <span><i class="dash"></i>Setpoint S and tipping point</span>
           <span><i style="background: var(--act-drug)"></i>Drug chosen</span>
@@ -111,7 +141,7 @@ r  = D(H) − D(H')
       <div class="minimal-row">
         <section class="panel">
           <h2>What the agent chooses</h2>
-          <p class="hint">Its preferred action in each (<i>H</i>, <i>B</i>) state. The dot is where it is now.</p>
+          <p class="hint">Its preferred action in each (<i>H</i>, <i>B</i>) state. The dot is where it is now, and the fading line is the path of its last 100 steps.</p>
           <canvas id="policy" aria-label="Preferred action for each internal state"></canvas>
           <div class="key">
             <span><i style="background: var(--act-nothing)"></i>Nothing</span>

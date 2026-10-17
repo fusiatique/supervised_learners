@@ -11,6 +11,8 @@ Two models of how an agent learning from reward can become dependent on a drug:
 
 ## Running it
 
+(No need to read this, technical specifications)
+
 Requires Node.js 22 or newer and no dependencies.
 
 | What | Command |
@@ -51,6 +53,8 @@ The reward is the drive reduction of homeostatic reinforcement learning (Keramat
 
 An agent counts as **dependent** when it chooses the drug on at least 5% of the steps in the last 1,000. Clean agents take it only while exploring, about 1% of steps.
 
+(No need to read each files)
+
 | File | Purpose |
 |---|---|
 | `js/minimal/model.js` | Parameters and the four equations |
@@ -58,6 +62,7 @@ An agent counts as **dependent** when it chooses the drug on at least 5% of the 
 | `js/minimal/life.js` | One agent's continuing life, stepped one step at a time, with forced doses |
 | `js/minimal/experiments.js` | The experiments below |
 | `js/minimal/page.js`, `minimal.html` | The interactive page |
+| `js/minimal/environmentView.js` | The page's environment panel: the agent walking between the three actions, their learned values, and a meter of `H` |
 | `scripts/minimal.js` | Command line, CSVs and figures |
 
 ## Results
