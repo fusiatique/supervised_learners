@@ -10,8 +10,10 @@
   --grid: #e9e8e3;
   --axis: #b9b7b0;
 
-  --maze-backdrop: #e2e3e2;
-  --maze-edge: #d2d5d3;
+  --maze-backdrop: #454b56;
+  --maze-label: #f4f5f7;
+  --maze-shadow: #38314d20;
+  --maze-edge: #d8d5e1;
   --maze-wall: #625b73;
   --maze-floor: #ffffff;
   --agent: #9bbce8;
@@ -38,10 +40,12 @@
     --grid: #2a2a28;
     --axis: #5a5953;
 
-    --maze-backdrop: #303332;
-    --maze-edge: #777c79;
+    --maze-backdrop: #161b24;
+    --maze-label: #f4f5f7;
+    --maze-shadow: #00000045;
+    --maze-edge: #444957;
     --maze-wall: #8c849d;
-    --maze-floor: #ffffff;
+    --maze-floor: #dfe5ee;
     --agent: #9bbce8;
     --agent-core: #f3dc91;
     --item-1: #c8b5e8;
@@ -684,3 +688,39 @@ button.dose-button:active {
 }
 
 .environment-panels { display: grid; gap: 18px; min-width: 0; }
+
+/* A contained board surface lets the maze read as a small interactive world. */
+.maze-panel {
+  border-color: var(--maze-edge);
+  box-shadow: 0 8px 28px var(--maze-shadow);
+}
+#maze {
+  border: 1px solid var(--maze-edge);
+  border-radius: 4px;
+  background: var(--maze-backdrop);
+}
+.maze-source-key {
+  justify-content: center;
+  gap: 12px;
+  padding-top: 16px;
+}
+.maze-source-key > span {
+  padding: 7px 12px;
+  border: 1px solid var(--maze-edge);
+  border-radius: 999px;
+  background: var(--maze-backdrop);
+  color: var(--maze-label);
+}
+.maze-hint { text-align: center; line-height: 1.65; }
+
+.preset-hint {
+  margin: 16px 0;
+  padding: 16px;
+  background: var(--grid);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.preset-hint h3 { margin: 0 0 8px; color: var(--text-primary); }
+.preset-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.preset-buttons button { flex: 1 1 170px; }
+.preset-hint p:last-child { margin-bottom: 0; }

@@ -113,6 +113,8 @@ export class Simulation {
   administer(source) {
     this.env.administer(source);
     this.dosesGiven++;
+    // External doses are visible too, but still are not agent choices/rewards.
+    this.lastConsumption = { source, cell: this.env.state, step: this.steps };
   }
 
   step() {

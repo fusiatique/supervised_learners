@@ -1,9 +1,11 @@
 import { PARAMS } from './config.js';
 import { SOURCE_TYPES, DEPENDENCE, HRL_SLIDERS, hrlConfig, getSourceType } from './hrl/config.js';
 import { harmWeight } from './hrl/reward.js';
+import { applyBehaviorPreset } from './hrl/presets.js';
 import { MOODS, moodOf } from './hrl/mood.js';
 import { Simulation } from './simulation.js';
 import { MazeView } from './ui/mazeView.js';
+import { sourceIcon } from './ui/sourceIcons.js';
 import { AgentView } from './ui/agentView.js';
 import { LineChart } from './ui/chart.js';
 import { buildParamControls, renderStats, renderLegend, renderMeter, renderChoices } from './ui/controls.js';
@@ -27,14 +29,16 @@ for (const [id, field] of [['mood-name', 'name'], ['mood-text', 'description']])
   }
 }
 
-// Keep the letter key aligned with the source colours used in the maze.
+// Keep the pictogram key aligned with the markers used in the maze.
 for (const source of SOURCE_TYPES.filter((source) => source.id === 'food' || source.id === 'drugB')) {
   const entry = document.createElement('span');
   const marker = document.createElement('span');
   marker.className = 'swatch';
-  marker.textContent = source.char;
+  marker.textContent = sourceIcon(source);
+  marker.style.fontSize = '18px';
+  marker.setAttribute('aria-hidden', 'true');
   marker.style.background = `var(${source.colorVar})`;
-  const name = source.name.replace(' (moderate)', '').replace(' (potent)', '');
+  const name = source.id === 'food' ? 'Food (pasta bolognese)' : 'Drug B (pill)';
   entry.append(marker, document.createTextNode(name));
   $('maze-source-key').append(entry);
 }
@@ -133,6 +137,15 @@ $('step').addEventListener('click', () => {
   sim.step();
 });
 $('reset').addEventListener('click', () => sim.resetLearning());
+for (const [buttonId, presetId] of [['preset-addiction', 'addiction'], ['preset-no-addiction', 'noAddiction']]) {
+  $(buttonId).addEventListener('click', () => {
+    setRunning(false);
+    const preset = applyBehaviorPreset(sim, presetId);
+    syncDependenceControl();
+    for (const sync of syncParamControls) sync();
+    $('preset-status').textContent = `${preset.name} preset applied. ${preset.description}`;
+  });
+}
 $('restore-defaults').addEventListener('click', () => {
   setRunning(false);
   const defaults = hrlConfig(DEPENDENCE);
@@ -141,6 +154,7 @@ $('restore-defaults').addEventListener('click', () => {
   sim.setDependenceOnly(defaults.drugDeficit);
   syncDependenceControl();
   for (const sync of syncParamControls) sync();
+  $('preset-status').textContent = 'Default settings restored. Learning has been reset.';
 });
 $('dose').addEventListener('click', () => sim.administer(DOSE));
 

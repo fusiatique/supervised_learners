@@ -32,7 +32,7 @@
       </div>
       <canvas id="maze" aria-label="Maze with the agent and the sources"></canvas>
       <div id="maze-source-key" class="maze-source-key" aria-label="Maze source key"></div>
-      <p class="hint maze-hint">The face icon represents the agent, showing its location and current feeling. The coloured letter icons represent reward items: food, social interaction, rest and drugs. The agent learns from experience as it moves through the maze and chooses which items to use.</p>
+      <p class="hint maze-hint">The face icon represents the agent, showing its location and current feeling. The plate of pasta bolognese represents food, and the pill represents Drug B. The agent learns from experience as it moves through the maze and chooses which items to use.</p>
     </section>
 
     <div class="side">
@@ -84,6 +84,15 @@
         <p class="hint">Model B uses an adaptive harm trade-off: harm counts less when d is low. The agent starts at d = 50.</p>
         <button id="restore-defaults" type="button" title="Restore parameter defaults, the adaptive model and dependence, then reset learning.">Restore defaults</button>
         <p class="hint">Restores parameter sliders and dependence ON, and resets learning.</p>
+        <div class="preset-hint" aria-labelledby="preset-heading">
+          <h3 id="preset-heading">Try a behavior preset</h3>
+          <p class="hint">Compare two parameter scenarios. Each resets learning; press Play afterward. Increase the simulation speed to see learned habits develop sooner.</p>
+          <div class="preset-buttons">
+            <button id="preset-addiction" type="button">Addiction-prone agent</button>
+            <button id="preset-no-addiction" type="button">Non-addicted agent</button>
+          </div>
+          <p id="preset-status" class="hint" role="status">The first scenario encourages repeated drug use and dependence. The second favors food and disables dependence. Choices still develop through learning.</p>
+        </div>
         <div class="parameter-disclosures">
           <div class="settings-heading">
             <button id="toggle-dopamine-params" type="button" aria-expanded="false" aria-controls="dopamine-params">Dopamine-related state</button>
