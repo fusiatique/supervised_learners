@@ -1,6 +1,6 @@
-episode,totalReward,length,drugInteractions,ordinaryInteractions,rejectedInteractions,meanD,finalD,minD,meanH,finalH,meanHarmWeight,moveShare,ordinaryShare,drugShare,n_food,n_social,n_rest,n_drugA,n_drugB,sum_sourceReward,sum_stateBenefit,sum_acuteHarmCost,sum_accumulatedHarmCost,sum_stepCost,steps_lowD,n_food_lowD,n_social_lowD,n_rest_lowD,n_drugA_lowD,n_drugB_lowD,steps_midD,n_food_midD,n_social_midD,n_rest_midD,n_drugA_midD,n_drugB_midD,steps_highD,n_food_highD,n_social_highD,n_rest_highD,n_drugA_highD,n_drugB_highD
-1,171.90117,338,0,111,0,93.393927,96.08,50,0,0,0.982969,0.671598,0.328402,0,111,0,0,0,0,166.5,12.16117,0,0,6.76,0,0,0,0,0,0,10,2,0,0,0,0,328,109,0,0,0,0
-2,171.90117,338,0,111,0,93.393927,96.08,50,0,0,0.982969,0.671598,0.328402,0,111,0,0,0,0,166.5,12.16117,0,0,6.76,0,0,0,0,0,0,10,2,0,0,0,0,328,109,0,0,0,0
-3,171.90117,338,0,111,0,93.393927,96.08,50,0,0,0.982969,0.671598,0.328402,0,111,0,0,0,0,166.5,12.16117,0,0,6.76,0,0,0,0,0,0,10,2,0,0,0,0,328,109,0,0,0,0
-4,171.90117,338,0,111,0,93.393927,96.08,50,0,0,0.982969,0.671598,0.328402,0,111,0,0,0,0,166.5,12.16117,0,0,6.76,0,0,0,0,0,0,10,2,0,0,0,0,328,109,0,0,0,0
-5,171.90117,338,0,111,0,93.393927,96.08,50,0,0,0.982969,0.671598,0.328402,0,111,0,0,0,0,166.5,12.16117,0,0,6.76,0,0,0,0,0,0,10,2,0,0,0,0,328,109,0,0,0,0
+episode,totalReward,length,drugInteractions,ordinaryInteractions,rejectedInteractions,meanD,finalD,minD,meanH,finalH,meanA,finalA,meanHarmWeight,moveShare,ordinaryShare,drugShare,n_food,n_drugB,sum_sourceReward,sum_stateBenefit,sum_acuteHarmCost,sum_accumulatedHarmCost,sum_stepCost,steps_lowD,n_food_lowD,n_drugB_lowD,steps_midD,n_food_midD,n_drugB_midD,steps_highD,n_food_highD,n_drugB_highD
+1,153.571903,338,1,107,0,93.465608,98,50,0.443245,0.003741,0,0,0.985676,0.680473,0.316568,0.002959,107,1,165.5,12.294099,2.875,14.587196,6.76,0,0,0,7,0,1,331,107,0
+2,153.571903,338,1,107,0,93.465608,98,50,0.443245,0.003741,0,0,0.985676,0.680473,0.316568,0.002959,107,1,165.5,12.294099,2.875,14.587196,6.76,0,0,0,7,0,1,331,107,0
+3,153.571903,338,1,107,0,93.465608,98,50,0.443245,0.003741,0,0,0.985676,0.680473,0.316568,0.002959,107,1,165.5,12.294099,2.875,14.587196,6.76,0,0,0,7,0,1,331,107,0
+4,153.571903,338,1,107,0,93.465608,98,50,0.443245,0.003741,0,0,0.985676,0.680473,0.316568,0.002959,107,1,165.5,12.294099,2.875,14.587196,6.76,0,0,0,7,0,1,331,107,0
+5,153.571903,338,1,107,0,93.465608,98,50,0.443245,0.003741,0,0,0.985676,0.680473,0.316568,0.002959,107,1,165.5,12.294099,2.875,14.587196,6.76,0,0,0,7,0,1,331,107,0

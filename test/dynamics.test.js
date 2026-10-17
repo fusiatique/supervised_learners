@@ -58,9 +58,9 @@ test('a positive background drift takes d below the target', () => {
 });
 
 test('harm rises with drug use, not with ordinary sources', () => {
-  close(nextHarm(0, getSourceType('drugA').harmGain, config), 1.5);
+  close(nextHarm(0, getSourceType('drugB').harmGain, config), 3);
   close(transition(50, 10, getSourceType('drugB'), config).hNext, 0.98 * 10 + 3);
-  for (const id of ['food', 'social', 'rest']) assert.equal(transition(50, 0, getSourceType(id), config).hNext, 0);
+  for (const id of ['food']) assert.equal(transition(50, 0, getSourceType(id), config).hNext, 0);
 });
 
 test('harm decays gradually when nothing is added', () => {
@@ -94,8 +94,7 @@ test('without the drug-induced deficit nothing changes', () => {
 
 test('with it, drug use lowers the level d recovers towards', () => {
   const deficit = hrlConfig({ drugDeficit: true });
-  for (const id of ['food', 'social', 'rest']) assert.equal(transition(50, 0, getSourceType(id), deficit).aNext, 0);
-  close(transition(50, 0, getSourceType('drugA'), deficit).aNext, 2);
+  for (const id of ['food']) assert.equal(transition(50, 0, getSourceType(id), deficit).aNext, 0);
   const { aNext, dAction, dNext } = transition(50, 0, getSourceType('drugB'), deficit, 10);
   close(aNext, deficit.rhoA * 10 + 4);
   close(dNext, dAction + deficit.kD * (deficit.dBase - aNext - dAction));

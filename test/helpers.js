@@ -11,12 +11,9 @@ export const RIGHT = 1;
 export const DOWN = 2;
 export const LEFT = 3;
 
-// Moves from the start of the 'arms' maze to the source at each arm's end.
+// Moves from the start of the 'arms' maze to the source at the end of each path.
 export const PATHS = {
   food: [LEFT, LEFT, LEFT, LEFT, DOWN, DOWN],
-  social: [LEFT, LEFT, DOWN, DOWN, DOWN, DOWN],
-  rest: [DOWN, DOWN, DOWN, DOWN, DOWN, DOWN],
-  drugA: [RIGHT, RIGHT, DOWN, DOWN, DOWN, DOWN],
   drugB: [RIGHT, RIGHT, RIGHT, RIGHT, DOWN, DOWN],
 };
 

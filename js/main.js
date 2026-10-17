@@ -28,14 +28,13 @@ for (const [id, field] of [['mood-name', 'name'], ['mood-text', 'description']])
 }
 
 // Keep the letter key aligned with the source colours used in the maze.
-for (const source of SOURCE_TYPES.filter((source) => source.id === 'food' || source.id === 'drugB')) {
+for (const source of SOURCE_TYPES) {
   const entry = document.createElement('span');
   const marker = document.createElement('span');
   marker.className = 'swatch';
   marker.textContent = source.char;
   marker.style.background = `var(${source.colorVar})`;
-  const name = source.name.replace(' (moderate)', '').replace(' (potent)', '');
-  entry.append(marker, document.createTextNode(name));
+  entry.append(marker, document.createTextNode(source.name));
   $('maze-source-key').append(entry);
 }
 
