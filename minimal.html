@@ -52,8 +52,19 @@
     <p>A Q-learning agent keeps an internal level <i>H</i> near its setpoint. Each drug use lowers the baseline <i>B</i> that <i>H</i> falls back to. Once <i>B</i> is below the tipping point, natural rewards can no longer reach the setpoint and the drug becomes the agent’s best option.</p>
   </header>
 
-  <main class="layout">
-    <aside class="panel controls">
+  <main class="layout with-sidebar">
+    <aside class="panel controls playback-sidebar">
+    <div class="toolbar simulation-toolbar" role="group" aria-label="Simulation playback">
+          <button id="play" type="button" class="primary">Play</button>
+          <button id="step" type="button">Step</button>
+          <button id="reset" type="button">Reset</button>
+          <label class="speed">
+            <span>Speed</span>
+            <input id="speed" type="range" min="0" max="100" value="55">
+            <output id="speed-label"></output>
+          </label>
+    </div>
+      <div class="sidebar-scroll">
       <section>
         <h2>Life events</h2>
         <label class="check"><input id="drug-available" type="checkbox"><span>Drug available</span></label>
@@ -77,12 +88,22 @@ D(H) = (S − H)² / S
 r  = D(H) − D(H')
      + (R0 − c)·[drug]</pre>
       </details>
+      </div>
     </aside>
 
     <div class="minimal-content">
-      <section class="panel">
-        <h2>Environment</h2>
-        <p class="hint">Each step the agent goes to one station. The bars show the value it has learned for each choice in the state (<i>D</i>, <i>B</i>) it chose in. The “next” line shows the values in the state it will choose in on the next step; the bold one is what it will pick unless it explores. It usually takes the highest value and sometimes explores at random. The green band on the meter is how high natural rewards alone can lift <i>D</i>. Once that band stops short of the setpoint, only the drug gets <i>D</i> there.</p>
+      <div class="minimal-row overview-row">
+        <section class="panel">
+        <div class="environment-heading">
+          <h2>Environment</h2>
+          <label class="check learning-details-toggle">
+            <input id="show-learning-details" type="checkbox" aria-controls="environment-learning-help" aria-describedby="learning-details-hint">
+            <span>Show learning details</span>
+          </label>
+        </div>
+        <p id="learning-details-hint" class="hint">Shows Q-values, decision reasons and rewards. This only changes the display.</p>
+        <p class="hint">Each step the agent chooses a station. The green band shows how high natural rewards alone can maintain its internal level. Below the tipping point, natural rewards cannot maintain the setpoint.</p>
+        <p id="environment-learning-help" class="hint" data-learning-details hidden>The bars show Q-values: expected future return, not the reward just received. “Next” shows Q-values for the next decision’s state; bold values are the highest, with ties broken randomly. Exploration can select any available action. These estimates may be inaccurate while learning.</p>
         <canvas id="environment" aria-label="The agent choosing between a natural reward, nothing and the drug"></canvas>
         <p id="env-caption" class="hint" aria-live="polite"></p>
         <div class="key">
@@ -92,25 +113,33 @@ r  = D(H) − D(H')
           <span><i style="background: var(--act-natural); opacity: 0.35"></i>Reachable with natural rewards</span>
         </div>
       </section>
+        <section class="panel">
+          <h2>Now</h2>
+          <p id="status" class="status"></p>
+          <p id="status-hint" class="hint"></p>
+          <dl class="readouts">
+            <div><dt>Step</dt><dd id="r-step"></dd></div>
+            <div><dt>Exploration probability ε</dt><dd id="r-eps"></dd></div>
+            <div><dt>Internal level H</dt><dd id="r-h"></dd></div>
+            <div><dt>Baseline B</dt><dd id="r-b"></dd></div>
+            <div><dt>Drug choices, last 1,000 steps</dt><dd id="r-drug"></dd></div>
+            <div><dt>Natural choices, last 1,000 steps</dt><dd id="r-natural"></dd></div>
+          </dl>
+        </section>
+      </div>
 
       <section class="panel">
-        <h2>Internal states over time</h2>
+        <div class="state-panel-heading">
+          <h2>Internal states over time</h2>
+        </div>
         <div class="toolbar">
-          <button id="play" type="button" class="primary">Play</button>
-          <button id="step" type="button">Step</button>
-          <button id="reset" type="button">Reset</button>
-          <label class="speed">
-            <span>Speed</span>
-            <input id="speed" type="range" min="0" max="100" value="55">
-            <output id="speed-label"></output>
-          </label>
           <label class="speed">
             <span>Show last</span>
             <select id="window">
-              <option value="200">200 steps</option>
+              <option value="200" selected>200 steps</option>
               <option value="500">500 steps</option>
               <option value="5000">5,000 steps</option>
-              <option value="50000" selected>50,000 steps</option>
+              <option value="50000">50,000 steps</option>
             </select>
           </label>
           <span class="speed" role="group" aria-label="Y-axis zoom">
@@ -127,19 +156,42 @@ r  = D(H) − D(H')
             <button id="x-now" type="button" title="Jump to the newest step and follow it">Now</button>
           </span>
         </div>
-        <canvas id="trace" title="Drag to move, pinch or Ctrl/⌘ + scroll to zoom the y-axis, Alt/Option + scroll to zoom time, double-click to reset" aria-label="Current state D and baseline B over the last steps"></canvas>
+        <canvas id="trace" title="When zoomed vertically, scroll up/down to move the y-axis. Scroll left/right or drag right to browse history. At full y range, up/down scrolling browses time. Ctrl/⌘ + scroll zooms the y-axis; Alt/Option + scroll zooms time." aria-label="Current state D and baseline B over elapsed simulation steps"></canvas>
+        <p class="hint">When the y-axis is zoomed in, scroll down to see lower values and up to see higher values. Scroll left/right or drag right to look back in time. At the full 0–100 y range, up/down scrolling browses time. Use Now to follow live steps. The latest 50,000 steps are retained.</p>
         <p id="trace-range" class="hint" aria-live="off"></p>
         <div class="key">
           <span><i class="line" style="background: var(--line-h)"></i>Current State (D), line: mean, shading: range</span>
           <span><i class="line" style="background: var(--line-b)"></i>Baseline B</span>
           <span><i class="dash"></i>Setpoint S and tipping point</span>
-          <span><i style="background: var(--act-drug)"></i>Drug chosen</span>
-          <span><i style="background: var(--text-primary)"></i>Forced dose</span>
+        </div>
+        <div class="state-panel-footer">
+          <div class="key state-event-key">
+            <span><i style="background: var(--act-drug)"></i>Drug chosen</span>
+            <span><i style="background: var(--text-primary)"></i>Forced dose</span>
+          </div>
+          <div class="state-help">
+            <button id="state-info" class="state-info-button" type="button" aria-expanded="false" aria-controls="state-info-popup" aria-haspopup="dialog">States <span class="state-info-symbol" aria-hidden="true">i</span></button>
+            <div id="state-info-popup" class="state-info-popup" role="dialog" aria-labelledby="state-info-title" hidden>
+              <h3 id="state-info-title">Understanding the states</h3>
+              <dl>
+                <dt>Current state D</dt>
+                <dd>The agent’s internal level right now. It learns actions that bring this closer to its target.</dd>
+                <dt>Baseline B</dt>
+                <dd>The level D drifts toward. Drug use lowers it; healing gradually restores it.</dd>
+                <dt>Setpoint S</dt>
+                <dd>The target internal level the agent tries to maintain: 50.</dd>
+                <dt>Tipping point</dt>
+                <dd>When baseline B falls below this threshold, natural rewards alone can no longer maintain the target. It is not an automatic addiction switch.</dd>
+                <dt>Natural-reward ceiling</dt>
+                <dd>The level D could maintain by choosing natural reward every step at the current baseline.</dd>
+              </dl>
+              <p>Blue shading shows the range of D within each plotted interval. Red marks show chosen drug use; dark marks show forced doses.</p>
+            </div>
+          </div>
         </div>
       </section>
 
-      <div class="minimal-row">
-        <section class="panel">
+      <section class="panel">
           <h2>What the agent chooses</h2>
           <p class="hint">Its preferred action in each (<i>H</i>, <i>B</i>) state. The dot is where it is now, and the fading line is the path of its last 100 steps.</p>
           <canvas id="policy" aria-label="Preferred action for each internal state"></canvas>
@@ -150,21 +202,6 @@ r  = D(H) − D(H')
             <span><i style="background: var(--unlearned); border: 1px solid var(--border)"></i>Not visited enough</span>
           </div>
         </section>
-
-        <section class="panel">
-          <h2>Now</h2>
-          <p id="status" class="status"></p>
-          <p id="status-hint" class="hint"></p>
-          <dl class="readouts">
-            <div><dt>Step</dt><dd id="r-step"></dd></div>
-            <div><dt>Exploration ε</dt><dd id="r-eps"></dd></div>
-            <div><dt>Internal level H</dt><dd id="r-h"></dd></div>
-            <div><dt>Baseline B</dt><dd id="r-b"></dd></div>
-            <div><dt>Drug choices, last 1,000 steps</dt><dd id="r-drug"></dd></div>
-            <div><dt>Natural choices, last 1,000 steps</dt><dd id="r-natural"></dd></div>
-          </dl>
-        </section>
-      </div>
     </div>
   </main>
 

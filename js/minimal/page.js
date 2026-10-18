@@ -14,11 +14,11 @@ const Y_MIN_SPAN = 2; // the time plot's y-axis zooms in no further than this
 const X_MIN_SPAN = 20; // nor its time axis further than this many steps
 
 const SLIDERS = [
-  { key: 'c', label: 'Drug harm cost (c)', min: 0, max: 20, step: 0.5 },
-  { key: 'R0', label: 'Drug pleasure (R0)', min: 0, max: 5, step: 0.5 },
-  { key: 'delta', label: 'Baseline drop per drug use (δ)', min: 0, max: 3, step: 0.1 },
-  { key: 'rho', label: 'Baseline healing rate (ρ)', min: 0, max: 0.01, step: 0.0005 },
-  { key: 'naturalGain', label: 'Natural reward gain', min: 0.5, max: 5, step: 0.5 },
+  { key: 'c', label: 'Drug harm cost (c)', help: 'Reward points subtracted when the agent chooses the drug. Increase this to make drug use less attractive. It does not change the baseline drop caused by a dose.', min: 0, max: 20, step: 0.5 },
+  { key: 'R0', label: 'Drug pleasure (R0)', help: 'Extra reward points for choosing the drug, on top of any reward from moving the internal level H toward its target. Higher values make drug use more attractive; they do not make H rise more.', min: 0, max: 5, step: 0.5 },
+  { key: 'delta', label: 'Baseline drop per drug use (δ)', help: 'How much each drug dose lowers the baseline B, the level H drifts toward. Higher values make repeated use lower the baseline faster, potentially making the drug more useful for relieving a low internal state.', min: 0, max: 3, step: 0.1 },
+  { key: 'rho', label: 'Baseline healing rate (ρ)', help: 'How quickly baseline B recovers toward its original value of 40 each step. Higher values mean faster recovery. At 0, the baseline does not recover automatically. This is a fraction of the remaining gap, not a fixed increase.', min: 0, max: 0.01, step: 0.0005 },
+  { key: 'naturalGain', label: 'Natural reward gain', help: 'How much a natural action raises the internal level H. This is not a direct reward-point bonus: moving H closer to the target earns reward, while overshooting can lose reward. Higher values help natural rewards compensate for a lower baseline and lower the tipping point.', min: 0.5, max: 5, step: 0.5 },
 ];
 
 const $ = (id) => document.getElementById(id);
@@ -27,6 +27,7 @@ let recent; // the last WINDOW actions, as a ring buffer
 // The last HISTORY steps as ring buffers indexed by step % HISTORY. `event`
 // is 1 for a chosen drug use and 2 for a forced dose.
 const history = { H: new Float32Array(HISTORY), B: new Float32Array(HISTORY), event: new Uint8Array(HISTORY) };
+let showLearningDetails = false;
 let playing = false;
 let carry = 0;
 // The agent's last decision and its walk to that station, for the environment
@@ -85,7 +86,10 @@ function xView() {
 // Sets the time axis, snapping back to following the newest step at the end.
 function setX(span, last) {
   xSpan = Math.round(Math.min(HISTORY, Math.max(X_MIN_SPAN, span)));
-  xEnd = Math.round(last) >= life.t ? null : Math.round(last);
+  const oldest = Math.max(0, life.t - HISTORY);
+  const earliestEnd = Math.min(life.t, oldest + xSpan);
+  const end = Math.min(life.t, Math.max(earliestEnd, Math.round(last)));
+  xEnd = end >= life.t ? null : end;
   render();
 }
 
@@ -157,7 +161,7 @@ function updateYControls() {
 
 function drawTrace() {
   const { ctx, width, height } = prepareCanvas($('trace'));
-  const pad = { left: 30, right: 84, top: 8, bottom: 26 };
+  const pad = { left: 30, right: 84, top: 8, bottom: 64 };
   const plotW = width - pad.left - pad.right;
   const plotH = height - pad.top - pad.bottom;
   const view = xView();
@@ -166,7 +170,7 @@ function drawTrace() {
   const [lo, hi] = yRange;
   traceGeometry = { top: pad.top, plotH, lo, hi, left: pad.left, plotW, ...view };
   const steps = (n) => Math.max(0, n).toLocaleString('en');
-  $('trace-range').textContent = `Steps ${steps(view.first)} to ${steps(view.last)}${view.live ? ', following the newest step' : ''}.`;
+  $('trace-range').textContent = `Elapsed: ${steps(life.t)} simulation steps. Viewing steps ${steps(view.first)} to ${steps(view.last)}${view.live ? ', following the newest step' : ''}.`;
   const x = (c) => pad.left + c + 0.5;
   const y = (v) => pad.top + (1 - (v - lo) / (hi - lo)) * plotH;
   const inRange = (v) => v >= lo && v <= hi;
@@ -215,6 +219,38 @@ function drawTrace() {
       ctx.fillRect(x(c) - 1, height - pad.bottom + 4, 2, 14);
     }
   });
+
+  // Elapsed simulation steps, with readable integer ticks at every zoom level.
+  // Event marks occupy a separate strip above the axis labels.
+  const axisY = height - pad.bottom + 23;
+  const span = view.last - view.first;
+  const targetTicks = Math.max(2, Math.floor(plotW / 95));
+  const roughStep = span / targetTicks;
+  const magnitude = 10 ** Math.floor(Math.log10(roughStep));
+  const tickStep = Math.max(1, [1, 2, 5, 10].find((n) => n * magnitude >= roughStep) * magnitude);
+  const stepX = (step) => pad.left + ((step - view.first) / span) * plotW;
+  ctx.save();
+  ctx.strokeStyle = cssVar('--axis');
+  ctx.fillStyle = cssVar('--text-secondary');
+  ctx.beginPath();
+  ctx.moveTo(pad.left, axisY);
+  ctx.lineTo(width - pad.right, axisY);
+  ctx.stroke();
+  ctx.textBaseline = 'top';
+  for (let step = Math.ceil(Math.max(0, view.first) / tickStep) * tickStep; step <= view.last; step += tickStep) {
+    const px = stepX(step);
+    ctx.beginPath();
+    ctx.moveTo(px, axisY);
+    ctx.lineTo(px, axisY + 4);
+    ctx.stroke();
+    ctx.textAlign = px < pad.left + 30 ? 'left' : px > width - pad.right - 30 ? 'right' : 'center';
+    ctx.fillText(steps(step), px, axisY + 7);
+  }
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'bottom';
+  ctx.font = `600 11px ${CANVAS_FONT}`;
+  ctx.fillText('Time elapsed (simulation steps)', pad.left + plotW / 2, height - 2);
+  ctx.restore();
 
   // H swings within a column: draw its range faintly, its mean on top.
   ctx.save();
@@ -320,17 +356,19 @@ function drawPolicy() {
 
 function drawEnvironmentPanel() {
   const shares = ACTIONS.map((_, a) => share(a));
-  walking = drawEnvironment($('environment'), life, view, shares, performance.now());
+  walking = drawEnvironment($('environment'), life, view, shares, performance.now(), showLearningDetails);
   let caption = 'Press Play or Step. Each step the agent picks one station.';
   if (view.s !== null) {
     const name = ACTIONS[view.action].name.toLowerCase();
-    const why = view.explored ? 'a random pick while exploring' : 'its highest-valued option';
+    const why = view.explored ? 'a random pick while exploring' : 'a highest-valued option (ties are random)';
     const sign = view.reward >= 0 ? '+' : '−';
-    caption = `Chose ${name}, ${why}. Reward ${sign}${Math.abs(view.reward).toFixed(2)}.`;
+    caption = showLearningDetails
+      ? `Chose ${name}, ${why}. Reward ${sign}${Math.abs(view.reward).toFixed(2)}.`
+      : `Chose ${name}.`;
   }
   const best = life.agent.bestActions(life.nextChoiceState());
   const next = best.length === 1 ? ACTIONS[best[0]].name.toLowerCase() : 'a tie, broken at random';
-  caption += ` Next step: ${next} (${(life.agent.epsilon * 100).toFixed(0)}% chance of exploring instead).`;
+  if (showLearningDetails) caption += ` Next step: ${next} (${(life.agent.epsilon * 100).toFixed(1)}% chance of exploring instead).`;
   $('env-caption').textContent = caption;
 }
 
@@ -362,7 +400,7 @@ function renderReadouts() {
   $('status').className = `status ${kind}`;
   $('status-hint').textContent = hint;
   $('r-step').textContent = life.t.toLocaleString('en');
-  $('r-eps').textContent = life.agent.epsilon.toFixed(3);
+  $('r-eps').textContent = `${(life.agent.epsilon * 100).toFixed(1)}%`;
   $('r-h').textContent = H.toFixed(1);
   $('r-b').textContent = B.toFixed(1);
   $('r-drug').textContent = `${(drugShare * 100).toFixed(1)}%`;
@@ -402,10 +440,31 @@ function frame() {
 function buildSliders() {
   const defaults = config();
   for (const slider of SLIDERS) {
-    const label = document.createElement('label');
-    label.className = 'param';
-    label.innerHTML = `<span>${slider.label}</span><output></output>
-      <input id="param-${slider.key}" type="range" min="${slider.min}" max="${slider.max}" step="${slider.step}">`;
+    const label = document.createElement('div');
+    label.className = 'param minimal-param';
+    const helpId = `help-${slider.key}`;
+    label.innerHTML = `<label for="param-${slider.key}">${slider.label}</label>
+      <div class="parameter-value">
+        <output for="param-${slider.key}"></output>
+        <button class="info-button parameter-info" type="button"
+          aria-label="About ${slider.label}" aria-describedby="${helpId}"
+          aria-expanded="false" aria-controls="${helpId}">i</button>
+      </div>
+      <input id="param-${slider.key}" type="range" min="${slider.min}" max="${slider.max}" step="${slider.step}" aria-describedby="${helpId}">
+      <span id="${helpId}" class="parameter-tooltip" role="tooltip" hidden></span>`;
+    const info = label.querySelector('.parameter-info');
+    const tooltip = label.querySelector('.parameter-tooltip');
+    tooltip.textContent = slider.help;
+    let pinned = false;
+    const show = () => { tooltip.hidden = false; info.setAttribute('aria-expanded', 'true'); };
+    const hide = () => { pinned = false; tooltip.hidden = true; info.setAttribute('aria-expanded', 'false'); };
+    info.addEventListener('mouseenter', show);
+    info.addEventListener('focus', show);
+    info.addEventListener('blur', hide);
+    info.addEventListener('click', () => { pinned = !pinned; if (pinned) show(); else hide(); });
+    label.addEventListener('mouseleave', () => { if (!pinned && document.activeElement !== info) hide(); });
+    document.addEventListener('click', (event) => { if (!label.contains(event.target)) hide(); });
+    document.addEventListener('keydown', (event) => { if (event.key === 'Escape') hide(); });
     const input = label.querySelector('input');
     const output = label.querySelector('output');
     input.value = defaults[slider.key];
@@ -420,6 +479,40 @@ function buildSliders() {
 }
 
 buildSliders();
+$('show-learning-details').addEventListener('change', (event) => {
+  showLearningDetails = event.target.checked;
+  for (const element of document.querySelectorAll('[data-learning-details]')) element.hidden = !showLearningDetails;
+  render();
+});
+const stateInfo = $('state-info');
+const statePopup = $('state-info-popup');
+const stateHelp = stateInfo.parentElement;
+function openStateInfo() {
+  statePopup.hidden = false;
+  stateInfo.setAttribute('aria-expanded', 'true');
+}
+function closeStateInfo() {
+  statePopup.hidden = true;
+  stateInfo.setAttribute('aria-expanded', 'false');
+}
+stateHelp.addEventListener('mouseenter', openStateInfo);
+stateHelp.addEventListener('mouseleave', () => {
+  if (!stateHelp.contains(document.activeElement)) closeStateInfo();
+});
+stateHelp.addEventListener('focusin', openStateInfo);
+stateHelp.addEventListener('focusout', (event) => {
+  if (!stateHelp.contains(event.relatedTarget)) closeStateInfo();
+});
+stateInfo.addEventListener('click', openStateInfo);
+document.addEventListener('click', (event) => {
+  if (!stateInfo.contains(event.target) && !statePopup.contains(event.target)) closeStateInfo();
+});
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && !statePopup.hidden) {
+    stateInfo.focus();
+    closeStateInfo();
+  }
+});
 xSpan = Number($('window').value);
 reset();
 updateSpeedLabel();
@@ -461,6 +554,27 @@ $('trace').addEventListener('wheel', (e) => {
   } else if (e.ctrlKey || e.metaKey) {
     e.preventDefault();
     zoomY(Math.exp(e.deltaY * 0.01), valueAt(e.clientY));
+  } else if (e.shiftKey
+    || e.clientX - $('trace').getBoundingClientRect().left < traceGeometry.left
+    || (yRange[1] - yRange[0] < 100 - 1e-9 && Math.abs(e.deltaY) >= Math.abs(e.deltaX) && e.deltaY !== 0)) {
+    e.preventDefault();
+    // Ordinary vertical scrolling pans a zoomed y-axis, anywhere on the plot.
+    // Shift-wheel and scrolling over y labels also select vertical panning.
+    const delta = e.deltaY || e.deltaX;
+    const pixels = delta * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? traceGeometry.plotH : 1);
+    const [lo, hi] = yRange;
+    const shift = -pixels * (hi - lo) / traceGeometry.plotH;
+    yFit = false;
+    yRange = clampRange([lo + shift, hi + shift]);
+    updateYControls();
+    render();
+  } else {
+    // Wheel up / trackpad left goes earlier; down / right goes later.
+    // Keep the selected window length, rather than zooming out to see history.
+    e.preventDefault();
+    const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    const pixels = delta * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? traceGeometry.plotW : 1);
+    setX(xSpan, xView().last + pixels * xSpan / traceGeometry.plotW);
   }
 }, { passive: false });
 let drag = null;

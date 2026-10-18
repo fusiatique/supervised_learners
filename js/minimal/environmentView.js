@@ -63,7 +63,7 @@ function drawIcon(ctx, action, x, y) {
   ctx.lineWidth = 1;
 }
 
-function drawStations(ctx, life, view, shares, { cardW, centers }) {
+function drawStations(ctx, life, view, shares, { cardW, centers }, advanced) {
   const s = view.s;
   const values = s === null ? [0, 0, 0] : ACTIONS.map((_, a) => life.agent.q[s * ACTIONS.length + a]);
   const valid = life.agent.validActions();
@@ -96,6 +96,8 @@ function drawStations(ctx, life, view, shares, { cardW, centers }) {
     ctx.fillStyle = cssVar('--text-secondary');
     if (!available) {
       ctx.fillText('Not available', x + 12, CARD_TOP + 56);
+    } else if (!advanced) {
+      ctx.fillText(chosen ? 'Chosen this step' : 'Available', x + 12, CARD_TOP + 56, cardW - 24);
     } else {
       // Learned value as a bar either side of a zero line.
       const barY = CARD_TOP + 46;
@@ -108,7 +110,7 @@ function drawStations(ctx, life, view, shares, { cardW, centers }) {
       ctx.fillRect(Math.min(mid, mid + len), barY, Math.abs(len), 10);
       ctx.fillStyle = cssVar('--text-secondary');
       ctx.fillRect(mid - 0.5, barY - 3, 1, 16);
-      ctx.fillText(`value ${s === null ? '–' : values[a].toFixed(2)}`, x + 12, barY + 26, cardW - 24);
+      ctx.fillText(`Q-value ${s === null ? '–' : values[a].toFixed(2)}`, x + 12, barY + 26, cardW - 24);
       // Value in the state the next step will choose in; the greedy pick in bold.
       const isNext = nextBest.includes(a);
       ctx.font = `${isNext ? '600 ' : ''}11px ${CANVAS_FONT}`;
@@ -219,11 +221,11 @@ function drawMeter(ctx, life, width, top) {
 
 // Draws the panel. Returns true while the agent is still walking, so the
 // caller knows to draw another frame.
-export function drawEnvironment(canvas, life, view, shares, now) {
+export function drawEnvironment(canvas, life, view, shares, now, advanced = false) {
   const { ctx, width, height } = prepareCanvas(canvas);
   const geometry = layout(width);
   const floorY = CARD_TOP + CARD_H + 34;
-  drawStations(ctx, life, view, shares, geometry);
+  drawStations(ctx, life, view, shares, geometry, advanced);
   const moving = drawAgent(ctx, view, geometry.centers, floorY, now);
   drawMeter(ctx, life, width, height - 52);
   return moving;
