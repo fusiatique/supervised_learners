@@ -1,0 +1,12 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "hrl:train": "node scripts/hrl.js train",
+    "hrl:evaluate": "node scripts/hrl.js evaluate",
+    "hrl:compare": "node scripts/hrl.js compare",
+    "hrl:sensitivity": "node scripts/hrl.js sensitivity",
+    "minimal": "node scripts/minimal.js"
+  }
+}

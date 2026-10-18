@@ -14,15 +14,21 @@ import { ACTIONS } from '../environment.js';
 //   stateValue(state) -> number   (used for the value overlay)
 //   bestActions(state) -> action[] (used for the policy arrows)
 //   info() -> [[label, text], ...] (model-specific readouts for the stats panel)
+//
+// `random` is the source of randomness; pass a seeded generator for
+// reproducible runs. `cellOf` and `validActions` are identity/"everything"
+// here and are overridden where a state is more than a cell (hrl/agent.js).
 const POLICY_STABILITY_EPISODES = 20;
 
 export class QLearningAgent {
-  constructor(env, params) {
+  constructor(env, params, random = Math.random) {
     this.params = params;
     this.env = env;
+    this.random = random;
     this.numActions = env.numActions;
+    this.allActions = Array.from({ length: this.numActions }, (_, a) => a);
     this.q = new Float64Array(env.numStates * env.numActions);
-    this.visited = new Uint8Array(env.numStates);
+    this.visited = new Uint8Array(env.numCells); // by cell
     this.episodes = 0;
     this.policySnapshot = null;
     this.policyStableEpisodes = 0;
@@ -34,11 +40,25 @@ export class QLearningAgent {
     return Math.max(epsilonMin, epsilonStart * epsilonDecay ** this.episodes);
   }
 
+  // The cell the agent stands on in `state`.
+  cellOf(state) {
+    return state;
+  }
+
+  // Actions that may be taken in `state`.
+  validActions(state) {
+    return this.allActions;
+  }
+
   act(state) {
-    this.visited[state] = 1;
-    const coverageAction = this.actionTowardUnvisited(state);
+    const cell = this.cellOf(state);
+    this.visited[cell] = 1;
+    const coverageAction = this.actionTowardUnvisited(cell);
     if (coverageAction !== null) return coverageAction;
-    if (Math.random() < this.epsilon) return Math.floor(Math.random() * this.numActions);
+    if (this.random() < this.epsilon) {
+      const valid = this.validActions(state);
+      return valid[Math.floor(this.random() * valid.length)];
+    }
     return this.bestAction(state);
   }
 
@@ -47,24 +67,26 @@ export class QLearningAgent {
     const target = reward + (done ? 0 : gamma * this.stateValue(nextState));
     const i = state * this.numActions + action;
     this.q[i] += alpha * (target - this.q[i]);
-    this.visited[state] = 1;
-    this.visited[nextState] = 1;
+    this.visited[this.cellOf(state)] = 1;
+    this.visited[this.cellOf(nextState)] = 1;
     if (this.policyConverged && this.bestActionMask(state) !== this.policySnapshot[state]) {
       this.policyConverged = false;
     }
   }
 
-  actionTowardUnvisited(state) {
+  // First move of a shortest path from cell `from` to the nearest cell not
+  // yet visited, or null once every reachable cell has been.
+  actionTowardUnvisited(from) {
     const firstAction = new Int8Array(this.visited.length).fill(-1);
-    const queue = [state];
-    this.visited[state] = 1;
+    const queue = [from];
+    this.visited[from] = 1;
 
     for (let i = 0; i < queue.length; i++) {
       const cell = queue[i];
-      for (let action = 0; action < this.numActions; action++) {
+      for (let action = 0; action < ACTIONS.length; action++) {
         const next = this.env.neighbor(cell, ACTIONS[action]);
-        if (next === null || this.env.isWall(next) || firstAction[next] !== -1 || next === state) continue;
-        firstAction[next] = cell === state ? action : firstAction[cell];
+        if (next === null || this.env.isWall(next) || firstAction[next] !== -1 || next === from) continue;
+        firstAction[next] = cell === from ? action : firstAction[cell];
         if (!this.visited[next]) return firstAction[next];
         queue.push(next);
       }
@@ -104,8 +126,8 @@ export class QLearningAgent {
 
   stateValue(state) {
     const base = state * this.numActions;
-    let best = this.q[base];
-    for (let a = 1; a < this.numActions; a++) best = Math.max(best, this.q[base + a]);
+    let best = -Infinity;
+    for (const a of this.validActions(state)) best = Math.max(best, this.q[base + a]);
     return best;
   }
 
@@ -113,7 +135,7 @@ export class QLearningAgent {
     const base = state * this.numActions;
     let bestValue = -Infinity;
     const best = [];
-    for (let a = 0; a < this.numActions; a++) {
+    for (const a of this.validActions(state)) {
       const value = this.q[base + a];
       if (value > bestValue) {
         bestValue = value;
@@ -129,7 +151,7 @@ export class QLearningAgent {
   // Ties are broken at random for the agent's actual moves.
   bestAction(state) {
     const best = this.bestActions(state);
-    return best[Math.floor(Math.random() * best.length)];
+    return best[Math.floor(this.random() * best.length)];
   }
 
   info() {

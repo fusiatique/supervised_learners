@@ -1,5 +1,4 @@
 import { buildMaze } from './mazes.js';
-import { getItemType } from './items.js';
 
 // Up, right, down, left.
 export const ACTIONS = [
@@ -9,16 +8,19 @@ export const ACTIONS = [
   { dx: -1, dy: 0 },
 ];
 
-// Grid world. A state is a cell index (y * cols + x). Reaching a cell that
-// holds an item ends the episode. The environment only reports what happened;
-// turning that into a reward is the simulation's job.
+// The grid itself: walls, the start, the agent's cell and which cell holds
+// which source. A cell is an index (y * cols + x). hrl/environment.js extends
+// this with the internal states and what using a source does; there a
+// learning state is more than a cell, hence `numCells` next to `numStates`.
 export class Environment {
   constructor(mazeDef) {
     Object.assign(this, buildMaze(mazeDef));
-    this.numStates = this.cols * this.rows;
+    this.numCells = this.cols * this.rows;
+    this.numStates = this.numCells;
     this.numActions = ACTIONS.length;
-    this.items = new Map(); // cell index -> item type id
+    this.items = new Map(this.defaultItems); // cell index -> source type id
     this.state = this.start;
+    this.layoutVersion = 0; // goes up whenever a wall changes
   }
 
   isWall(cell) {
@@ -26,19 +28,20 @@ export class Environment {
   }
 
   setWall(cell, isWall) {
-    if (!Number.isInteger(cell) || cell < 0 || cell >= this.numStates || cell === this.start) return false;
+    if (!Number.isInteger(cell) || cell < 0 || cell >= this.numCells || cell === this.start) return false;
     const x = cell % this.cols;
     const y = Math.floor(cell / this.cols);
     if (x === 0 || y === 0 || x === this.cols - 1 || y === this.rows - 1) return false;
     if (this.isWall(cell) === isWall) return false;
 
     this.walls[cell] = Number(isWall);
+    this.layoutVersion++;
     if (isWall) this.items.delete(cell);
     return true;
   }
 
   isValidCell(cell) {
-    return Number.isInteger(cell) && cell >= 0 && cell < this.numStates;
+    return Number.isInteger(cell) && cell >= 0 && cell < this.numCells;
   }
 
   neighbor(cell, { dx, dy }) {
@@ -54,12 +57,14 @@ export class Environment {
   addWall(cell) {
     if (!this.canAddWall(cell)) return false;
     this.walls[cell] = 1;
+    this.layoutVersion++;
     return true;
   }
 
   removeWall(cell) {
     if (!this.isValidCell(cell) || !this.isWall(cell)) return false;
     this.walls[cell] = 0;
+    this.layoutVersion++;
     return true;
   }
 
@@ -67,11 +72,25 @@ export class Environment {
     if (!this.isValidCell(from) || !this.isWall(from) || !this.canAddWall(to)) return false;
     this.walls[from] = 0;
     this.walls[to] = 1;
+    this.layoutVersion++;
     return true;
   }
 
   clearWalls() {
     this.walls.fill(0);
+    this.layoutVersion++;
+  }
+
+  canStartAt(cell) {
+    return this.isValidCell(cell) && !this.isWall(cell) && !this.items.has(cell);
+  }
+
+  // Moves the starting cell and puts the agent on it.
+  setStart(cell) {
+    if (!this.canStartAt(cell)) return false;
+    this.start = cell;
+    this.state = cell;
+    return true;
   }
 
   reset() {
@@ -79,11 +98,11 @@ export class Environment {
     return this.state;
   }
 
+  // Moves the agent; walking into a wall leaves it where it is.
   step(action) {
     const next = this.neighbor(this.state, ACTIONS[action]);
     if (next !== null && !this.isWall(next)) this.state = next;
-    const item = getItemType(this.items.get(this.state));
-    return { state: this.state, item, done: item !== null };
+    return this.state;
   }
 
   canHoldItem(cell) {
@@ -100,7 +119,7 @@ export class Environment {
 
   // Shortest-path length from `from` to every cell (Infinity if unreachable).
   distancesFrom(from) {
-    const dist = new Array(this.numStates).fill(Infinity);
+    const dist = new Array(this.numCells).fill(Infinity);
     dist[from] = 0;
     const queue = [from];
     for (let i = 0; i < queue.length; i++) {
@@ -114,42 +133,5 @@ export class Environment {
       }
     }
     return dist;
-  }
-
-  isDeadEnd(cell) {
-    const open = ACTIONS.filter((action) => {
-      const next = this.neighbor(cell, action);
-      return next !== null && !this.isWall(next);
-    });
-    return !this.isWall(cell) && open.length === 1;
-  }
-
-  // Spread one of each item type across the maze, far from the start and from
-  // each other, with the most valuable item furthest from the start. Items go
-  // in dead ends so that none of them blocks the way to another.
-  placeDefaultItems(itemTypes) {
-    this.items.clear();
-    const fromStart = this.distancesFrom(this.start);
-    const spread = [...fromStart];
-    const cells = [];
-    const pick = (allowed) => {
-      let best = -1;
-      for (let cell = 0; cell < this.numStates; cell++) {
-        if (!this.canHoldItem(cell) || !allowed(cell) || cells.includes(cell)) continue;
-        if (best === -1 || spread[cell] > spread[best]) best = cell;
-      }
-      return best;
-    };
-    for (let n = 0; n < itemTypes.length; n++) {
-      let best = pick((cell) => this.isDeadEnd(cell));
-      if (best === -1) best = pick(() => true);
-      if (best === -1) break;
-      cells.push(best);
-      const fromBest = this.distancesFrom(best);
-      for (let cell = 0; cell < this.numStates; cell++) spread[cell] = Math.min(spread[cell], fromBest[cell]);
-    }
-    cells.sort((a, b) => fromStart[a] - fromStart[b]);
-    const byValue = [...itemTypes].sort((a, b) => a.value - b.value);
-    cells.forEach((cell, i) => this.items.set(cell, byValue[i].id));
   }
 }

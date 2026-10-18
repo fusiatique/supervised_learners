@@ -1,9 +1,7 @@
 import { RECENT_EPISODES } from './config.js';
-import { getMaze } from './mazes.js';
-import { ITEM_TYPES } from './items.js';
-import { Environment } from './environment.js';
-import { RewardState } from './rewardState.js';
-import { AGENTS, createAgent } from './agents/index.js';
+import { DEPENDENCE, HRL_DEFAULTS, MODELS, SOURCE_TYPES, getModel } from './hrl/config.js';
+import { HrlEnvironment } from './hrl/environment.js';
+import { HrlQLearningAgent } from './hrl/agent.js';
 
 // A time series that stays a bounded size however long the run is: once it
 // fills up, neighbouring points are averaged together and the sampling
@@ -34,73 +32,111 @@ class Series {
   }
 }
 
-// Ties the environment, the agent and the reward state together and keeps the
-// statistics the UI displays. Contains no DOM code.
+const zeroPerSource = () => Object.fromEntries(SOURCE_TYPES.map((s) => [s.id, 0]));
+
+// Ties the environment and the agent together one step at a time and keeps
+// the statistics the UI displays. Contains no DOM code. `params` is the
+// model's config (hrl/config.js); it is read live, so changing a value takes
+// effect on the next step. `random` replaces Math.random for the agent.
 export class Simulation {
-  constructor(params) {
+  constructor(params, random, modelId = 'adaptive') {
     this.params = params;
-    this.agentId = AGENTS[0].id;
-    this.setMaze(getMaze().id);
+    this.random = random;
+    this.env = new HrlEnvironment(params);
+    this.setModel(modelId);
   }
 
-  setMaze(mazeId) {
-    this.mazeId = mazeId;
-    this.env = new Environment(getMaze(mazeId));
-    this.env.placeDefaultItems(ITEM_TYPES);
-    this.maxEpisodeSteps = this.env.numStates * 2;
+  // Switches to one of the compared models: whatever the models differ in
+  // goes back to its default, then the chosen model's own values apply.
+  setModel(modelId) {
+    const model = getModel(modelId);
+    for (const { overrides } of MODELS) {
+      for (const key of Object.keys(overrides)) this.params[key] = HRL_DEFAULTS[key];
+    }
+    Object.assign(this.params, model.overrides);
+    this.modelId = modelId;
     this.resetLearning();
   }
 
-  setAgent(agentId) {
-    this.agentId = agentId;
+  // Switches the mechanisms in DEPENDENCE on or off together. They change
+  // what a state is, so the environment is rebuilt and learning starts over.
+  setDependence(enabled) {
+    for (const [key, value] of Object.entries(DEPENDENCE)) this.params[key] = enabled ? value : HRL_DEFAULTS[key];
+    this.env = new HrlEnvironment(this.params);
     this.resetLearning();
   }
 
-  // Forget everything learned; the maze and the placed items stay.
+  get dependence() {
+    return Object.entries(DEPENDENCE).every(([key, value]) => this.params[key] === value);
+  }
+
+  // Forget everything learned; the maze and the placed sources stay.
   resetLearning() {
-    this.agent = createAgent(this.agentId, this.env, this.params);
-    this.rewardState = new RewardState(this.params);
-    this.history = new Series();
+    this.agent = new HrlQLearningAgent(this.env, this.params, this.random);
+    this.history = { d: new Series(), rest: new Series() };
     this.steps = 0;
     this.episodes = 0;
-    this.episodeSteps = 0;
-    this.lastEpisodeSteps = null;
-    this.outcomes = []; // item id (or null for a timeout) of recent episodes
-    this.env.reset();
+    this.lastOutcome = null;
+    this.dosesGiven = 0;
+    this.recent = []; // interactions per source in each of the recent episodes
+    this.beginEpisode(true);
   }
 
-  // The learning signal for one transition. Extend here for harm, withdrawal
-  // penalties and the like.
-  reward(outcome) {
-    return (outcome.item ? outcome.item.value : 0) - this.params.stepCost;
+  // An episode puts the agent back on the start. Its internal states carry
+  // over from the one before unless `fresh` asks for the initial values.
+  beginEpisode(fresh = false) {
+    const { d, h, a } = this.env;
+    this.env.reset(fresh ? undefined : { d, h, a });
+    this.episodeSteps = 0;
+    this.episodeInteractions = zeroPerSource();
+  }
+
+  // Move the agent's starting cell. What was learned is kept; the episode in
+  // progress is abandoned and a new one begins from the new start.
+  setStart(cell) {
+    if (!this.env.setStart(cell)) return false;
+    this.beginEpisode();
+    return true;
+  }
+
+  // Gives the agent a dose of `source` wherever it stands. It is not one of
+  // the agent's actions, so nothing is learned from it directly and it does
+  // not count among the sources the agent chose.
+  administer(source) {
+    this.env.administer(source);
+    this.dosesGiven++;
   }
 
   step() {
-    const state = this.env.state;
+    // d and h may have been changed from outside since the last step.
+    const state = this.env.qState();
     const action = this.agent.act(state);
     const outcome = this.env.step(action);
-    this.agent.learn(state, action, this.reward(outcome), outcome.state, outcome.done);
+    this.agent.learn(state, action, outcome.reward, outcome.state, outcome.done);
 
     this.steps++;
     this.episodeSteps++;
-    this.rewardState.update(outcome.item ? outcome.item.value : 0);
-    this.history.add(this.steps, this.rewardState.level);
+    this.lastOutcome = outcome;
+    if (outcome.source) this.episodeInteractions[outcome.source.id]++;
+    this.history.d.add(this.steps, this.env.d);
+    this.history.rest.add(this.steps, this.env.restingLevel);
 
-    if (outcome.done || this.episodeSteps >= this.maxEpisodeSteps) {
-      this.outcomes.push(outcome.item ? outcome.item.id : null);
-      if (this.outcomes.length > RECENT_EPISODES) this.outcomes.shift();
-      this.lastEpisodeSteps = this.episodeSteps;
-      this.episodeSteps = 0;
+    if (this.episodeSteps >= this.env.maxEpisodeSteps) {
+      this.recent.push(this.episodeInteractions);
+      if (this.recent.length > RECENT_EPISODES) this.recent.shift();
       this.episodes++;
       this.agent.endEpisode();
-      this.env.reset();
+      this.beginEpisode();
     }
   }
 
-  // Map of item id (null = no item reached) -> number of recent episodes.
+  // Interactions with each source over the recent episodes and the one in
+  // progress, as a Map of source id -> count.
   recentChoices() {
-    const counts = new Map();
-    for (const id of this.outcomes) counts.set(id, (counts.get(id) ?? 0) + 1);
+    const counts = new Map(SOURCE_TYPES.map((s) => [s.id, 0]));
+    for (const episode of [...this.recent, this.episodeInteractions]) {
+      for (const [id, n] of Object.entries(episode)) counts.set(id, counts.get(id) + n);
+    }
     return counts;
   }
 }
