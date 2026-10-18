@@ -1,12 +1,118 @@
-# Maze RL Simulation
+# Homeostatic RL models of dependence
 
-A Q-learning agent in a grid-world maze with two internal state variables and five usable sources: food, social interaction, rest and two drugs. It is a prototype of a homeostatic reinforcement-learning model for asking when an agent chooses drugs despite their costs. It runs as an interactive page (`index.html`) and as command-line experiments.
+Two models of how an agent learning from reward can become dependent on a drug:
 
-> **What this model is and is not.** The model is a computational hypothesis, not a validated account of dopamine physiology or of clinical addiction. `d` and `h` are abstract simulation units, every parameter value is illustrative rather than measured, and the results depend on those values. The model does not claim that dopamine is pleasure.
+- **The minimal model** (`minimal.html`, `js/minimal/`, `npm run minimal`): two internal states, three actions, no maze. Dependence forms through one mechanism, a drug-induced drop in the baseline the agent's internal level returns to. This is the current model.
+- **The maze model** (`index.html`, `js/hrl/`, `npm run hrl:*`): the earlier and much larger model, described from "Maze model" below.
+
+> **What these models are and are not.** They are computational hypotheses, not validated accounts of dopamine physiology or of clinical addiction. All states are abstract simulation units, every parameter value is illustrative rather than measured, and the results depend on those values.
+
+# Minimal model
 
 ## Running it
 
-Requires Node.js 22 or newer. There are no runtime dependencies; `npm install` is only needed for the optional esbuild bundle.
+(No need to read this, technical specifications)
+
+Requires Node.js 22 or newer and no dependencies.
+
+| What | Command |
+|---|---|
+| Interactive page | serve the folder (for example `npx serve .` or `python -m http.server`) and open `minimal.html` |
+| All experiments | `npm run minimal` (writes CSVs and SVG figures to `results/minimal/`, about 20 s) |
+| One experiment | `node scripts/minimal.js doses` (or `acquisition`, `compulsion`, `relapse`, `policy`) |
+| Tests | `npm test` |
+
+Options: `--seeds 20`, `--out <directory>`, and `--set key=value` for any parameter in `js/minimal/model.js`, e.g. `node scripts/minimal.js doses --set rho=0.002`.
+
+## The model
+
+Two internal states:
+
+- `H`, the internal level the agent cares about (0 to 100). It wants `H` at the **setpoint** `S = 50`.
+- `B`, the **baseline** `H` relaxes towards when the agent does nothing. It starts at, and heals back to, `B0 = 40`.
+
+Each step the agent chooses one of three actions: **nothing**, **natural reward** (`H` + 2) or **drug** (`H` + 25).
+
+```
+H' = H + gain + k·(B − H)                    k = 0.1     H relaxes 10% of the way to B
+B' = B − δ·[drug] + ρ·(B0 − B)               δ = 1, ρ = 0.001   each use lowers B; it heals slowly (half-life ~700 steps)
+D(H) = (S − H)² / S                                      drive: how far H is from the setpoint
+r  = D(H) − D(H') + (R0 − c)·[drug]          R0 = 2, c = 1      drive reduction, plus drug pleasure minus harm
+```
+
+The reward is the drive reduction of homeostatic reinforcement learning (Keramati & Gutkin, 2014): moving `H` towards the setpoint is rewarded and moving it away is punished, in either direction. So a drug that overshoots the setpoint is unpleasant for an agent that is already content.
+
+**The tipping point.** If the agent took the natural reward every step, `H` would settle at `B + naturalGain / k = B + 20`. While `B` is above `S − naturalGain / k = 30`, natural rewards can hold `H` at the setpoint. Below it they cannot, and only the drug can lift `H` that far. Each drug use pushes `B` further down, so once an agent is below the tipping point and using the drug, it tends to stay there: dependence feeds itself.
+
+| Situation | Nothing | Natural | Drug |
+|---|---:|---:|---:|
+| Healthy, `H = 50`, `B = 40` | −0.02 | −0.02 | **−10.5** (overshoot) |
+| Withdrawal, `H = 20`, `B = 0` | −2.5 | 0.0 | **+18.0** |
+
+**Learning.** Tabular Q-learning (`α = 0.1`, `γ = 0.9`) over `(H, B)` in bins of 10 and 5: 80 states × 3 actions. The agent lives one continuing life with no episodes, so a lowered `B` carries over. ε decays per step from 0.3 to 0.02. The experiments give every agent a drug-free "childhood" of 20,000 steps, in which it learns to use natural rewards, before the drug becomes available; otherwise the heavy random exploration at the start would decide the outcome.
+
+An agent counts as **dependent** when it chooses the drug on at least 5% of the steps in the last 1,000. Clean agents take it only while exploring, about 1% of steps.
+
+(No need to read each files)
+
+| File | Purpose |
+|---|---|
+| `js/minimal/model.js` | Parameters and the four equations |
+| `js/minimal/agent.js` | Q-learning over binned `(H, B)` |
+| `js/minimal/life.js` | One agent's continuing life, stepped one step at a time, with forced doses |
+| `js/minimal/experiments.js` | The experiments below |
+| `js/minimal/page.js`, `minimal.html` | The interactive page |
+| `js/minimal/environmentView.js` | The page's environment panel: the agent walking between the three actions, their learned values, and a meter of `H` |
+| `scripts/minimal.js` | Command line, CSVs and figures |
+
+## Results
+
+From `npm run minimal` with the defaults, 20 agents (seeds) per condition.
+
+**1. Acquisition.** With the drug available and nothing forced, **2 of 20** agents become dependent through their own exploration. The others take it only at exploration's ~1% rate, which holds their `B` around 33, just above the tipping point.
+
+**2. Forced doses.** Doses given at step 40,000, dependent agents at step 80,000:
+
+| Doses | 0 | 5 | 10 | 15 | 20 | 30 |
+|---|---:|---:|---:|---:|---:|---:|
+| Drug lowers `B` | 2 | 3 | 7 | 19 | 20 | 20 |
+| Control, `δ = 0` | 0 | 0 | 0 | 0 | 0 | 0 |
+
+Twenty doses take `B` from 40 to about 20, well below the tipping point, and every agent becomes dependent. In the control the drug cannot lower `B`, and no agent becomes dependent, not even the two from experiment 1. The baseline drop is the whole mechanism.
+
+**3. Compulsion.** At step 50,000 the drug's harm cost `c` is raised. Dependent agents, out of 20:
+
+| `c` | 1 | 3 | 6 | 10 | 15 |
+|---|---:|---:|---:|---:|---:|
+| Not dosed | 2 | 2 | 2 | 2 | 0 |
+| Dosed (20 doses at step 40,000) | 20 | 20 | 20 | 7 | 0 |
+
+Already-dependent agents keep using the drug at costs that would deter a clean agent from starting: in separate acquisition runs with `c` = 3, 6 or 10 from the start, none of 20 agents became dependent. (The 2 "not dosed" agents had already become dependent on their own before the cost rose.) Above a cost of about 10 to 15, withdrawal relief no longer outweighs the harm, and they quit.
+
+**4. Relapse.** Dependent agents (20 doses) lose access to the drug, then get it back:
+
+| Steps of abstinence | 0 | 250 | 500 | 1,000 | 2,000 | 5,000 |
+|---|---:|---:|---:|---:|---:|---:|
+| Mean `B` when the drug returns | 0 | 9 | 16 | 25 | 35 | 40 |
+| Relapsed, of 20 | 20 | 20 | 17 | 0 | 0 | 0 |
+
+Agents relapse when the drug returns before `B` has healed and recover when it has. Once `B` is back, a former user behaves exactly like an agent that never used: a sudden drop in `H` (a "stressor") after long abstinence had the same effect on both. The model therefore has **no lasting relapse vulnerability**, because the only trace of past use is `B`, and `B` heals. Real addiction leaves longer-lasting traces, such as drug-associated cues and changes to learning itself; adding one, for example Redish's (2004) drug-driven learning signal, would be the natural next step.
+
+**5. Policy.** `policy.svg` shows the agent's preferred action in each `(H, B)` state for a clean and a dosed agent. The dosed agent lives at `B` near 0 and chooses the drug whenever `H` falls into the 30s.
+
+## Limitations
+
+- All parameter values were chosen by hand so that the arithmetic is easy to follow and the tipping point lies inside the range `B` moves in. The qualitative results follow from the tipping point. How many agents cross it on their own depends on the exploration settings and `ρ`.
+- A first version with a smaller range (`B0 = 20`, natural gain 4) produced no dependence at all: at `B = 0` natural rewards still reached `H = 40`, and the remaining drive was too small to matter. Dependence needs the baseline to be able to fall well below the tipping point.
+- With 20 seeds per condition, counts like 2 of 20 are rough.
+
+---
+
+# Maze model
+
+## Running it
+
+Requires Node.js 22 or newer. There are no dependencies, so `npm install` is not needed.
 
 | What | Command |
 |---|---|
@@ -136,7 +242,7 @@ with `kD = 0.04`, `rhoH = 0.98` and `dBackgroundDrift = 0` by default.
 
 ### Drug-induced deficit and refractory sources
 
-Two optional mechanisms, both off in `js/hrl/config.js` and so in the experiments reported below, and both switched on by the page's "Dependence mechanisms" box. Like the background drift they are added modelling assumptions, not established mechanisms. They exist because without them nothing in the model makes past drug use increase later drug use, and an agent with free, unlimited ordinary sources never needs a drug.
+Two optional mechanisms, both off in `js/hrl/config.js` and so in the command-line experiments, and both switched on by the page's "Dependence mechanisms" box. Like the background drift they are added modelling assumptions, not established mechanisms. They exist because without them nothing in the model makes past drug use increase later drug use, and an agent with free, unlimited ordinary sources never needs a drug.
 
 **Drug-induced deficit** (`drugDeficit`). Each use of a drug adds its `deficitGain` (Drug A 2, Drug B 4, ordinary sources 0) to `a`, and `d` recovers towards `dBase - a` instead of `dBase`:
 
@@ -145,14 +251,14 @@ aNext = clip(rhoA * a + deficitGain, 0, aMax)
 dNext = clip(dAction + kD * ((dBase - aNext) - dAction) - dBackgroundDrift, dMin, dMax)
 ```
 
-with `rhoA = 0.9995` and `aMax = 50`. The deficit heals with a half-life of about 1,400 steps, far more slowly than `d` itself moves (its half-life is under 20 steps), so the high from a dose is gone long before the lowered resting level is. The reward function is unchanged: a lowered resting level matters because it leaves `d` below the target, where raising `d` is worth more and, in the adaptive model, harm weighs less.
+with `rhoA = 0.9995` and `aMax = 50`. The deficit heals with a half-life of about 1,400 steps, far more slowly than `d` itself moves (its half-life is under 20 steps), so the high from a dose is gone long before the lowered resting level is. A lowered resting level matters because it leaves `d` below the target: every step spent there costs reward (the `kappa` term below), raising `d` is worth more, and, in the adaptive model, harm weighs less.
 
 **Refractory sources** (`refractorySteps`). After a source is used it cannot be used again for that many steps (15 on the page), in addition to the agent having to leave and return. This applies to every source alike. It caps how much `d` the ordinary sources can supply, which is what lets a deficit actually bite: without it, steady use of the ordinary sources holds `d` at about 40, not far below the target, even at the largest deficit.
 
 ### Reward
 
 ```
-r = R0 + beta * (phi(dAction) - phi(d)) - lambda(d) * (acuteHarm + omega * hNext) - stepCost
+r = R0 + beta * (phi(dAction) - phi(d)) - lambda(d) * (acuteHarm + omega * hNext) - kappa * max(0, -phi(dNext)) - stepCost
 ```
 
 | Term | Meaning | Default |
@@ -163,6 +269,7 @@ r = R0 + beta * (phi(dAction) - phi(d)) - lambda(d) * (acuteHarm + omega * hNext
 | `lambda(d)` | harm-sensitivity weight (below) | `lambdaMin = 0.15`, `lambdaMax = 1.0`, `lambdaS = 8` |
 | `acuteHarm` | the source's acute harm cost; 0 for a move | see table above |
 | `omega` | weight of accumulated harm | 0.1 |
+| `kappa` | weight of the per-step cost of being below the target | 1.0 |
 | `stepCost` | cost of spending a step | 0.02 |
 
 **State-dependent benefit.**
@@ -173,6 +280,8 @@ phi(d) =  phiB * (1 - exp(-phiC * (d - dTarget)))   for d >= dTarget
 ```
 
 `phi` is zero and continuous at the target, rises steeply from below it and flattens above it. The benefit term uses `dAction`, the state right after the source's effect and before passive recovery, so that what is rewarded is the action's own effect and not the drift back to baseline that would have happened anyway.
+
+**Low-state cost.** `kappa * max(0, -phi(dNext))` is charged on every step that ends with `d` below the target, using the same `phi`, so it grows quadratically with the distance below. It is what makes a low state aversive in itself: without it, the benefit term only rewards jumps in `d`, and an agent whose resting level has been lowered can sit far below the target at no cost. Because it uses `dNext`, passive recovery and drift count. A small deficit costs little (at `d = 46`, 0.06 per step), a large one a lot (at `d = 20`, 3.6 per step), so only a substantial deficit pushes the agent towards the sources that raise `d` the most. `kappa = 0` restores the previous reward.
 
 **State-dependent harm sensitivity.** This is the model's central assumption:
 
@@ -232,40 +341,13 @@ A against B tests the adaptive harm-sensitivity assumption with everything else 
 
 ### Reading the metrics
 
-Per episode: `totalReward`, `length`, interactions per source (`n_food`, …), `drugInteractions`, `ordinaryInteractions`, the shares of steps spent moving, on ordinary sources and on drugs, the mean, final and minimum `d`, the mean and final `h`, the mean harm weight, and the summed reward components (`sum_sourceReward`, `sum_stateBenefit`, `sum_acuteHarmCost`, `sum_accumulatedHarmCost`, `sum_stepCost`). Columns ending in `_lowD`, `_midD`, `_highD` count interactions by the level of `d` just before them, and `steps_lowD` etc. say how long the agent spent at each level.
+Per episode: `totalReward`, `length`, interactions per source (`n_food`, …), `drugInteractions`, `ordinaryInteractions`, the shares of steps spent moving, on ordinary sources and on drugs, the mean, final and minimum `d`, the mean and final `h`, the mean harm weight, and the summed reward components (`sum_sourceReward`, `sum_stateBenefit`, `sum_acuteHarmCost`, `sum_accumulatedHarmCost`, `sum_lowStateCost`, `sum_stepCost`). Columns ending in `_lowD`, `_midD`, `_highD` count interactions by the level of `d` just before them, and `steps_lowD` etc. say how long the agent spent at each level.
 
 Things to keep in mind:
 
 - **Reward is not a measure of realism.** The models have different reward functions, so a higher total says nothing about which is the better model. What bears on the hypothesis is how often and when drugs are chosen, what they replace, and how `d` and `h` move.
 - **Look at the spread over seeds.** Trained agents usually settle on working a single source for the whole episode, so a per-seed count is typically either 0 or about 111 (one use every three steps). A mean of 11 over ten seeds means "one seed in ten", not "a little, every time". `evaluation_by_seed.csv` shows this directly, and the error bars in the plots are standard deviations over seeds.
 - **Training curves include exploration**, evaluation numbers do not.
-
-## Results of the included runs
-
-These are the numbers from the runs saved under `results/`, produced by the commands above with their defaults (20 seeds, 1,500 training episodes, 5 greedy evaluation episodes of 338 steps). Drug interactions are per evaluation episode, mean ± standard deviation over seeds; the last number is how many of the 20 trained agents used a drug at all.
-
-| Condition | A: fixed | B: adaptive | C: no accumulated-harm penalty |
-|---|---|---|---|
-| Base (drift 0, start 50) | 0.1 ± 0.5 (1) | 0 ± 0 (0) | 8.3 ± 27.0 (2) |
-| Drift 0.2 | 0.3 ± 1.0 (2) | 0.4 ± 0.8 (5) | 16.7 ± 40.7 (3) |
-| Start at d = 20 | 1.1 ± 1.8 (6) | 0.8 ± 1.4 (6) | 32.9 ± 51.5 (6) |
-| Drift 0.2, start at d = 20 | 0.9 ± 1.8 (4) | 0.9 ± 1.4 (6) | 27.4 ± 48.6 (5) |
-| Drift 1 (exploratory) | 0 (0) | 0 (0) | 0 (0) |
-| Drift 2 (exploratory) | 0 (0) | 0 (0) | 32.7 ± 22.5 (14) |
-| Drift 3 (exploratory) | 1.9 ± 8.5 (1) | 19.7 ± 18.3 (11) | 47.9 ± 23.6 (17) |
-
-What these runs show, for these parameter values:
-
-- **In the base configuration the adaptive and fixed models do not differ, and neither seeks drugs.** Both spend the episode on ordinary sources, which hold `d` around 86 on average. `d` never goes below 50, so the low end of `lambda(d)` is never reached; the adaptive model's average harm weight is 0.97 against the fixed model's 0.575, which makes it the *more* harm-averse of the two here.
-- **A drift of 0.2 or a start at `d = 20` does not separate them either.** A drift of 0.2 only lowers the resting level to 45, and from a start at 20 the agent is below 40 for about 10 of 338 steps. In that window a handful of agents take a drug once or twice, equally often under A and B.
-- **The two models part ways only under strong, sustained depletion.** With a drift of 3, `d` stays below 40 for practically the whole episode (mean about 20). The adaptive model's harm weight is then about 0.19, and 11 of 20 adaptive agents use Drug A regularly against 1 of 20 fixed agents. This is the regime in which the adaptive-sensitivity assumption changes source selection. The drifts of 1 to 3 were added to find that regime; they are far larger than the 0.2 the experiment was planned with.
-- **Accumulated harm is what holds drug use back.** Without its ongoing cost (C), drug use appears in every condition but drift 1, and in most agents once the drift reaches 2.
-- **Drug B is almost never chosen**, in any model or condition. Where drugs are used, it is the moderate one.
-
-Two caveats on reading these:
-
-- **Seed-to-seed variation is large**, and part of it is incomplete learning rather than behaviour. Which ordinary source an agent settles on differs between seeds, and Rest (the least rewarding) is often the one, so the exploration settings leave many agents in a local optimum. As a check, `npm run hrl:compare -- --set epsilonStart=1 --set epsilonDecay=0.998 --set epsilonMin=0.1 --episodes 3000 --out results/compare-more-exploration` repeats the base comparison with much more exploration: drug use is then zero in all 60 agents, including model C. The drug use of C in the base row above is therefore better read as a few agents stuck on a drug than as a preference. The same check has not been run for the drift conditions.
-- These are 20 seeds of one parameter set and one maze. They say when the adaptive assumption matters in this model, not whether the assumption is true.
 
 ## What is in the model, and what is not
 
@@ -275,7 +357,7 @@ Deliberately left out of this version: tolerance (a drug's effect does not shrin
 
 ## Limitations
 
-- All parameters are illustrative and the conclusions above hold for these values only.
+- All parameters are illustrative, and any result holds for those values only.
 - Nothing limits the ordinary sources. They never run out and cost nothing, so an agent can keep `d` far above the target indefinitely, which is why low-`d` states are rare unless they are imposed.
 - The exploration settings (ε-greedy, after a first walk to every cell) are enough to find a workable policy but not a reliably optimal one: which source a trained agent settles on varies with the seed. Differences between models should be judged against that seed-to-seed variation.
 - Binning `d` and `h` in steps of 10 hides differences inside a bin from the agent.
