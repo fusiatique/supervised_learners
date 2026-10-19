@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Step-by-step tutorial | Maze RL Simulation</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="app-header tutorial-header">
+    <a href="index.html">Back to the simulation</a>
+    <h1>Learn how the maze agent learns</h1>
+    <p>A beginner-friendly guide to the controls, the model, and how to interpret what you see.</p>
+  </header>
+
+  <main class="tutorial-content">
+    <section class="panel">
+      <h2>Before you begin</h2>
+      <h3>Learning goals</h3>
+      <ul>
+        <li>Describe the simulation as a small world where an agent learns by choosing actions and observing scores.</li>
+        <li>Explain the basic concepts of state, action, reward, and learning in everyday language.</li>
+        <li>Use the displays to make a prediction and conduct a simple one-change-at-a-time experiment.</li>
+      </ul>
+      <p>No programming, biology, or mathematics background is needed. Open the <a href="index.html">simulation</a> alongside this guide. You can skip the equations on your first read: each is followed by an explanation in words.</p>
+      <p>This is a computational hypothesis, not a validated model of physiology or clinical addiction. Its states and parameter values are abstract, illustrative units. It demonstrates what can follow from these particular rules; it does not describe or predict real people.</p>
+    </section>
+
+    <section class="panel lesson">
+      <h2>A small glossary</h2>
+      <h3>Learning goals</h3>
+      <ul>
+        <li>Recognize the words used to describe an agent learning in an environment.</li>
+        <li>Distinguish what the agent knows (state), what it does (action), and the score it receives (reward).</li>
+      </ul>
+      <ul>
+        <li><strong>Simulation / model:</strong> a simplified set of rules that a computer follows. It is like a small imaginary world, not a complete copy of real life.</li>
+        <li><strong>Agent:</strong> the decision-maker in the simulation. Here, it is the face moving around the maze.</li>
+        <li><strong>Environment:</strong> the maze, its walls and sources, and the rules for movement and interaction.</li>
+        <li><strong>State:</strong> information about the agent’s situation right now. Here that includes its maze cell and grouped ranges of its internal variables.</li>
+        <li><strong>Action:</strong> one thing the agent can choose to do, such as move one cell or use a source it is standing on.</li>
+        <li><strong>Reward:</strong> a numerical score the model gives after an action. The agent uses this score to learn; it is not a real-world reward or a moral judgment.</li>
+        <li><strong>Parameter:</strong> a setting that changes one of the simulation’s rules, such as how quickly <i>d</i> recovers.</li>
+        <li><strong>Episode:</strong> one fixed-length stretch of steps. At its end the agent returns to the start, while its learning and internal state continue.</li>
+      </ul>
+      <p>This is <strong>reinforcement learning</strong>: unlike a student given an answer key, the agent is not told the right action. It tries actions, receives scores, and gradually changes its estimates of what may work well.</p>
+    </section>
+
+    <section class="panel lesson">
+      <h2>1. Get oriented</h2>
+      <h3>Learning goals</h3>
+      <ul>
+        <li>Identify the agent, maze, start, walls, and source markers.</li>
+        <li>Use Play, Step, speed, and Reset learning, and describe what Reset does and does not erase.</li>
+      </ul>
+      <p>The face in the maze is the agent. The letter markers are sources it can visit. In the default maze, the agent starts in the middle and the five sources are placed at the ends of separate paths, at equal distances from the start.</p>
+      <ul>
+        <li><strong>Play / Pause</strong> runs or pauses the simulation.</li>
+        <li><strong>Step</strong> advances by one decision.</li>
+        <li><strong>Reset learning</strong> clears what the agent has learned and restores its initial internal state. It keeps the current settings and maze layout.</li>
+        <li><strong>Speed</strong> changes how many simulation steps run per second.</li>
+        <li><strong>Give Drug B</strong> administers a dose at the agent’s current location. The agent does not choose the dose, and it is not a learned action or a rewarded step.</li>
+      </ul>
+      <p><strong>Try:</strong> Press <strong>Step</strong> a few times. One step is one decision, not one episode. The agent moves up, right, down, or left. Walking into a wall leaves it in place, but the step still passes and has the usual step cost.</p>
+      <p><strong>Play</strong> runs continuously; while it is running, the button becomes <strong>Pause</strong>. Reset learning starts a new learner at the start with initial internal values, but keeps the current settings and maze layout.</p>
+    </section>
+
+    <section class="panel lesson">
+      <h2>2. Find out what the agent can do</h2>
+      <h3>Learning goals</h3>
+      <ul>
+        <li>Distinguish walking from interacting with a source.</li>
+        <li>Explain why reaching a source does not automatically mean the agent uses it.</li>
+      </ul>
+      <p>At each step, the agent chooses to move one cell or—if it is standing on a usable source—to interact with that source.</p>
+      <ul>
+        <li><strong>F</strong> — Food</li>
+        <li><strong>C</strong> — Social interaction</li>
+        <li><strong>R</strong> — Rest</li>
+        <li><strong>A</strong> — Drug A (moderate)</li>
+        <li><strong>B</strong> — Drug B (potent)</li>
+      </ul>
+      <p>At a source, <strong>interacting</strong> is a separate action from moving. The agent can stand on a source and leave without using it. If it interacts, that source is unavailable for the rest of the visit. It must leave and return before using it again. With Dependence mechanisms on, there is also a 15-step cooldown.</p>
+      <p>The built-in source rewards are 1.0 for Rest, 1.4 for Social interaction, 1.5 for Food, 3.5 for Drug A, and 5.0 for Drug B. These are abstract score units, not measured pleasure or real-world value. The built-in reward is only one part of the outcome: using a source also changes internal states, and walking to it takes steps. So the source with the largest built-in reward is not automatically the agent’s best choice. Drug B, for example, has the largest built-in reward but also has the largest modeled acute harm.</p>
+      <p><strong>Try:</strong> Step until the agent reaches a source. Watch whether it chooses to interact or move away, then continue and see what it does next.</p>
+    </section>
+
+    <section class="panel lesson">
+      <h2>3. Understand the agent’s state</h2>
+      <h3>Learning goals</h3>
+      <ul>
+        <li>Explain the difference between <i>d</i>, its resting level, and accumulated harm <i>h</i>.</li>
+        <li>Describe what source use and passive recovery do to the internal values.</li>
+      </ul>
+      <p>The simulation tracks two main internal quantities. You can think of <i>d</i> as the agent’s current reading, and the resting level as the level its reading drifts toward when it is not using a source. The target and resting level are different: the target is the level used to calculate state benefits and mood, while the resting level determines the direction of passive recovery.</p>
+      <ul>
+        <li><strong><i>d</i>, the dopamine-related state:</strong> sources raise it, then it moves back toward its resting level. The neutral target is 50. The chart plots <i>d</i> and the resting level over time; the dashed line marks the target.</li>
+        <li><strong><i>h</i>, accumulated harm:</strong> harmful sources increase it and it fades gradually. The meter shows its current amount; the face also becomes paler and greyer as harm builds up.</li>
+      </ul>
+      <p>Each normal step has two parts: source use may first raise <i>d</i>, then <i>d</i> moves toward its current resting level. Harm moves toward its previous value by retaining 98% by default, and source use can add new harm. With Dependence mechanisms enabled, each drug use also lowers the resting level; that lowered level heals very slowly. The chart’s <strong>Resting level</strong> line makes this longer-lasting change visible.</p>
+      <p><strong>Try:</strong> Note the two chart lines and the harm meter. Click <strong>Give Drug B</strong> once or several times and watch how the agent’s state, harm, and—when dependence is enabled—resting level change. A dose is administered immediately, without advancing the step counter or being counted as an action chosen by the agent.</p>
+    </section>
+
+    <section class="panel lesson">
+      <h2>4. See how rewards guide learning</h2>
+      <h3>Learning goals</h3>
+      <ul>
+        <li>Explain why a source’s listed reward is not the same as the total reward for a step.</li>
+        <li>Identify how state change, immediate harm, accumulated harm, low state, and time spent affect the score.</li>
+      </ul>
+      <p>The agent learns from the reward it receives after each decision. In broad terms, that reward combines:</p>
+      <ul>
+        <li>the source’s built-in reward, if the agent interacted with one;</li>
+        <li>the benefit or cost of the change in <i>d</i>;</li>
+        <li>the immediate and accumulated harm costs;</li>
+        <li>an ongoing cost when <i>d</i> is below its target; and</li>
+        <li>the cost of taking a step.</li>
+      </ul>
+      <p>In plain language, the model gives points for a source, adjusts them based on whether <i>d</i> moved in a helpful direction, subtracts costs associated with harm and low <i>d</i>, and charges a small cost for every step. This means the same source can have different total consequences depending on the agent’s current state. Harm weight also depends on the selected model and the current <i>d</i>.</p>
+      <p><strong>A worked example:</strong> Suppose the agent starts at the target <i>d</i> = 50 with no accumulated harm and uses Food. Food adds 7, so <i>d</i> briefly rises to 57, then recovers toward 50 to about 56.7. With the default settings, this state increase is worth about 0.89 points; adding Food’s 1.5 source reward and subtracting the 0.02 step cost gives a total reward of about <strong>2.37</strong>. If the agent started at a different <i>d</i> or had accumulated harm, the same Food action could score differently. All numbers are model units.</p>
+      <details>
+        <summary>Optional: reward equation</summary>
+        <p class="equation"><code>r = source reward + β × [φ(dAction) − φ(d)] − λ(d) × [acute harm + ω × hNext] − κ × max(0, −φ(dNext)) − step cost</code></p>
+        <p><i>dAction</i> is the level just after the source’s effect but before recovery; <i>dNext</i> is the level at the end of the step. <i>φ</i> is the model’s score for a particular value of <i>d</i>; its change after the source gives the state benefit. <i>λ</i> is the model’s harm weight, while β, ω, and κ set the strengths of the state benefit, accumulated-harm penalty, and low-state cost. Passive recovery does not itself earn the state-change benefit, but a low ending state can still incur a cost.</p>
+      </details>
+      <p><strong>Try:</strong> Expand <strong>Learning details</strong> on the simulation and watch <strong>Reward, last step</strong>. An ordinary move normally has no source reward and still pays the step cost. Compare that with an interaction, and notice that the overall reward can be positive or negative.</p>
+    </section>
+
+    <section class="panel lesson">
+      <h2>5. The agent learns by trial and error</h2>
+      <h3>Learning goals</h3>
+      <ul>
+        <li>Describe a Q-value as the agent’s estimate of how useful an action is in a particular situation.</li>
+        <li>Explain what the learning rate, discount factor, and exploration settings do.</li>
+        <li>Describe when an episode ends and what the agent carries into the next one.</li>
+      </ul>
+      <p>For each situation, the agent stores estimates called <i>Q</i>-values. A value is like a running guess about how much reward may come from an action in that situation. A situation includes more than the maze cell: it also includes grouped ranges (bins) of internal states and whether a source is available there.</p>
+      <p>After an action, Q-learning nudges the estimate toward the reward just received plus the estimated value of the best next action:</p>
+      <p class="equation"><code>new Q = old Q + α × (reward + γ × best future Q − old Q)</code></p>
+      <ul>
+        <li><strong>Learning rate (α)</strong> controls how much each new experience changes an estimate.</li>
+        <li><strong>Discount factor (γ)</strong> controls how much future estimated reward matters compared with reward now. A higher value makes future rewards count more.</li>
+        <li><strong>Initial exploration (ε)</strong> sets how often the agent tries random actions instead of choosing its current favorite. Exploration decays after each episode until it reaches Minimum ε.</li>
+      </ul>
+      <p>The agent also deliberately searches for unvisited maze cells while reachable unvisited cells remain. This guided exploration happens before its usual random-or-best action choice. Trying a random action is exploration; choosing an action with the highest current estimate is exploitation. The estimates start at zero, so early choices are not yet evidence of a settled preference.</p>
+      <p>This simulation uses a table rather than a neural network. It groups nearby values of <i>d</i> and <i>h</i> into bins so it can store a finite number of estimates. With dependence on, the drug-related deficit is also part of the state. Grouping values makes learning manageable, but means slightly different readings can share an estimate.</p>
+      <p>Episodes are fixed-length runs: reaching or using a source does <em>not</em> end an episode. The default step limit is twice the number of maze cells. At the limit, the agent returns to the start and begins another episode. Its learned Q-values and internal state carry over, so it can build on previous experience.</p>
+      <p><strong>Try:</strong> Let the simulation run and watch <strong>Episodes</strong>, <strong>ε</strong>, and the bars showing sources used over recent episodes (up to the last 51 episodes, including the current one). The bars summarize recent behavior, not a promise about what the agent will choose next.</p>
+    </section>
+
+    <section class="panel lesson">
+      <h2>6. Compare the three models</h2>
+      <h3>Learning goals</h3>
+      <ul>
+        <li>Summarize what A, B, and C change about the reward rule.</li>
+        <li>Explain why the same amount of harm can have different effects on reward in different models or internal states.</li>
+      </ul>
+      <p><strong>Harm trade-off</strong> selects how the model weighs harm when calculating reward:</p>
+      <ul>
+        <li><strong>A: fixed trade-off</strong> weighs harm the same at every value of <i>d</i>.</li>
+        <li><strong>B: adaptive trade-off</strong> weighs harm less when <i>d</i> is further below its target.</li>
+        <li><strong>C: no accumulated-harm penalty</strong> uses B’s adaptive trade-off but removes the ongoing reward penalty from accumulated harm. Immediate harm costs still apply.</li>
+      </ul>
+      <p>The displayed <strong>Harm weight λ</strong> is the multiplier on harm costs at the current <i>d</i>; it is not the amount of harm. In B and C it changes with <i>d</i>: it is lower below the target and higher above it. In A it is fixed. All three models still track accumulated harm <i>h</i>, but C sets its reward penalty weight to zero; it does not erase the harm state or remove immediate harm costs.</p>
+      <p>Switching models resets learning so the comparison starts with a fresh agent. A model changes how the agent scores outcomes, not the underlying effects of a source on its internal state.</p>
+      <p><strong>Try:</strong> Run the same setup under A, B, and C. Compare the harm-weight display, accumulated-harm meter, and recent source choices. Differences can take time to emerge and individual runs may vary because the agent explores.</p>
+    </section>
+
+    <section class="panel lesson">
+      <h2>7. Explore dependence mechanisms</h2>
+      <h3>Learning goals</h3>
+      <ul>
+        <li>Describe the two rules enabled together by the Dependence mechanisms checkbox.</li>
+        <li>Distinguish the lasting change to resting level from a temporary source cooldown.</li>
+      </ul>
+      <p>Turn on <strong>Dependence mechanisms</strong> to enable two additional assumptions together:</p>
+      <ol>
+        <li>Each drug use lowers the level <i>d</i> naturally returns toward. That level heals slowly.</li>
+        <li>A source the agent has used cannot be used again for 15 steps, in addition to needing to leave and revisit its cell.</li>
+      </ol>
+      <p>With dependence enabled, each drug use adds to a deficit that lowers the resting level below 50; the deficit heals very slowly. This lasting internal change is separate from the cooldown, which only temporarily blocks reuse of a source. Changing the checkbox rebuilds the model and resets learning. When it is off, drug use does not lower the resting level and sources have no extra cooldown.</p>
+      <p><strong>Try:</strong> Turn the setting on, administer several Drug B doses, and watch the resting-level line. Then let the agent explore. Reset learning and compare with a run where the mechanism is off, keeping the model and other settings the same.</p>
+    </section>
+
+    <section class="panel lesson">
+      <h2>8. Run a fair experiment</h2>
+      <h3>Learning goals</h3>
+      <ul>
+        <li>Write a testable question and prediction about one simulation setting.</li>
+        <li>Identify what to hold constant and what to measure in a comparison.</li>
+        <li>Explain why one run is not conclusive evidence.</li>
+      </ul>
+      <ol>
+        <li>Choose one question, such as “Does adaptive harm weighting change which sources the agent uses?”</li>
+        <li>Record your settings and make a prediction.</li>
+        <li>Change one thing—such as the model, dependence setting, or a parameter—and keep the rest fixed.</li>
+        <li>Press <strong>Reset learning</strong> before comparing runs with changed parameters. Model and dependence changes reset learning automatically.</li>
+        <li>Run each setup for a similar number of steps or episodes. Compare the chart, harm meter, learning details, and recent source-choice bars.</li>
+        <li>Repeat if possible: exploration is partly random, so a single run may not represent every run.</li>
+      </ol>
+      <p><strong>Parameters:</strong> Use <strong>Show all parameters</strong> to expand sliders grouped under Internal states, Agent, and Reward. The short descriptions and “About this parameter” disclosures explain what they change. Slider adjustments affect later steps immediately, but do not erase existing learning. Reset learning before a new comparison so old Q-values do not carry over. Changing the model or dependence checkbox already triggers a reset.</p>
+      <p>For every experiment, treat the result as a consequence of this particular computational hypothesis and its chosen settings—not as evidence about real people or a clinical prediction.</p>
+    </section>
+
+    <p><a href="index.html">Return to the simulation</a></p>
+  </main>
+</body>
+</html>

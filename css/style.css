@@ -96,9 +96,60 @@ h3 {
   color: var(--text-secondary);
 }
 
+.tutorial-link {
+  display: inline-block;
+  margin-top: 8px;
+}
+
 .hint {
   font-size: 12px;
   margin-bottom: 10px;
+}
+
+/* --- Tutorial ------------------------------------------------------------ */
+
+.tutorial-header a {
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.tutorial-content {
+  display: grid;
+  gap: 16px;
+  max-width: 900px;
+  margin: 16px auto 24px;
+  padding: 0 20px;
+}
+
+.tutorial-content p + p,
+.tutorial-content ul + p,
+.tutorial-content ol + p {
+  margin-top: 10px;
+}
+
+.tutorial-content ul,
+.tutorial-content ol {
+  padding-left: 22px;
+}
+
+.tutorial-content li + li {
+  margin-top: 4px;
+}
+
+.tutorial-content h3 {
+  margin-top: 12px;
+}
+
+.equation {
+  overflow-x: auto;
+  padding: 10px 12px;
+  background: var(--page);
+  border-radius: 6px;
+  font-size: 15px;
+}
+
+.equation code {
+  white-space: nowrap;
 }
 
 /* --- Layout -------------------------------------------------------------- */
