@@ -22,11 +22,4 @@ export class HrlQLearningAgent extends QLearningAgent {
     if (action === null) this.coveredLayout = this.env.layoutVersion;
     return action;
   }
-
-  // The parent class also tracks whether its policy has stopped changing.
-  // That scan covers every state after every episode, which is too slow for
-  // this state space and not used.
-  endEpisode() {
-    this.episodes++;
-  }
 }

@@ -10,7 +10,6 @@ import { ACTIONS } from '../environment.js';
 //   act(state) -> action
 //   learn(state, action, reward, nextState, done)
 //   endEpisode()
-//   hasVisited(state) -> boolean  (the overlay only covers visited cells)
 //   stateValue(state) -> number   (used for the value overlay)
 //   bestActions(state) -> action[] (used for the policy arrows)
 //   info() -> [[label, text], ...] (model-specific readouts for the stats panel)
@@ -18,7 +17,6 @@ import { ACTIONS } from '../environment.js';
 // `random` is the source of randomness; pass a seeded generator for
 // reproducible runs. `cellOf` and `validActions` are identity/"everything"
 // here and are overridden where a state is more than a cell (hrl/agent.js).
-const POLICY_STABILITY_EPISODES = 20;
 
 export class QLearningAgent {
   constructor(env, params, random = Math.random) {
@@ -30,9 +28,6 @@ export class QLearningAgent {
     this.q = new Float64Array(env.numStates * env.numActions);
     this.visited = new Uint8Array(env.numCells); // by cell
     this.episodes = 0;
-    this.policySnapshot = null;
-    this.policyStableEpisodes = 0;
-    this.policyConverged = false;
   }
 
   get epsilon() {
@@ -69,9 +64,6 @@ export class QLearningAgent {
     this.q[i] += alpha * (target - this.q[i]);
     this.visited[this.cellOf(state)] = 1;
     this.visited[this.cellOf(nextState)] = 1;
-    if (this.policyConverged && this.bestActionMask(state) !== this.policySnapshot[state]) {
-      this.policyConverged = false;
-    }
   }
 
   // First move of a shortest path from cell `from` to the nearest cell not
@@ -94,34 +86,8 @@ export class QLearningAgent {
     return null;
   }
 
-  hasVisitedReachableCells() {
-    const distances = this.env.distancesFrom(this.env.start);
-    return distances.every((distance, cell) => distance === Infinity || this.visited[cell] === 1);
-  }
-
   endEpisode() {
     this.episodes++;
-    const policy = new Uint8Array(this.visited.length);
-    for (let state = 0; state < policy.length; state++) policy[state] = this.bestActionMask(state);
-
-    if (this.hasVisitedReachableCells()
-      && this.policySnapshot
-      && policy.every((actions, state) => actions === this.policySnapshot[state])) {
-      this.policyStableEpisodes++;
-    } else {
-      this.policyStableEpisodes = 0;
-    }
-    this.policySnapshot = policy;
-    this.policyConverged = this.hasVisitedReachableCells()
-      && this.policyStableEpisodes >= POLICY_STABILITY_EPISODES;
-  }
-
-  bestActionMask(state) {
-    return this.bestActions(state).reduce((mask, action) => mask | (1 << action), 0);
-  }
-
-  hasVisited(state) {
-    return this.visited[state] === 1;
   }
 
   stateValue(state) {

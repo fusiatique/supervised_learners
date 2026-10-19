@@ -6,11 +6,6 @@ function el(tag, props = {}, children = []) {
   return node;
 }
 
-export function fillSelect(select, options, onChange) {
-  select.replaceChildren(...options.map((o) => el('option', { value: o.id, textContent: o.name })));
-  select.addEventListener('change', () => onChange(select.value));
-}
-
 // One slider per entry in `defs`. Sliders write
 // straight into the shared `params` object, which the simulation reads live.
 // Returns a function that brings the sliders back in line with `params` after
