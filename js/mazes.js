@@ -4,8 +4,8 @@ import { SOURCE_TYPES } from './hrl/config.js';
 // wall boundary and all interior cells start open for users to edit.
 //
 // A maze may also carry a `layout`: one string per row, where `#` is a wall,
-// `.` an open cell, `S` the agent's start and a source's `char` (`F`, `C`,
-// `R`, `A`, `B`, see hrl/config.js) that source. The "Copy layout" button in
+// `.` an open cell, `S` the agent's start and a source's `char` (`F`,
+// `B`, see hrl/config.js) that source. The "Copy layout" button in
 // the UI produces one from whatever is currently on screen.
 export const MAZES = [
   // Two symmetric paths, with food and Drug B both six steps from the start.

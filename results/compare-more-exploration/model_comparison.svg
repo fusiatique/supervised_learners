@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 716 301" width="716" height="301" font-family='system-ui, -apple-system, "Segoe UI", sans-serif'>
+<rect width="716" height="301" fill="#fcfcfb"/>
+<text x="52.0" y="22.0" font-size="14" font-weight="600" fill="#0b0b0b" text-anchor="start">Source use of the three models</text>
+<text x="52.0" y="39.0" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">Interactions per greedy evaluation episode. Mean ± sd over 20 seeds, 3000 training episodes each.</text>
+<rect x="52" y="49" width="12" height="12" rx="2" fill="#2a78d6"/>
+<text x="69.0" y="59.0" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">A: fixed trade-off</text>
+<rect x="198.60000000000002" y="49" width="12" height="12" rx="2" fill="#eb6834"/>
+<text x="215.6" y="59.0" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">B: adaptive trade-off</text>
+<rect x="363.80000000000007" y="49" width="12" height="12" rx="2" fill="#1baf7a"/>
+<text x="380.8" y="59.0" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">C: no accumulated-harm penalty</text>
+<line x1="52" x2="700" y1="267.5" y2="267.5" stroke="#898781" stroke-width="1"/>
+<text x="46.0" y="271.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">0</text>
+<line x1="52" x2="700" y1="209.5" y2="209.5" stroke="#e1e0d9" stroke-width="1"/>
+<text x="46.0" y="213.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">50</text>
+<line x1="52" x2="700" y1="151.5" y2="151.5" stroke="#e1e0d9" stroke-width="1"/>
+<text x="46.0" y="155.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">100</text>
+<line x1="52" x2="700" y1="93.5" y2="93.5" stroke="#e1e0d9" stroke-width="1"/>
+<text x="46.0" y="97.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">150</text>
+<text x="214.0" y="282.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Food</text>
+<path d="M176,267 v-124.75999999999999 q0,-4 4,-4 h16 q4,0 4,4 v124.75999999999999 z" fill="#2a78d6"><title>A: fixed trade-off, Food: 111</title></path>
+<path d="M202,267 v-124.75999999999999 q0,-4 4,-4 h16 q4,0 4,4 v124.75999999999999 z" fill="#eb6834"><title>B: adaptive trade-off, Food: 111</title></path>
+<path d="M228,267 v-124.75999999999999 q0,-4 4,-4 h16 q4,0 4,4 v124.75999999999999 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Food: 111</title></path>
+<text x="538.0" y="282.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Drug B</text>
+<path d="M500,267 v0 q0,0 0,0 h24 q0,0 0,0 v0 z" fill="#2a78d6"><title>A: fixed trade-off, Drug B: 0.00</title></path>
+<path d="M526,267 v0 q0,0 0,0 h24 q0,0 0,0 v0 z" fill="#eb6834"><title>B: adaptive trade-off, Drug B: 0.00</title></path>
+<path d="M552,267 v0 q0,0 0,0 h24 q0,0 0,0 v0 z" fill="#1baf7a"><title>C: no accumulated-harm penalty, Drug B: 0.00</title></path>
+<text transform="translate(13 172) rotate(-90)" font-size="11" fill="#898781" text-anchor="middle">Interactions per episode</text>
+</svg>

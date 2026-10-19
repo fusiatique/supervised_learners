@@ -39,7 +39,7 @@ const overrides = Object.fromEntries(args.set.map((pair) => {
   return [key, Number.isNaN(Number(raw)) ? raw : Number(raw)];
 }));
 const evalEpisodes = Number(args['eval-episodes']);
-const SOURCE_LABELS = { food: 'Food', social: 'Social', rest: 'Rest', drugA: 'Drug A', drugB: 'Drug B' };
+const SOURCE_LABELS = { food: 'Food', drugB: 'Drug B' };
 const sourceLabel = (source) => SOURCE_LABELS[source.id] ?? source.name;
 
 // --- Output helpers ----------------------------------------------------------

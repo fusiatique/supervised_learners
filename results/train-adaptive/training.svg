@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 716 281" width="716" height="281" font-family='system-ui, -apple-system, "Segoe UI", sans-serif'>
+<rect width="716" height="281" fill="#fcfcfb"/>
+<text x="52.0" y="22.0" font-size="14" font-weight="600" fill="#0b0b0b" text-anchor="start">Training, model "adaptive", seed 1</text>
+<text x="52.0" y="39.0" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">Means over blocks of episodes, with exploration on</text>
+<text x="52.0" y="65.0" font-size="11" font-weight="600" fill="#0b0b0b" text-anchor="start">Total reward per episode</text>
+<line x1="52" x2="700" y1="247.5" y2="247.5" stroke="#898781" stroke-width="1"/>
+<text x="46.0" y="251.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">0</text>
+<line x1="52" x2="700" y1="189.5" y2="189.5" stroke="#e1e0d9" stroke-width="1"/>
+<text x="46.0" y="193.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">50</text>
+<line x1="52" x2="700" y1="131.5" y2="131.5" stroke="#e1e0d9" stroke-width="1"/>
+<text x="46.0" y="135.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">100</text>
+<line x1="52" x2="700" y1="73.5" y2="73.5" stroke="#e1e0d9" stroke-width="1"/>
+<text x="46.0" y="77.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">150</text>
+<text x="259.2" y="262.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">500</text>
+<text x="479.6" y="262.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">1000</text>
+<text x="700.0" y="262.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">1500</text>
+<polyline points="52.0,199.9 65.2,121.9 78.4,86.5 91.7,80.9 104.9,79.2 118.1,78.5 131.3,79.3 144.6,79.1 157.8,78.7 171.0,78.1 184.2,78.2 197.5,78.4 210.7,79.3 223.9,77.8 237.1,79.2 250.4,78.5 263.6,78.9 276.8,79.0 290.0,78.5 303.3,79.0 316.5,77.8 329.7,79.1 342.9,78.2 356.2,78.7 369.4,79.0 382.6,79.2 395.8,78.2 409.1,78.2 422.3,78.6 435.5,77.7 448.7,78.5 462.0,78.3 475.2,79.0 488.4,79.0 501.6,78.1 514.9,78.7 528.1,79.0 541.3,79.0 554.5,78.4 567.8,78.4 581.0,78.3 594.2,79.0 607.4,78.6 620.7,78.4 633.9,78.4 647.1,79.0 660.3,78.7 673.6,79.3 686.8,79.4 700.0,79.1" fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><title>Reward: ends at 145</title></polyline>
+<text x="376.0" y="277.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Episode</text>
+</svg>

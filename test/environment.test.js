@@ -32,10 +32,10 @@ test('sources can be placed and removed while the agent is in the maze', () => {
   assert.ok(!env.validActions().includes(INTERACT));
   assert.ok(env.step(INTERACT).rejected);
 
-  env.placeItem(env.state, 'drugA');
+  env.placeItem(env.state, 'drugB');
   assert.ok(env.validActions().includes(INTERACT));
-  assert.equal(env.step(INTERACT).source.id, 'drugA');
-  assert.equal(env.h, 1.5);
+  assert.equal(env.step(INTERACT).source.id, 'drugB');
+  assert.equal(env.h, 3);
 });
 
 test('interacting is only valid on a usable source', () => {
