@@ -7,7 +7,8 @@
     "hrl:train": "node scripts/hrl.js train",
     "hrl:evaluate": "node scripts/hrl.js evaluate",
     "hrl:compare": "node scripts/hrl.js compare",
-    "hrl:sensitivity": "node scripts/hrl.js sensitivity"
+    "hrl:sensitivity": "node scripts/hrl.js sensitivity",
+    "minimal": "node scripts/minimal.js"
   },
   "devDependencies": {
     "esbuild": "^0.25.0"

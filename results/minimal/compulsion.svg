@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 716 301" width="716" height="301" font-family='system-ui, -apple-system, "Segoe UI", sans-serif'>
+<rect width="716" height="301" fill="#fcfcfb"/>
+<text x="52.0" y="22.0" font-size="14" font-weight="600" fill="#0b0b0b" text-anchor="start">Compulsion: raising the drug’s harm cost c at step 50,000</text>
+<text x="52.0" y="39.0" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">Drug choices in the last 1,000 steps, mean over 20 agents. The dosed group got 20 forced doses at step 40,000.</text>
+<rect x="52" y="49" width="12" height="12" rx="2" fill="#2a78d6"/>
+<text x="69.0" y="59.0" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">Not dosed</text>
+<rect x="142.8" y="49" width="12" height="12" rx="2" fill="#e34948"/>
+<text x="159.8" y="59.0" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">Dosed</text>
+<line x1="52" x2="700" y1="267.5" y2="267.5" stroke="#898781" stroke-width="1"/>
+<text x="46.0" y="271.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">0</text>
+<line x1="52" x2="700" y1="224.5" y2="224.5" stroke="#e1e0d9" stroke-width="1"/>
+<text x="46.0" y="227.5" font-size="11" font-weight="400" fill="#898781" text-anchor="end">5</text>
+<line x1="52" x2="700" y1="180.5" y2="180.5" stroke="#e1e0d9" stroke-width="1"/>
+<text x="46.0" y="184.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">10</text>
+<line x1="52" x2="700" y1="137.5" y2="137.5" stroke="#e1e0d9" stroke-width="1"/>
+<text x="46.0" y="140.5" font-size="11" font-weight="400" fill="#898781" text-anchor="end">15</text>
+<line x1="52" x2="700" y1="93.5" y2="93.5" stroke="#e1e0d9" stroke-width="1"/>
+<text x="46.0" y="97.0" font-size="11" font-weight="400" fill="#898781" text-anchor="end">20</text>
+<text x="106.0" y="282.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">1</text>
+<path d="M81,267 v-17.706500000000005 q0,-4 4,-4 h16 q4,0 4,4 v17.706500000000005 z" fill="#2a78d6"><title>Not dosed, 1: 2.50</title></path>
+<path d="M107,267 v-156.1235 q0,-4 4,-4 h16 q4,0 4,4 v156.1235 z" fill="#e34948"><title>Dosed, 1: 18.4</title></path>
+<text x="214.0" y="282.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">3</text>
+<path d="M189,267 v-13.791500000000013 q0,-4 4,-4 h16 q4,0 4,4 v13.791500000000013 z" fill="#2a78d6"><title>Not dosed, 3: 2.05</title></path>
+<path d="M215,267 v-115.10300000000001 q0,-4 4,-4 h16 q4,0 4,4 v115.10300000000001 z" fill="#e34948"><title>Dosed, 3: 13.7</title></path>
+<text x="322.0" y="282.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">6</text>
+<path d="M297,267 v-12.355999999999995 q0,-4 4,-4 h16 q4,0 4,4 v12.355999999999995 z" fill="#2a78d6"><title>Not dosed, 6: 1.88</title></path>
+<path d="M323,267 v-105.05449999999999 q0,-4 4,-4 h16 q4,0 4,4 v105.05449999999999 z" fill="#e34948"><title>Dosed, 6: 12.5</title></path>
+<text x="430.0" y="282.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">10</text>
+<path d="M405,267 v-8.484499999999997 q0,-4 4,-4 h16 q4,0 4,4 v8.484499999999997 z" fill="#2a78d6"><title>Not dosed, 10: 1.44</title></path>
+<path d="M431,267 v-24.796999999999997 q0,-4 4,-4 h16 q4,0 4,4 v24.796999999999997 z" fill="#e34948"><title>Dosed, 10: 3.31</title></path>
+<text x="538.0" y="282.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">15</text>
+<path d="M513,267 v-1.9594999999999914 q0,-4 4,-4 h16 q4,0 4,4 v1.9594999999999914 z" fill="#2a78d6"><title>Not dosed, 15: 0.69</title></path>
+<path d="M539,267 v-1.9594999999999914 q0,-4 4,-4 h16 q4,0 4,4 v1.9594999999999914 z" fill="#e34948"><title>Dosed, 15: 0.69</title></path>
+<text x="646.0" y="282.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">20</text>
+<path d="M621,267 v-1.9594999999999914 q0,-4 4,-4 h16 q4,0 4,4 v1.9594999999999914 z" fill="#2a78d6"><title>Not dosed, 20: 0.69</title></path>
+<path d="M647,267 v-1.9594999999999914 q0,-4 4,-4 h16 q4,0 4,4 v1.9594999999999914 z" fill="#e34948"><title>Dosed, 20: 0.69</title></path>
+<text x="376.0" y="297.0" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">Harm cost c</text>
+<text transform="translate(13 172) rotate(-90)" font-size="11" fill="#898781" text-anchor="middle">Drug choices (% of steps)</text>
+</svg>
