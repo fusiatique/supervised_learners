@@ -1,0 +1,372 @@
+/* ==========================================================
+   Design tokens
+   ========================================================== */
+:root {
+  --bg: #0b0e14;
+  --bg-elev: #131824;
+  --fg: #e6e9ef;
+  --fg-muted: #8b93a7;
+  --line: #262d3d;
+
+  /* Narrative colour motifs (see STORYBOARD.md) */
+  --c-dopamine: #f5b041;  /* dopamine / prediction error */
+  --c-homeo:    #2ec4b6;  /* internal state, set-point   */
+  --c-harm:     #e5484d;  /* harm, adverse consequences  */
+  --c-model:    #9d7cf2;  /* RL agent, values            */
+
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+
+  --t-scene: 700ms;       /* scene transition duration */
+  --t-beat: 450ms;        /* beat reveal duration      */
+  --ease: cubic-bezier(.22, .61, .36, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+}
+
+/* ==========================================================
+   HUD: progress bar + chapter nav
+   ========================================================== */
+.hud {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 10;
+  padding: 0 24px;
+}
+.hud__progress { height: 3px; background: var(--line); margin: 0 -24px; }
+.hud__progress-bar {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, var(--c-dopamine), var(--c-homeo));
+  transition: width var(--t-scene) var(--ease);
+}
+.hud__chapters {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  padding-top: 10px;
+}
+.hud__chapters button {
+  font: inherit;
+  font-size: 12px;
+  color: var(--fg-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: color .2s, border-color .2s;
+}
+.hud__chapters button:hover { color: var(--fg); }
+.hud__chapters button.is-active { color: var(--fg); border-color: var(--line); }
+
+/* ==========================================================
+   Deck & scenes
+   ========================================================== */
+.deck {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+
+.scene {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  padding: 72px 6vw 80px;
+  gap: 4vw;
+  align-items: center;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(40px);
+  transition:
+    opacity var(--t-scene) var(--ease),
+    transform var(--t-scene) var(--ease),
+    visibility 0s linear var(--t-scene);
+}
+.scene.is-active {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition:
+    opacity var(--t-scene) var(--ease),
+    transform var(--t-scene) var(--ease),
+    visibility 0s;
+}
+/* scenes already passed exit to the left */
+.scene.is-past { transform: translateX(-40px); }
+
+/* ----- Layout variants ----- */
+.scene--title {
+  grid-template-rows: 1fr auto;
+  justify-items: center;
+  text-align: center;
+}
+.scene--title .scene__stage { width: min(560px, 80vw); height: 40vh; }
+
+.scene--split { grid-template-columns: 3fr 2fr; }
+
+.scene--equation { grid-template-columns: 1fr 1fr; }
+.scene--equation .equation { font-size: 1.35em; }
+
+.scene--wide { grid-template-columns: 1fr; max-width: 1100px; margin: 0 auto; }
+
+/* ----- Stage (animation area) ----- */
+.scene__stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+  max-height: 70vh;
+  border-radius: 16px;
+  background: var(--bg-elev);
+  overflow: hidden;
+}
+
+/* Temporary placeholder until animations are built */
+.placeholder {
+  position: absolute;
+  inset: 16px;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--fg-muted);
+  border: 1.5px dashed var(--line);
+  border-radius: 12px;
+}
+
+/* ----- Content (narration) ----- */
+.scene__content { max-width: 560px; }
+.scene--title .scene__content,
+.scene--wide .scene__content { max-width: none; }
+
+.eyebrow {
+  margin: 0 0 8px;
+  font-size: 13px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--c-dopamine);
+}
+h1 { font-size: clamp(2.2rem, 5vw, 4rem); line-height: 1.1; margin: 0 0 12px; }
+h2 { font-size: clamp(1.6rem, 3vw, 2.4rem); line-height: 1.15; margin: 0 0 24px; }
+h3 { margin: 0 0 12px; }
+.subtitle { font-size: 1.2rem; color: var(--fg-muted); margin: 0 0 32px; }
+.hint { color: var(--fg-muted); font-size: 14px; }
+.caption { color: var(--fg-muted); font-size: 14px; margin-top: -8px; }
+
+kbd {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 2px 6px;
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+}
+
+ul.beats, ol.beats { padding-left: 1.2em; margin: 0 0 16px; }
+.beats li { margin-bottom: 10px; }
+
+.definition {
+  margin: 0 0 24px;
+  padding: 16px 20px;
+  border-left: 3px solid var(--c-dopamine);
+  background: var(--bg-elev);
+  border-radius: 0 8px 8px 0;
+}
+
+.equation {
+  margin: 16px 0;
+  padding: 12px 16px;
+  background: var(--bg-elev);
+  border-radius: 10px;
+  overflow-x: auto;
+}
+
+.tag { padding: 1px 8px; border-radius: 999px; font-size: .9em; }
+.tag--dopamine { background: color-mix(in srgb, var(--c-dopamine) 20%, transparent); color: var(--c-dopamine); }
+
+/* Roadmap */
+.roadmap {
+  list-style: none;
+  padding: 0;
+  margin: 24px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  counter-reset: road;
+}
+.roadmap li {
+  counter-increment: road;
+  padding: 12px 20px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg-elev);
+}
+.roadmap li::before {
+  content: counter(road) " ";
+  color: var(--c-model);
+  font-family: var(--font-mono);
+  margin-right: 6px;
+}
+
+/* Mapping table */
+.mapping { width: 100%; border-collapse: collapse; }
+.mapping td { padding: 10px 8px; border-bottom: 1px solid var(--line); }
+.mapping td:first-child { color: var(--c-model); }
+
+/* Limitations columns */
+.columns { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.col { padding: 20px 24px; border-radius: 14px; background: var(--bg-elev); }
+.col--good h3 { color: var(--c-homeo); }
+.col--bad h3  { color: var(--c-harm); }
+
+/* References */
+.refs { margin-top: 24px; font-size: 13px; color: var(--fg-muted); }
+.refs summary { cursor: pointer; }
+.refs ul { padding-left: 1.2em; }
+
+/* ==========================================================
+   Canvas scenes (Manim style): full-bleed SVG, captions at bottom
+   Stroke widths and font sizes are divided by --z (camera zoom,
+   set by JS) so lines stay crisp and thin at any zoom level.
+   ========================================================== */
+.scene--canvas { display: block; padding: 0; }
+.scene--canvas .scene__stage {
+  position: absolute;
+  inset: 56px 0 72px;
+  width: auto;
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+.mn-svg { --z: 1; display: block; width: 100%; height: 100%; overflow: hidden; }
+
+.mn-line {
+  fill: none;
+  stroke: var(--fg);
+  stroke-width: calc(var(--sw, 2.2px) / var(--z));
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.mn-line--soft   { stroke: #9aa3b5; }
+.mn-line--thick  { --sw: 9px; stroke: #4a5266; }
+.mn-line--detail { --sw: 1.3px; stroke: #6f7890; }
+
+.mn-fill { fill: #ffffff; fill-opacity: .035; stroke: none; opacity: 0; }
+
+.mn-region--pfc { stroke: #58c4dd; fill: #58c4dd; }
+.mn-region--nac { stroke: #83c167; fill: #83c167; }
+.mn-region--vta { stroke: var(--c-dopamine); fill: var(--c-dopamine); }
+
+.da-glow { opacity: 0; stroke: none; pointer-events: none; }
+.da-glow--pfc { fill: #58c4dd; }
+.da-glow--nac { fill: #83c167; }
+
+.da-soma { fill: var(--c-dopamine); stroke: #ffe3a3; stroke-width: calc(1.2px / var(--z)); }
+.da-dendrite { --sw: 1.4px; stroke: #f3d7a0; }
+.da-axon { --sw: 1.3px; stroke: var(--c-dopamine); stroke-opacity: .75; }
+.da-ring { fill: none; stroke: var(--c-dopamine); stroke-width: calc(1.5px / var(--z)); opacity: 0; }
+.da-particle { fill: #ffe9b8; }
+.da-particle-halo { fill: var(--c-dopamine); opacity: .3; }
+
+.mn-label {
+  font-family: "KaTeX_Main", "Times New Roman", serif;
+  font-size: calc(var(--fs, 22px) / var(--z));
+  fill: var(--fg);
+  white-space: pre;
+}
+.mn-label--small { --fs: 18px; fill: #ffe3a3; }
+.mn-label--path  { --fs: 18px; font-style: italic; fill: var(--c-dopamine); }
+
+.mn-eyebrow {
+  position: absolute;
+  top: 52px;
+  left: 24px;
+  margin: 0;
+  font-size: 13px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+.mn-captions {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 72px;
+  height: 2.2em;
+  pointer-events: none;
+  font-family: "KaTeX_Main", "Times New Roman", serif;
+  font-size: clamp(1.05rem, 2vw, 1.45rem);
+  text-align: center;
+}
+.mn-caption { position: absolute; inset: 0; margin: 0; transition: opacity var(--t-beat) var(--ease); }
+/* show only the most recent caption */
+.mn-captions:has(.beat.is-shown) .mn-caption--intro,
+.mn-caption.beat.is-shown:has(~ .beat.is-shown) { opacity: 0; }
+
+/* ==========================================================
+   Beats: step-wise reveal inside a scene
+   ========================================================== */
+.beat {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity var(--t-beat) var(--ease), transform var(--t-beat) var(--ease);
+}
+.beat.is-shown { opacity: 1; transform: none; }
+
+/* ==========================================================
+   Footer controls
+   ========================================================== */
+.controls {
+  position: fixed;
+  right: 24px;
+  bottom: 20px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.controls__btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--bg-elev);
+  color: var(--fg);
+  font-size: 16px;
+  cursor: pointer;
+}
+.controls__btn:hover { border-color: var(--fg-muted); }
+.controls__counter { font-family: var(--font-mono); font-size: 12px; color: var(--fg-muted); }
+
+/* ==========================================================
+   Responsive & accessibility
+   ========================================================== */
+@media (max-width: 860px) {
+  html, body { overflow: auto; }
+  .scene { padding: 64px 16px 80px; overflow-y: auto; align-content: start; }
+  .scene--split, .scene--equation, .columns { grid-template-columns: 1fr; }
+  .scene__stage { min-height: 220px; height: 35vh; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --t-scene: 0ms; --t-beat: 0ms; }
+}
