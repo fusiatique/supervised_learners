@@ -1,5 +1,5 @@
 import { ACTIONS, NOTHING, NATURAL, naturalCeiling } from './model.js';
-import { cssVar, prepareCanvas, CANVAS_FONT } from '../ui/theme.js';
+import { cssVar, prepareCanvas, CANVAS_FONT } from './theme.js';
 
 // The environment panel: three stations the agent walks between, one per
 // action, each showing the value the agent has learned for that action in the

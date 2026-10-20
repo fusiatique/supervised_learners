@@ -3,155 +3,209 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Maze RL Simulation</title>
+  <title>Minimal Dependence Model</title>
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    :root {
+      --line-h: #2a78d6;
+      --line-b: #a8791c;
+      --act-nothing: #d9d7d0;
+      --act-natural: #1baf7a;
+      --act-drug: #e34948;
+      --unlearned: #f3f2ee;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --line-h: #6aa5ec;
+        --line-b: #e5c46a;
+        --act-nothing: #4a4945;
+        --act-natural: #2fc28c;
+        --act-drug: #ee6463;
+        --unlearned: #232321;
+      }
+    }
+    .minimal-content { display: grid; gap: 18px; min-width: 0; }
+    .minimal-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+    #environment { display: block; width: 100%; height: 248px; }
+    #trace { display: block; width: 100%; height: 280px; cursor: move; }
+    #y-fit[aria-pressed="true"] { background: var(--text-primary); color: var(--surface); }
+    #policy { display: block; width: 100%; max-width: 320px; aspect-ratio: 1; margin: 0 auto; }
+    .key { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: var(--text-secondary); margin-top: 10px; }
+    .key span { display: inline-flex; align-items: center; gap: 6px; }
+    .key i { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
+    .key i.line { height: 3px; border-radius: 2px; }
+    .key i.dash { height: 0; border-top: 2px dashed var(--text-secondary); border-radius: 0; }
+    .readouts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .readouts div { display: grid; gap: 2px; }
+    .readouts dt { font-size: 12px; color: var(--text-secondary); }
+    .readouts dd { margin: 0; font-size: 18px; font-variant-numeric: tabular-nums; }
+    .status { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+    .status.dependent { color: var(--act-drug); }
+    .status.clean { color: var(--act-natural); }
+    .equations { font: 12px/1.6 ui-monospace, Consolas, monospace; color: var(--text-secondary); white-space: pre; overflow-x: auto; margin: 0; }
+    @media (max-width: 900px) { .minimal-row { grid-template-columns: minmax(0, 1fr); } }
+  </style>
 </head>
 <body>
   <header class="app-header">
-    <h1>Maze RL Simulation</h1>
-    <p>A Q-learning agent with a dopamine-related state <i>d</i> and accumulated harm <i>h</i> learns which of two sources to use: food or a drug (Drug B). A computational hypothesis in abstract units, not a model of physiology.</p>
-    <a class="tutorial-link" href="tutorial.html">Open step-by-step tutorial</a>
+    <h1>Minimal Dependence Model</h1>
+    <p>A Q-learning agent keeps an internal level <i>H</i> near its setpoint. Each drug use lowers the baseline <i>B</i> that <i>H</i> falls back to. Once <i>B</i> is below the tipping point, natural rewards can no longer reach the setpoint and the drug becomes the agent’s best option.</p>
+    <a class="tutorial-link" href="tutorial.html">Open the minimal model tutorial</a>
   </header>
 
   <main class="layout with-sidebar">
-    <div class="parameter-panels">
-    <aside class="panel controls">
+    <aside class="panel controls playback-sidebar">
+    <div class="toolbar simulation-toolbar" role="group" aria-label="Simulation playback">
+          <button id="play" type="button" class="primary">Play</button>
+          <button id="step" type="button">Step</button>
+          <button id="reset" type="button">Reset</button>
+          <label class="speed">
+            <span>Speed</span>
+            <input id="speed" type="range" min="0" max="100" value="55">
+            <output id="speed-label"></output>
+          </label>
+    </div>
+      <div class="sidebar-scroll">
+      <section>
+        <h2>Life events</h2>
+        <label class="check"><input id="drug-available" type="checkbox"><span>Drug available</span></label>
+        <p class="hint">Let the agent learn natural rewards first (a few thousand steps at high speed), then make the drug available.</p>
+        <div class="toolbar">
+          <button id="dose" type="button">Give 1 dose</button>
+          <button id="dose10" type="button">Give 10 doses</button>
+        </div>
+        <p class="hint">A forced dose raises <i>H</i> and lowers <i>B</i>, but the agent did not choose it and learns nothing from it directly.</p>
+      </section>
       <section>
         <h2>Parameters</h2>
-        <p class="hint">Model B uses an adaptive harm trade-off: harm counts less when d is low. The agent starts at d = 50.</p>
-        <button id="restore-defaults" type="button" title="Restore parameter defaults, the adaptive model and dependence, then reset learning.">Restore defaults</button>
-        <p class="hint">Restores parameter sliders and dependence ON, and resets learning.</p>
-        <div class="preset-hint" aria-labelledby="preset-heading">
-          <h3 id="preset-heading">Try a behavior preset</h3>
-          <p class="hint">Compare two parameter scenarios. Each resets learning; press Play afterward. Increase the simulation speed to see learned habits develop sooner.</p>
-          <div class="preset-buttons">
-            <button id="preset-addiction" type="button">Addiction-prone agent</button>
-            <button id="preset-no-addiction" type="button">Non-addicted agent</button>
-          </div>
-          <p id="preset-status" class="hint" role="status">The first scenario encourages repeated drug use and dependence. The second favors food and disables dependence. Choices still develop through learning.</p>
-        </div>
-        <div class="parameter-disclosures">
-          <div class="settings-heading">
-            <button id="toggle-dopamine-params" type="button" aria-expanded="false" aria-controls="dopamine-params">Dopamine-related state</button>
-            <span class="settings-info">
-              <button class="info-button" type="button" aria-label="About dopamine-related state" aria-describedby="info-dopamine" aria-expanded="false">i</button>
-              <span class="info-tooltip" id="info-dopamine" role="tooltip">How d changes between source uses.</span>
-            </span>
-          </div>
-          <div id="dopamine-params" hidden></div>
-          <div class="settings-heading">
-            <button id="toggle-reward-params" type="button" aria-expanded="false" aria-controls="reward-params">Reward valuation</button>
-            <span class="settings-info">
-              <button class="info-button" type="button" aria-label="About reward valuation" aria-describedby="info-reward" aria-expanded="false">i</button>
-              <span class="info-tooltip" id="info-reward" role="tooltip">How much raising d helps reward and accumulated harm reduces it.</span>
-            </span>
-          </div>
-          <div id="reward-params" hidden></div>
-          <div class="settings-heading">
-            <button id="toggle-exploration-params" type="button" aria-expanded="false" aria-controls="exploration-params">Exploration settings</button>
-            <span class="settings-info">
-              <button class="info-button" type="button" aria-label="About exploration settings" aria-describedby="info-exploration" aria-expanded="false">i</button>
-              <span class="info-tooltip" id="info-exploration" role="tooltip">How often the agent tries alternatives instead of following its learned choices.</span>
-            </span>
-          </div>
-          <div id="exploration-params" hidden></div>
-          <div class="settings-heading">
-            <button id="toggle-harm-params" type="button" aria-expanded="false" aria-controls="harm-params">Harm sensitivity settings</button>
-            <span class="settings-info">
-              <button class="info-button" type="button" aria-label="About harm sensitivity settings" aria-describedby="info-harm" aria-expanded="false">i</button>
-              <span class="info-tooltip" id="info-harm" role="tooltip">How strongly harm counts when d is low or high.</span>
-            </span>
-          </div>
-          <div id="harm-params" hidden></div>
-        </div>
+        <div id="params"></div>
+        <p class="hint">Tipping point <i>S − natural gain / k</i> = <strong id="tipping"></strong></p>
       </section>
+      <details>
+        <summary>The model</summary>
+        <pre class="equations">H' = H + gain + k·(B − H)
+B' = B − δ·[drug] + ρ·(B0 − B)
+D(H) = (S − H)² / S
+r  = D(H) − D(H')
+     + (R0 − c)·[drug]</pre>
+      </details>
+      </div>
     </aside>
-      <div class="environment-panels">
-        <section id="dependence-control" class="panel dependence-panel">
-          <h2>Drug-induced dependence</h2>
-          <label class="check"><input id="dependence" type="checkbox" aria-controls="dependence-params"><span>Enable drug-induced dependence</span></label>
-          <p class="hint">Drug use lowers the resting level of d. Turning this on or off resets learning. Source cooldown is controlled separately.</p>
-          <div id="dependence-params" hidden></div>
-        </section>
-        <section class="panel cooldown-panel">
-          <h2>Source cooldown</h2>
-          <div id="cooldown-params"></div>
-        </section>
-        <section class="panel discount-panel">
-          <h2>Future rewards</h2>
-          <p class="hint">How much the agent values rewards it can receive later.</p>
-          <div id="discount-params"></div>
+
+    <div class="minimal-content">
+      <div class="minimal-row overview-row">
+        <section class="panel">
+        <div class="environment-heading">
+          <h2>Environment</h2>
+          <label class="check learning-details-toggle">
+            <input id="show-learning-details" type="checkbox" aria-controls="environment-learning-help" aria-describedby="learning-details-hint">
+            <span>Show learning details</span>
+          </label>
+        </div>
+        <p id="learning-details-hint" class="hint">Shows Q-values, decision reasons and rewards. This only changes the display.</p>
+        <p class="hint">Each step the agent chooses a station. The green band shows how high natural rewards alone can maintain its internal level. Below the tipping point, natural rewards cannot maintain the setpoint.</p>
+        <p id="environment-learning-help" class="hint" data-learning-details hidden>The bars show Q-values: expected future return, not the reward just received. “Next” shows Q-values for the next decision’s state; bold values are the highest, with ties broken randomly. Exploration can select any available action. These estimates may be inaccurate while learning.</p>
+        <canvas id="environment" aria-label="The agent choosing between a natural reward, nothing and the drug"></canvas>
+        <p id="env-caption" class="hint" aria-live="polite"></p>
+        <div class="key">
+          <span><i class="line" style="background: var(--line-h)"></i>D now</span>
+          <span><i style="background: var(--line-b); width: 3px"></i>Baseline B</span>
+          <span><i class="dash"></i>Setpoint S</span>
+          <span><i style="background: var(--act-natural); opacity: 0.35"></i>Reachable with natural rewards</span>
+        </div>
+      </section>
+        <section class="panel">
+          <h2>Now</h2>
+          <p id="status" class="status"></p>
+          <p id="status-hint" class="hint"></p>
+          <dl class="readouts">
+            <div><dt>Step</dt><dd id="r-step"></dd></div>
+            <div><dt>Exploration probability ε</dt><dd id="r-eps"></dd></div>
+            <div><dt>Internal level H</dt><dd id="r-h"></dd></div>
+            <div><dt>Baseline B</dt><dd id="r-b"></dd></div>
+            <div><dt>Drug choices, last 1,000 steps</dt><dd id="r-drug"></dd></div>
+            <div><dt>Natural choices, last 1,000 steps</dt><dd id="r-natural"></dd></div>
+          </dl>
         </section>
       </div>
-    </div>
 
-
-
-    <div class="simulation-content">
-    <div class="visuals">
-    <section class="panel maze-panel">
-      <h2>Explore the maze</h2>
-      <div class="toolbar">
-        <button id="play" type="button" class="primary">Play</button>
-        <button id="step" type="button">Step</button>
-        <button id="reset" type="button">Reset learning</button>
-        <button id="dose" class="dose-button" type="button" title="Gives the agent one dose of Drug B wherever it is. The agent does not choose it and gets no reward for it. About 13 doses in quick succession take the resting level of d to its floor.">Give Drug B</button>
-        <label class="speed">
-          <span>Speed</span>
-          <input id="speed" type="range" min="0" max="100" value="35">
-          <output id="speed-label"></output>
-        </label>
-      </div>
-      <canvas id="maze" aria-label="Maze with the agent and the sources"></canvas>
-      <div id="maze-source-key" class="maze-source-key" aria-label="Maze source key"></div>
-      <p class="hint maze-hint">The face icon represents the agent, showing its location and current feeling. The plate of pasta bolognese represents food, and the pill represents Drug B. The agent learns from experience as it moves through the maze and chooses which items to use.</p>
-    </section>
-
-    <div class="side">
-      <section class="panel agent-panel">
-        <h2>Agent state</h2>
-        <canvas id="agent-state" aria-label="The agent's face, showing its mood and its accumulated harm"></canvas>
-        <div>
-          <p id="mood-name" class="mood-name" role="status"></p>
-          <p id="mood-text" class="hint"></p>
-          <div id="harm-meter" class="meter" role="meter" aria-label="Accumulated harm" aria-valuemin="0" aria-valuemax="100">
-            <span>Accumulated harm <i>h</i></span>
-            <output></output>
-            <span class="bar"><span class="bar-fill"></span></span>
+      <section class="panel">
+        <div class="state-panel-heading">
+          <h2>Internal states over time</h2>
+        </div>
+        <div class="toolbar">
+          <label class="speed">
+            <span>Show last</span>
+            <select id="window">
+              <option value="200" selected>200 steps</option>
+              <option value="500">500 steps</option>
+              <option value="5000">5,000 steps</option>
+              <option value="50000">50,000 steps</option>
+            </select>
+          </label>
+          <span class="speed" role="group" aria-label="Y-axis zoom">
+            <span>Y axis</span>
+            <button id="y-out" type="button" aria-label="Zoom out">−</button>
+            <button id="y-in" type="button" aria-label="Zoom in">+</button>
+            <button id="y-fit" type="button" aria-pressed="false" title="Keep the y-axis fitted to the shown data">Fit</button>
+            <button id="y-full" type="button" title="Show 0 to 100">0–100</button>
+          </span>
+          <span class="speed" role="group" aria-label="Time-axis zoom">
+            <span>Time</span>
+            <button id="x-out" type="button" aria-label="Zoom out in time">−</button>
+            <button id="x-in" type="button" aria-label="Zoom in in time">+</button>
+            <button id="x-now" type="button" title="Jump to the newest step and follow it">Now</button>
+          </span>
+        </div>
+        <canvas id="trace" title="When zoomed vertically, scroll up/down to move the y-axis. Scroll left/right or drag right to browse history. At full y range, up/down scrolling browses time. Ctrl/⌘ + scroll zooms the y-axis; Alt/Option + scroll zooms time." aria-label="Current state D and baseline B over elapsed simulation steps"></canvas>
+        <p class="hint">When the y-axis is zoomed in, scroll down to see lower values and up to see higher values. Scroll left/right or drag right to look back in time. At the full 0–100 y range, up/down scrolling browses time. Use Now to follow live steps. The latest 50,000 steps are retained.</p>
+        <p id="trace-range" class="hint" aria-live="off"></p>
+        <div class="key">
+          <span><i class="line" style="background: var(--line-h)"></i>Current State (D), line: mean, shading: range</span>
+          <span><i class="line" style="background: var(--line-b)"></i>Baseline B</span>
+          <span><i class="dash"></i>Setpoint S and tipping point</span>
+        </div>
+        <div class="state-panel-footer">
+          <div class="key state-event-key">
+            <span><i style="background: var(--act-drug)"></i>Drug chosen</span>
+            <span><i style="background: var(--text-primary)"></i>Forced dose</span>
           </div>
-          <p class="hint">The face shows how the agent is feeling based on its current state and resting level. Its skin becomes paler and greyer as harm builds up.</p>
+          <div class="state-help">
+            <button id="state-info" class="state-info-button" type="button" aria-expanded="false" aria-controls="state-info-popup" aria-haspopup="dialog">States <span class="state-info-symbol" aria-hidden="true">i</span></button>
+            <div id="state-info-popup" class="state-info-popup" role="dialog" aria-labelledby="state-info-title" hidden>
+              <h3 id="state-info-title">Understanding the states</h3>
+              <dl>
+                <dt>Current state D</dt>
+                <dd>The agent’s internal level right now. It learns actions that bring this closer to its target.</dd>
+                <dt>Baseline B</dt>
+                <dd>The level D drifts toward. Drug use lowers it; healing gradually restores it.</dd>
+                <dt>Setpoint S</dt>
+                <dd>The target internal level the agent tries to maintain: 50.</dd>
+                <dt>Tipping point</dt>
+                <dd>When baseline B falls below this threshold, natural rewards alone can no longer maintain the target. It is not an automatic addiction switch.</dd>
+                <dt>Natural-reward ceiling</dt>
+                <dd>The level D could maintain by choosing natural reward every step at the current baseline.</dd>
+              </dl>
+              <p>Blue shading shows the range of D within each plotted interval. Red marks show chosen drug use; dark marks show forced doses.</p>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section class="panel chart-panel">
-        <h2>Dopamine-related state over time</h2>
-        <div id="state-legend" class="legend"></div>
-        <canvas id="state-chart" aria-label="Line chart of the agent's dopamine-related state, resting level and neutral threshold over simulation steps"></canvas>
-        <p class="hint chart-caption">Watch how reward items raise the agent’s state and how it changes afterward. A falling resting level shows the lasting effect of drug use. Drag or swipe horizontally to explore past values. Double-click to return to the latest 200 steps.</p>
-      </section>
-
-    </div>
-    </div>
-
-      <section class="panel progress-panel">
-        <h2>Simulation progress</h2>
-        <dl id="stats" class="stats"></dl>
-        <details class="learning-details">
-          <summary>Learning details</summary>
-          <dl id="learning-stats" class="stats"></dl>
-        </details>
-        <h3 id="choices-title">Sources the agent chose</h3>
-        <label for="choices-window">Show episodes</label>
-        <select id="choices-window">
-          <option value="100">Last 100</option>
-          <option value="1000">Last 1,000</option>
-          <option value="10000">Last 10,000</option>
-        </select>
-        <div id="choices"></div>
-      </section>
+      <section class="panel">
+          <h2>What the agent chooses</h2>
+          <p class="hint">Its preferred action in each (<i>H</i>, <i>B</i>) state. The dot is where it is now, and the fading line is the path of its last 100 steps.</p>
+          <canvas id="policy" aria-label="Preferred action for each internal state"></canvas>
+          <div class="key">
+            <span><i style="background: var(--act-nothing)"></i>Nothing</span>
+            <span><i style="background: var(--act-natural)"></i>Natural reward</span>
+            <span><i style="background: var(--act-drug)"></i>Drug</span>
+            <span><i style="background: var(--unlearned); border: 1px solid var(--border)"></i>Not visited enough</span>
+          </div>
+        </section>
     </div>
   </main>
 
-  <script type="module" src="js/main.js"></script>
+  <script type="module" src="js/page.js"></script>
 </body>
 </html>
