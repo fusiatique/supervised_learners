@@ -110,12 +110,12 @@ function drawStations(ctx, life, view, shares, { cardW, centers }, advanced) {
       ctx.fillRect(Math.min(mid, mid + len), barY, Math.abs(len), 10);
       ctx.fillStyle = cssVar('--text-secondary');
       ctx.fillRect(mid - 0.5, barY - 3, 1, 16);
-      ctx.fillText(`Q-value ${s === null ? '–' : values[a].toFixed(2)}`, x + 12, barY + 26, cardW - 24);
+      ctx.fillText(`Previous state Q ${s === null ? '–' : values[a].toFixed(2)}`, x + 12, barY + 26, cardW - 24);
       // Value in the state the next step will choose in; the greedy pick in bold.
       const isNext = nextBest.includes(a);
       ctx.font = `${isNext ? '600 ' : ''}11px ${CANVAS_FONT}`;
       ctx.fillStyle = isNext ? cssVar('--text-primary') : cssVar('--text-secondary');
-      ctx.fillText(`next ${nextValues[a].toFixed(2)}${isNext ? ' ◂ next pick' : ''}`, x + 12, barY + 42, cardW - 24);
+      ctx.fillText(`Current state Q ${nextValues[a].toFixed(2)}${isNext ? ' ◂ next pick' : ''}`, x + 12, barY + 42, cardW - 24);
       ctx.font = `11px ${CANVAS_FONT}`;
     }
     ctx.fillStyle = cssVar('--text-muted');

@@ -3,7 +3,7 @@ import { stateShape } from './agent.js';
 import { Life } from './life.js';
 import { DEPENDENT_SHARE, WINDOW } from './experiments.js';
 import { drawEnvironment } from './environmentView.js';
-import { cssVar, prepareCanvas, CANVAS_FONT } from '../ui/theme.js';
+import { cssVar, prepareCanvas, CANVAS_FONT, clearThemeCache } from '../ui/theme.js';
 
 // The interactive page for the minimal model: one life, stepped in real time.
 
@@ -54,11 +54,12 @@ function reset() {
 }
 
 function tick() {
+  const hadTie = life.agent.bestActions(life.nextChoiceState()).length > 1;
   const { action, reward, forced, s, explored } = life.tick();
   const now = performance.now();
   // Walk for most of the time until the next step; too fast to follow, snap.
   const duration = Math.min(450, 800 / stepsPerSecond());
-  view = { ...view, s, action, explored, reward, from: view.to, to: action, at: now, duration: duration < 40 ? 0 : duration };
+  view = { ...view, s, action, explored, reward, hadTie, from: view.to, to: action, at: now, duration: duration < 40 ? 0 : duration };
   if (forced) view.forcedAt = now;
   recent[life.t % WINDOW] = action;
   const i = (life.t - 1) % HISTORY;
@@ -284,6 +285,33 @@ function drawTrace() {
   ctx.lineWidth = 1;
 }
 
+let policyGeometry;
+let inspectedPolicyCell = null;
+
+function updatePolicyDetails() {
+  const details = $('policy-details');
+  details.hidden = inspectedPolicyCell === null;
+  if (inspectedPolicyCell === null) return;
+  const { h, b } = inspectedPolicyCell;
+  const p = life.p;
+  const { hBins, bBins } = stateShape(p);
+  const s = h * bBins + b;
+  const range = (bin, width, min, max, last) => `${min + bin * width} ≤ ${last ? 'VALUE ≤' : 'VALUE <'} ${Math.min(max, min + (bin + 1) * width)}`;
+  const hRange = range(h, p.hBinWidth, p.hMin, p.hMax, h === hBins - 1).replace('VALUE', 'H');
+  const bRange = range(b, p.bBinWidth, p.bMin, p.B0, b === bBins - 1).replace('VALUE', 'B');
+  let explanation;
+  if (life.agent.visits[s] < MIN_VISITS) {
+    explanation = 'Too little experience to interpret this state confidently.';
+  } else {
+    const best = life.agent.bestActions(s);
+    explanation = best.length === 1
+      ? `Highest learned value: ${ACTIONS[best[0]].name}. The agent currently expects this action to produce the greatest cumulative future reward.`
+      : `Equal highest learned values: ${best.map((a) => ACTIONS[a].name).join(', ')}. Ties are broken randomly.`;
+    explanation += ' Exploration can lead to a different choice.';
+  }
+  details.textContent = `${hRange}; ${bRange}. ${explanation}`;
+}
+
 function drawPolicy() {
   const { ctx, width, height } = prepareCanvas($('policy'));
   const p = life.p;
@@ -291,6 +319,7 @@ function drawPolicy() {
   const pad = { left: 50, right: 6, top: 6, bottom: 34 };
   const cellW = (width - pad.left - pad.right) / bBins;
   const cellH = (height - pad.top - pad.bottom) / hBins;
+  policyGeometry = { width, height, pad, cellW, cellH, hBins, bBins };
   const colors = [cssVar('--act-nothing'), cssVar('--act-natural'), cssVar('--act-drug')];
   const xOfB = (B) => pad.left + (B / p.B0) * bBins * cellW;
   const yOfH = (H) => pad.top + (1 - H / p.hMax) * hBins * cellH;
@@ -352,24 +381,60 @@ function drawPolicy() {
   ctx.fill();
   ctx.stroke();
   ctx.lineWidth = 1;
+  const dotX = xOfB(life.state.B);
+  const dotY = yOfH(life.state.H);
+  ctx.font = `bold 11px ${CANVAS_FONT}`;
+  ctx.textAlign = dotX > pad.left + bBins * cellW / 2 ? 'right' : 'left';
+  ctx.textBaseline = 'middle';
+  const labelX = dotX + (ctx.textAlign === 'right' ? -10 : 10);
+  const labelY = Math.max(pad.top + 10, Math.min(height - pad.bottom - 10, dotY));
+  ctx.strokeStyle = cssVar('--surface');
+  ctx.lineWidth = 4;
+  ctx.strokeText('Agent now', labelX, labelY);
+  ctx.fillText('Agent now', labelX, labelY);
+  ctx.textBaseline = 'alphabetic';
+  ctx.lineWidth = 1;
+  updatePolicyDetails();
 }
+
+function inspectPolicy(event) {
+  if (!policyGeometry) return;
+  const { width, height, pad, cellW, cellH, hBins, bBins } = policyGeometry;
+  const rect = $('policy').getBoundingClientRect();
+  const x = (event.clientX - rect.left) * width / rect.width - pad.left;
+  const y = (event.clientY - rect.top) * height / rect.height - pad.top;
+  inspectedPolicyCell = x >= 0 && y >= 0 && x < bBins * cellW && y < hBins * cellH
+    ? { b: Math.floor(x / cellW), h: hBins - 1 - Math.floor(y / cellH) }
+    : null;
+  updatePolicyDetails();
+}
+
+$('policy').addEventListener('pointermove', inspectPolicy);
+$('policy').addEventListener('click', inspectPolicy);
+$('policy').addEventListener('pointerleave', () => {
+  inspectedPolicyCell = null;
+  updatePolicyDetails();
+});
 
 function drawEnvironmentPanel() {
   const shares = ACTIONS.map((_, a) => share(a));
   walking = drawEnvironment($('environment'), life, view, shares, performance.now(), showLearningDetails);
-  let caption = 'Press Play or Step. Each step the agent picks one station.';
-  if (view.s !== null) {
-    const name = ACTIONS[view.action].name.toLowerCase();
-    const why = view.explored ? 'a random pick while exploring' : 'a highest-valued option (ties are random)';
-    const sign = view.reward >= 0 ? '+' : '−';
-    caption = showLearningDetails
-      ? `Chose ${name}, ${why}. Reward ${sign}${Math.abs(view.reward).toFixed(2)}.`
-      : `Chose ${name}.`;
-  }
+  const hasDecision = view.s !== null;
+  const caption = $('env-caption');
+  caption.hidden = showLearningDetails && hasDecision;
+  caption.textContent = hasDecision
+    ? `Chose ${ACTIONS[view.action].name.toLowerCase()}.`
+    : 'Press Play or Step. Each step the agent picks one station.';
+  $('decision-action').textContent = hasDecision ? ACTIONS[view.action].name : '—';
+  $('decision-reason').textContent = hasDecision
+    ? (view.explored ? 'Random exploration' : 'Highest learned value') : '—';
+  $('decision-tie').textContent = hasDecision && !view.explored && view.hadTie ? ' (tie broken randomly)' : '';
+  $('decision-reward').textContent = hasDecision
+    ? `${view.reward >= 0 ? '+' : '−'}${Math.abs(view.reward).toFixed(2)}` : '—';
   const best = life.agent.bestActions(life.nextChoiceState());
-  const next = best.length === 1 ? ACTIONS[best[0]].name.toLowerCase() : 'a tie, broken at random';
-  if (showLearningDetails) caption += ` Next step: ${next} (${(life.agent.epsilon * 100).toFixed(1)}% chance of exploring instead).`;
-  $('env-caption').textContent = caption;
+  $('decision-next').textContent = best.map((a) => ACTIONS[a].name).join(' / ')
+    + (best.length > 1 ? ' (tie; chosen randomly)' : '');
+  $('r-eps').textContent = `${(life.agent.epsilon * 100).toFixed(1)}%`;
 }
 
 // Keeps drawing the environment while the agent walks and the page is paused.
@@ -381,6 +446,8 @@ function animateWalk() {
 
 function renderReadouts() {
   const { H, B } = life.state;
+  const ceiling = naturalCeiling(B, life.p);
+  $('natural-ceiling-caption').textContent = `At the current baseline, choosing natural reward every step would make H approach ${Number(ceiling.toFixed(1))}.`;
   const drugShare = share(DRUG);
   const tipping = tippingPoint(life.p);
   let status = 'Clean';
@@ -403,8 +470,6 @@ function renderReadouts() {
   $('r-eps').textContent = `${(life.agent.epsilon * 100).toFixed(1)}%`;
   $('r-h').textContent = H.toFixed(1);
   $('r-b').textContent = B.toFixed(1);
-  $('r-drug').textContent = `${(drugShare * 100).toFixed(1)}%`;
-  $('r-natural').textContent = `${(share(NATURAL) * 100).toFixed(1)}%`;
   $('tipping').textContent = tipping.toFixed(1);
 }
 
@@ -481,6 +546,7 @@ function buildSliders() {
 buildSliders();
 $('show-learning-details').addEventListener('change', (event) => {
   showLearningDetails = event.target.checked;
+  $('environment-intro').classList.toggle('learning-visible', showLearningDetails);
   for (const element of document.querySelectorAll('[data-learning-details]')) element.hidden = !showLearningDetails;
   render();
 });
@@ -605,3 +671,24 @@ $('dose').addEventListener('click', () => { life.dose(1); render(); });
 $('dose10').addEventListener('click', () => { life.dose(10); render(); });
 window.addEventListener('resize', render);
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', render);
+
+const themeButtons = document.querySelectorAll('[data-theme-choice]');
+function syncThemePicker() {
+  const theme = document.documentElement.dataset.theme
+    || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  for (const button of themeButtons) {
+    button.setAttribute('aria-pressed', String(button.dataset.themeChoice === theme));
+  }
+}
+syncThemePicker();
+for (const button of themeButtons) {
+  button.addEventListener('click', () => {
+    const theme = button.dataset.themeChoice;
+    document.documentElement.dataset.theme = theme;
+    try { localStorage.setItem('minimal-theme', theme); } catch {}
+    syncThemePicker();
+    clearThemeCache();
+    render();
+  });
+}
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', syncThemePicker);
