@@ -3,7 +3,7 @@ import { stateShape } from './agent.js';
 import { Life } from './life.js';
 import { DEPENDENT_SHARE, WINDOW } from './experiments.js';
 import { drawEnvironment } from './environmentView.js';
-import { cssVar, prepareCanvas, CANVAS_FONT, clearThemeCache } from '../ui/theme.js';
+import { cssVar, prepareCanvas, CANVAS_FONT, clearThemeCache } from './theme.js';
 
 // The interactive page for the minimal model: one life, stepped in real time.
 
