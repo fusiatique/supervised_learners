@@ -1,4 +1,4 @@
-// Command-line entry point for the minimal model (js/minimal).
+// Command-line entry point for the minimal model (js/).
 //
 //   node scripts/minimal.js [all|acquisition|doses|compulsion|relapse|policy] [--seeds 20] [--out DIR]
 //
@@ -7,9 +7,9 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
-import { ACTIONS, config, tippingPoint } from '../js/minimal/model.js';
-import { stateShape } from '../js/minimal/agent.js';
-import { acquisition, doses, compulsion, relapse, runLife, isDependent } from '../js/minimal/experiments.js';
+import { ACTIONS, config, tippingPoint } from '../js/model.js';
+import { stateShape } from '../js/agent.js';
+import { acquisition, doses, compulsion, relapse, runLife, isDependent } from '../js/experiments.js';
 import { lineChart, barChart } from './lib/svgChart.js';
 
 const { positionals, values: args } = parseArgs({

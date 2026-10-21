@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { config, drive, step, tippingPoint, naturalCeiling, NOTHING, NATURAL, DRUG } from '../js/minimal/model.js';
-import { Agent, stateIndex, stateShape } from '../js/minimal/agent.js';
-import { Life, DOSE_SPACING } from '../js/minimal/life.js';
-import { runLife, isDependent } from '../js/minimal/experiments.js';
+import { config, drive, step, tippingPoint, naturalCeiling, NOTHING, NATURAL, DRUG } from '../js/model.js';
+import { Agent, stateIndex, stateShape } from '../js/agent.js';
+import { Life, DOSE_SPACING } from '../js/life.js';
+import { runLife, isDependent } from '../js/experiments.js';
 
 const p = config();
 const close = (actual, expected, message) => assert.ok(Math.abs(actual - expected) < 1e-9, `${message}: ${actual} != ${expected}`);

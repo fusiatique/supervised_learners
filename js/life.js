@@ -1,6 +1,6 @@
 import { config, step, NOTHING } from './model.js';
 import { Agent, stateIndex } from './agent.js';
-import { seededRandom } from '../hrl/rng.js';
+import { seededRandom } from './rng.js';
 
 // Forced doses are given this many steps apart.
 export const DOSE_SPACING = 5;

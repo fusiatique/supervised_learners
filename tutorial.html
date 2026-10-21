@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tutorial | Minimal Dependence Model</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="app-header tutorial-header">
+    <a href="index.html">Back to the minimal simulation</a>
+    <h1>Explore the minimal dependence model</h1>
+    <p>A beginner-friendly guide to the agent’s choices, internal states, and learning.</p>
+  </header>
+
+  <main class="tutorial-content">
+    <section class="panel">
+      <h2>Start here</h2>
+      <h3>Learning goals</h3>
+      <ul>
+        <li>Describe the simulation as a small world with an agent that learns by trying actions and observing their consequences.</li>
+        <li>Connect the model’s two internal states, its reward rule, and the agent’s choices to the displays on the page.</li>
+        <li>Run a simple comparison while changing one setting at a time.</li>
+      </ul>
+      <p>No programming, biology, or mathematics background is needed. Open the <a href="index.html">minimal simulation</a> and follow the activities alongside it. Make a prediction before changing a setting, then use <strong>Step</strong> to see what happens. Equations are explained in words; you can skip them on your first read.</p>
+      <p>This is a computational hypothesis, not a validated model of physiology or clinical addiction. Its variables are abstract units, and its conclusions depend on the assumptions and parameter values. It illustrates how a particular set of rules can produce behavior; it does not predict or diagnose real people.</p>
+    </section>
+
+    <section class="panel lesson">
+      <h2>A small glossary</h2>
+      <h3>Learning goals</h3>
+      <ul>
+        <li>Recognize the basic words used to describe a learning simulation.</li>
+        <li>Distinguish the agent’s state from its action and the reward it receives.</li>
+      </ul>
+      <ul>
+        <li><strong>Model / simulation:</strong> a simplified set of rules that a computer uses to step through a made-up world.</li>
+        <li><strong>Agent:</strong> the decision-maker in that world. Here, it is the learner choosing among three actions.</li>
+        <li><strong>State:</strong> information about the agent’s situation right now. Here, it is mainly the pair of numbers <i>H</i> and <i>B</i>.</li>
+        <li><strong>Action:</strong> one choice the agent can make: Nothing, Natural reward, or Drug.</li>
+        <li><strong>Reward:</strong> a score produced by the model after an action. It is information used for learning, not a real-world reward or a moral judgment.</li>
+        <li><strong>Step:</strong> one decision and its resulting state change. The agent continues from one step to the next; it does not have separate rounds or episodes.</li>
+        <li><strong>Parameter:</strong> a setting that changes one of the model’s rules, such as how much a drug lowers the baseline.</li>
+      </ul>
+      <p>This is <strong>reinforcement learning</strong>: the agent is not shown examples of the correct action. It chooses, receives a score from the model, and uses that feedback to improve its future choices. The score tells it how good an outcome was under the model’s rules; it does not tell it why the outcome happened.</p>
+      <p>A useful everyday analogy is a thermostat: it measures a current temperature and compares it with a desired setting. This model is more complicated because its agent chooses actions and learns from scores, but the thermostat helps explain why a preferred level and a current level are different things.</p>
+    </section>
+
+    <section class="panel lesson">
+      <h2>1. Meet the agent and its choices</h2>
+      <h3>Learning goals</h3>
+      <ul>
+        <li>Name the agent’s three available actions and say how they differ.</li>
+        <li>Explain that the agent chooses an action; the person using the page does not move it directly.</li>
+      </ul>
+      <p>The agent lives continuously and chooses one of three actions at every step:</p>
+      <ul>
+        <li><strong>Nothing</strong> — no reward gain; the internal level moves toward its baseline.</li>
+        <li><strong>Natural reward</strong> — raises the internal level by the configured natural gain.</li>
+        <li><strong>Drug</strong> — raises the internal level more strongly, gives a direct reward bonus, and lowers the baseline.</li>
+      </ul>
+      <p>The agent is not controlled directly. It learns which action tends to be valuable in its current state and sometimes tries an action at random. This occasional trying of alternatives is called <strong>exploration</strong>; following the best choice it currently knows is called <strong>exploitation</strong>. The agent can choose Drug only when <strong>Drug available</strong> is on.</p>
+      <p><strong>Try:</strong> Press <strong>Step</strong> several times. In the Environment panel, watch the agent move between the three action stations and read the caption to see what it chose and the reward it received. Notice whether the caption says it explored or picked its highest-valued option.</p>
+    </section>
+
+    <section class="panel lesson">
+      <h2>2. Understand the two internal states</h2>
+      <h3>Learning goals</h3>
+      <ul>
+        <li>Explain the difference between the current internal level and the baseline it tends toward.</li>
+        <li>Predict the direction in which each state changes after a natural reward or a drug use.</li>
+      </ul>
+      <ul>
+        <li><strong><i>H</i>, the internal level:</strong> the agent’s current level, shown in blue. The setpoint <i>S</i> is the preferred level (50 by default). One chart label calls this “D” as a display name; the equations use <i>H</i>. This is different from the drive score <i>D(H)</i> in the reward equation.</li>
+        <li><strong><i>B</i>, the baseline:</strong> the level <i>H</i> tends toward over time, shown in gold. It starts at 40 by default. Drug use lowers it, and it heals back toward its original value slowly.</li>
+      </ul>
+      <p>Think of <i>H</i> as the current reading on a meter and <i>B</i> as the level it slowly drifts back toward. The setpoint <i>S</i> is the model’s preferred reading; it is not the same as the baseline. With the default settings, a natural reward raises <i>H</i> by 2 and each step pulls it 10% of the way toward <i>B</i>. A drug raises <i>H</i> by 25 and lowers <i>B</i> by 1. These are illustrative model values, not measurements.</p>
+      <p>On a step, the chosen action first adds its gain to <i>H</i>; then <i>H</i> is pulled toward the baseline at the start of that step. The model also updates <i>B</i>: drug use lowers it, while slow healing nudges it toward its starting value (40 by default). The updated baseline affects <i>H</i> on later steps. For example, if <i>H</i> is 50 and <i>B</i> is 40, a step with Nothing changes <i>H</i> to 49: it moves 10% of the 10-point gap toward <i>B</i>. A step with Natural reward first adds 2, so <i>H</i> becomes 51 instead. A drug use adds its larger gain and lowers <i>B</i> for the future.</p>
+      <p><strong>Try:</strong> Use <strong>Step</strong> and follow the blue and gold values in <strong>Now</strong> and in the time chart. Notice that <i>H</i> can change more quickly than <i>B</i>.</p>
+    </section>
+
+    <section class="panel lesson">
+      <h2>3. Discover the tipping point</h2>
+      <h3>Learning goals</h3>
+      <ul>
+        <li>Describe in plain language what the tipping point means in this model.</li>
+        <li>Use the displayed settings to work out why changing natural reward gain moves the threshold.</li>
+      </ul>
+      <p>Natural rewards can hold <i>H</i> at most around <code>B + natural gain / k</code>. With the defaults, that is <i>B</i> + 20. The tipping point is therefore:</p>
+      <p class="equation"><code>tipping point = setpoint − natural gain / k = 50 − 2 / 0.1 = 30</code></p>
+      <p>Why? The pull toward <i>B</i> lowers <i>H</i> by about 10% of the gap each step. A natural reward adds 2 points. If the gap is more than 20 points, that pull is larger than the natural reward can offset. So the highest level natural rewards can maintain is about <i>B</i> + 20. When <i>B</i> is 30, that ceiling just reaches the setpoint of 50; below 30, it falls short.</p>
+      <p>The green band in the Environment meter shows the range natural rewards can reach; the dashed line marks the setpoint. The dark dashed marker in the policy map marks the tipping point. This is a threshold implied by these particular settings, not a universal boundary or a point at which the agent automatically changes behavior.</p>
+      <p>This threshold is a property of the selected parameters, not a universal boundary. Changing natural reward gain changes the tipping point.</p>
+      <p><strong>Try:</strong> Look at the displayed tipping point. Lower <strong>Baseline drop per drug use</strong> or increase <strong>Baseline healing rate</strong>, then observe how the baseline moves relative to the threshold.</p>
+    </section>
+
+    <section class="panel lesson">
+      <h2>4. Follow the reward</h2>
+      <h3>Learning goals</h3>
+      <ul>
+        <li>Explain why a reward can be positive or negative.</li>
+        <li>Identify the two parts of the drug’s reward and distinguish a chosen drug action from a forced dose.</li>
+      </ul>
+      <p>The model rewards reductions in the agent’s distance from its setpoint. It also adds a direct pleasure-minus-harm term when the agent chooses the drug:</p>
+      <p class="equation"><code>D(H) = (S − H)² / S</code><br><code>reward = D(H) − D(H after action) + (R0 − c) if drug chosen</code></p>
+      <p><i>D(H)</i> is a measure of how far <i>H</i> is from the setpoint: it is zero at the setpoint and grows as <i>H</i> moves away in either direction. In this equation, <i>D</i> means “drive”; it is not the chart’s display label for the current internal level. The first part of the reward is the old distance score minus the new one. If the distance gets smaller, the score is positive; if it gets bigger, the score is negative. Choosing the drug adds <i>R0 − c</i>. At the defaults this direct bonus is <code>2 − 1 = 1</code>, but the total reward can still be negative if the drug moves <i>H</i> too far past the setpoint.</p>
+      <p>A forced dose is imposed from outside the agent. It changes the internal state but is not the agent’s chosen action, so it does not receive the drug’s direct pleasure-minus-harm bonus. The regular action the agent takes on that step still gets a reward.</p>
+      <p><strong>Try:</strong> Watch the step reward in the Environment caption. Raise the drug harm-cost slider or lower its pleasure slider and see how that may change the agent’s learned preferences.</p>
+    </section>
+
+    <section class="panel lesson">
+      <h2>5. See how Q-learning works</h2>
+      <h3>Learning goals</h3>
+      <ul>
+        <li>Describe a Q-value as the agent’s learned estimate of how useful an action will be.</li>
+        <li>Explain how feedback, learning rate, future value, and exploration affect decisions.</li>
+      </ul>
+      <p>The agent records an estimated value, called a <i>Q</i>-value, for each available action in each binned <i>(H, B)</i> state. It updates the value after every step:</p>
+      <p class="equation"><code>new Q = old Q + α × (reward + γ × best next-state Q − old Q)</code></p>
+      <ul>
+        <li><strong>Learning rate (α)</strong> sets how strongly each new experience changes an estimate.</li>
+        <li><strong>Discount factor (γ)</strong> sets how much future value matters in the current decision.</li>
+        <li><strong>Exploration ε</strong> is the chance the agent tries a random available action instead of its current best guess. It gradually falls toward a minimum.</li>
+      </ul>
+      <p>In words, the agent starts with an estimate, sees what actually happened, and adjusts the estimate toward a new target: the reward it just got plus an estimate of what it can get later. It does not need to be told the correct action. It learns from its own experience. <i>α</i> is the learning rate; <i>γ</i> is the discount factor, which makes far-off future value count a little less than immediate value. Because of this future-value term, the agent can prefer an action that is not the most rewarding on this step if it leads to better outcomes later.</p>
+      <p>The state is <em>binned</em>: nearby values of <i>H</i> and <i>B</i> are grouped into ranges, so the learner uses a manageable table rather than a separate entry for every possible decimal value. A Q-value is an estimate, not a certainty or a promise that the agent will choose that action next.</p>
+      <p>The bars in the Environment panel show learned values for the last decision state and estimates for the next state. The bold next value marks the action the agent currently prefers; it may still explore instead. The chart’s ε readout is the exploration chance: it starts at 0.3 and gradually falls toward 0.02 as the agent gains experience.</p>
+      <p>This simulation is one continuing life, not a sequence of episodes. <strong>Reset</strong> starts a new learner and returns <i>H</i> and <i>B</i> to their initial values, but keeps the current sliders and whether the drug is available.</p>
+      <p><strong>Try:</strong> Observe the bars over many steps. Increase the learning rate, press <strong>Reset</strong>, and compare how quickly values change. Reset between comparisons because it starts a new learner.</p>
+    </section>
+
+    <section class="panel lesson">
+      <h2>6. Read the charts and policy map</h2>
+      <h3>Learning goals</h3>
+      <ul>
+        <li>Find the current state and recent choices in the displays.</li>
+        <li>Distinguish learned preferences from recent behavior and from states the agent has not explored enough.</li>
+      </ul>
+      <ul>
+        <li><strong>Internal states over time:</strong> blue is <i>H</i> and gold is <i>B</i>. The blue shading shows the range when many steps are compressed into the chart. Dashed lines mark the setpoint and tipping point. Red marks a drug chosen by the agent; a dark marker denotes a forced dose.</li>
+        <li><strong>What the agent chooses:</strong> the horizontal axis is <i>B</i> and the vertical axis is <i>H</i>. Each cell’s colour shows the action with the highest learned value there. Pale cells have not been visited enough to show a reliable preference. The dot is the current state; the fading trail traces recent states.</li>
+        <li><strong>Now:</strong> reports the current values, exploration chance, and the shares of drug and natural-reward choices over the last 1,000 steps.</li>
+      </ul>
+      <p>The policy map’s colors show the action with the highest learned value only where a state has been visited at least 20 times. Pale cells are not evidence that an action is bad; the agent simply has not visited that state enough for the map to show a preference. The fading path is only the last 100 steps.</p>
+      <p>The status labels are shorthand for this model’s recent behavior: “Dependent” means at least 5% of the last 1,000 actions were drug choices; “At risk” means <i>B</i> is below the tipping point but that recent-use threshold has not been reached. “Clean” does not necessarily mean the agent never chose the drug. These labels are model-defined descriptions, not diagnoses.</p>
+      <p>Use <strong>Show last</strong> to change the time window. When lots of steps are compressed into a chart column, blue shading shows the range of <i>H</i> and the blue line shows its mean; the gold line shows the mean of <i>B</i>. The time and y-axis buttons zoom or fit the chart; <strong>Now</strong> returns it to the newest data. You can drag the chart to pan, double-click to reset its view, or use the labeled modifier-key scroll gestures in the chart’s tooltip.</p>
+    </section>
+
+    <section class="panel lesson">
+      <h2>7. Run the drug-free learning experiment</h2>
+      <h3>Learning goals</h3>
+      <ul>
+        <li>Explain why the simulation can begin learning before the drug is available.</li>
+        <li>Compare behavior before and after enabling the drug without erasing what was learned.</li>
+      </ul>
+      <p>The <strong>Drug available</strong> checkbox starts off unchecked. This lets you first observe the agent learning to use natural rewards, before deciding when to make the drug available.</p>
+      <ol>
+        <li>Leave the drug unavailable and run for a few thousand steps at high speed.</li>
+        <li>Note the policy map and the natural-choice share.</li>
+        <li>Turn on <strong>Drug available</strong> without resetting, and continue running. The agent keeps its earlier learning.</li>
+        <li>Compare its choices with the drug-free period. Exploration can produce different outcomes on different runs.</li>
+      </ol>
+      <p>For a clean repeat, press <strong>Reset</strong> while Drug available is off, let the agent learn natural rewards again, and then enable the drug. Reset creates a new randomly seeded learner but keeps the selected sliders and availability setting. Since the seed changes, the exact sequence of choices may differ on each reset.</p>
+    </section>
+
+    <section class="panel lesson">
+      <h2>8. Test how forced doses affect the baseline</h2>
+      <h3>Learning goals</h3>
+      <ul>
+        <li>Distinguish an externally imposed dose from an action the agent chose.</li>
+        <li>Observe how repeated drug exposure can affect both the current level and the slower baseline.</li>
+      </ul>
+      <p><strong>Give 1 dose</strong> schedules one dose; <strong>Give 10 doses</strong> schedules ten, five steps apart. On each dose step, the dose changes <i>H</i> and <i>B</i> before the agent makes its usual decision. The dose itself is not chosen, does not earn reward, and is not directly learned from; the agent still makes and learns from its regular action that step.</p>
+      <p><strong>Try:</strong> First run without forced doses and note <i>B</i>. Then reset, repeat with 10 doses, and compare the baseline and later choices. With the default drop of 1 per use, a burst of doses can push <i>B</i> closer to or below the tipping point. The exact outcome depends on when doses occur and on the other settings.</p>
+    </section>
+
+    <section class="panel lesson">
+      <h2>9. Make a controlled comparison</h2>
+      <h3>Learning goals</h3>
+      <ul>
+        <li>Make a prediction that can be checked against the simulation’s displays.</li>
+        <li>Change one factor at a time and describe a result without treating one run as proof.</li>
+      </ul>
+      <ol>
+        <li>Choose one question, such as “Does slower baseline healing make drug choices persist longer?”</li>
+        <li>Write down the current settings and predict what will happen.</li>
+        <li>Change one slider only. Slider changes take effect immediately.</li>
+        <li>Press <strong>Reset</strong> to start fresh with the new settings, then repeat the same sequence of events.</li>
+        <li>Compare <i>B</i>, the policy map, and choice shares. Repeat the runs if possible.</li>
+      </ol>
+      <p>Useful sliders include drug harm cost, drug pleasure, baseline drop per drug use, baseline healing rate, and natural reward gain. Keep in mind that random exploration and starting a fresh random seed can make individual runs differ.</p>
+      <p>These experiments illustrate what follows from this model’s assumptions; they do not establish what happens in real people.</p>
+    </section>
+
+    <p><a href="index.html">Return to the minimal simulation</a></p>
+  </main>
+</body>
+</html>
