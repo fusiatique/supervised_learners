@@ -1,10 +1,10 @@
 # Scene 04 — Mesocorticolimbic introduction
 
-In the presentation, this scene follows Scene 03. Open `animation/index.html#mesocorticolimbic-introduction` using Live Server. `animation/scene04.html` also offers standalone playback and scrubbing.
+In the presentation, this scene follows Scene 03. Open `animation/index.html#mesocorticolimbic-introduction` using Live Server. `animation/bio/html/scene04.html` also offers standalone playback and scrubbing.
 
 30 seconds · 900 frames · 30 FPS · 1920 × 1080 · silent.
 
-From `animation/remotion` with Node.js 22+:
+From `animation/bio/remotion` with Node.js 22+:
 
 ```sh
 npm run studio
@@ -15,7 +15,7 @@ npm run render:scene04
 ```
 
 Studio composition: `Scene04-MesocorticolimbicIntroduction`.
-Output: `animation/media/scene04-mesocorticolimbic-introduction.mp4`.
+Output: `animation/bio/video/scene04-mesocorticolimbic-introduction.mp4`.
 To use an installed Chrome, append:
 
 ```sh
@@ -40,7 +40,7 @@ The on-screen citations follow the supplied narration: Piantadosi et al., 2021 d
 
 ## Reusable anatomy
 
-`src/BrainAnatomy.tsx` defines `BrainAnatomy`, `BrainRegionHighlight`, `DopaminePathway`, `DopamineParticle`, and `BrainRegionLabel`.
+`remotion/src/BrainAnatomy.tsx` defines `BrainAnatomy`, `BrainRegionHighlight`, `DopaminePathway`, `DopamineParticle`, and `BrainRegionLabel`.
 
 The component accepts position/scale, drawing progress, cortical opacity, per-region highlights and opacity, optional labels, per-path drawing and visibility, and frame-based activity. `BRAIN_REGIONS`, `BRAIN_PATHWAYS`, `BRAIN_CENTER` and `BRAIN_BOUNDS` provide shared coordinates. Use `anatomyToScreen` for leader lines or camera targets.
 

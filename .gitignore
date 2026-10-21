@@ -3,5 +3,10 @@ node_modules/
 results/
 
 # Remotion build cache
-animation/remotion/.remotion/
-animation/remotion/build/
+animation/bio/remotion/.remotion/
+animation/bio/remotion/build/
+
+# Manim working files
+animation/maths/manim/build/
+animation/maths/manim/.venv/
+__pycache__/
