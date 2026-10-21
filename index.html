@@ -115,7 +115,7 @@
 
   <main class="layout with-sidebar">
     <aside class="panel controls playback-sidebar">
-    <div class="toolbar simulation-toolbar" role="group" aria-label="Simulation playback">
+    <div class="toolbar simulation-toolbar" data-panel="playback" role="group" aria-label="Simulation playback">
           <button id="play" type="button" class="primary">Play</button>
           <button id="step" type="button">Step</button>
           <button id="reset" type="button">Reset</button>
@@ -126,7 +126,7 @@
           </label>
     </div>
       <div class="sidebar-scroll">
-      <section>
+      <section data-panel="events">
         <h2>Life events</h2>
         <label class="check"><input id="drug-available" type="checkbox"><span>Drug available</span></label>
         <p class="hint">Let the agent learn natural rewards first (a few thousand steps at high speed), then make the drug available.</p>
@@ -136,12 +136,12 @@
         </div>
         <p class="hint">A forced dose raises <i>H</i> and lowers <i>B</i>, but the agent did not choose it and learns nothing from it directly.</p>
       </section>
-      <section>
+      <section data-panel="params">
         <h2>Parameters</h2>
         <div id="params"></div>
         <p class="hint">Tipping point <i>S − natural gain / k</i> = <strong id="tipping"></strong></p>
       </section>
-      <details>
+      <details data-panel="model">
         <summary>The model</summary>
         <pre class="equations">H' = H + gain + k·(B − H)
 B' = B − δ·[drug] + ρ·(B0 − B)
@@ -154,7 +154,7 @@ r  = D(H) − D(H')
 
     <div class="minimal-content">
       <div class="minimal-row overview-row">
-        <section class="panel">
+        <section class="panel" data-panel="environment">
         <div class="environment-heading">
           <h2>Environment</h2>
           <label class="check learning-details-toggle">
@@ -186,7 +186,7 @@ r  = D(H) − D(H')
           <span><i style="background: var(--act-natural); opacity: 0.35"></i>Reachable with natural rewards</span>
         </div>
       </section>
-      <section class="panel compact-now" aria-label="Current simulation status">
+      <section class="panel compact-now" data-panel="now" aria-label="Current simulation status">
         <div class="agent-status">
           <p id="status" class="status"></p>
           <p id="status-hint" class="hint"></p>
@@ -205,7 +205,7 @@ r  = D(H) − D(H')
       </section>
       </div>
 
-      <section class="panel">
+      <section class="panel" data-panel="trace">
         <div class="state-panel-heading">
           <h2>Internal states over time</h2>
         </div>
@@ -271,7 +271,7 @@ r  = D(H) − D(H')
         </div>
       </section>
 
-      <section class="panel">
+      <section class="panel" data-panel="policy">
           <h2>What the agent chooses</h2>
           <p class="hint">Its preferred action in each (<i>H</i>, <i>B</i>) state. The dot is where it is now, and the fading line is the path of its last 100 steps.</p>
           <canvas id="policy" aria-label="Preferred action for each internal state" aria-describedby="policy-help policy-details"></canvas>
