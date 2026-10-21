@@ -33,10 +33,54 @@ viewer sees the *same* system being described first biologically, then computati
 - **Stage:** Chapter map: Biology → RL → HRL → Harm → Mapping → Limits.
 - **Beat:** Each chapter node lights up in sequence.
 
+**1.3 Human vs computer — 42-second Remotion sequence**
+- **0–9 s:** Human draws in, considers uncertain branching routes, shrugs, and makes a workable choice.
+- **9–21 s:** Split screen introduces conventional programmed computation. Incomplete instructions cause a warning; an explicit IF/ELSE resolves it.
+- **21–32 s:** A brain and processor draw in and exchange signals, showing how neuroscience can inspire computational models.
+- **32–42 s:** Both move upward; “HOW DO WE LEARN TO MAKE DECISIONS?” and Action → Outcome → Learning form the final composition, held for one second.
+- **Attribution:** “Bellman, 1966” remains at the lower left after its first-second fade-in. No quotation or audio.
+- **Implementation:** `remotion/src/Scene01_HumanVsComputer.tsx`; embedded player in `scene01.html`. See `remotion/README.md` for editing and MP4 export.
+
 ## 2 · Biological processes
 **2a Risk & decision making — learning through consequences**
 - **Stage:** Agent at a fork: path A (small, certain reward), path B (larger, risky reward / occasional penalty). Repeated trials; choice frequency bar shifts as consequences accumulate.
 - **Beats:** options → outcomes → updated preference → "behaviour is shaped by consequences".
+
+**Standalone Scene 02 — Risk, learning, and addiction (23 seconds)**
+- **Page:** `scene02.html`; Remotion composition: `Scene02-RiskAndAddiction`.
+- **0–7 s:** The closing learning loop from Scene 01 gives way to a persistent crossroads. An uncertain mystery-box choice reveals an undesirable outcome.
+- **7–15 s:** The character returns, remembers the warning, and chooses the safer apple.
+- **15–23 s:** The same box becomes a capsule. Despite the remembered warning, the character approaches it; no consumption is shown. End on “LEARNING CAN BECOME MALADAPTIVE.”
+- **Sources:** Yates & Stone, 1992 → Piantadosi et al., 2021 around 15 seconds.
+- **Handoff:** The final second holds still. `RiskAndAddictionArtwork` at frame 660 is reusable for Scene 03. See `remotion/SCENE02.md`.
+
+**Scene 03 — Addiction and reward learning (56 seconds)**
+- **Presentation:** immediately after Scene 02; direct preview `scene03.html`.
+- **0–8 s:** Repeated drug-associated approaches despite visible harm, continuing the same crossroads.
+- **8–16 s:** An initially rewarding outcome and its association introduce positive reinforcement.
+- **16–27 s:** Repeated choices strengthen the conceptual association; the environment becomes a learning diagram.
+- **27–33 s:** Warnings remain as the association receives emphasis. Hold “REWARD LEARNING GONE TOO FAR” through the 33-second boundary.
+- **33–46 s:** Bell-cued apple trials show changing anticipation, then form Cue → Action → Reward.
+- **46–56 s:** Compare natural and drug-associated conceptual signals; transition to particles around a faint, forming neuron.
+- **Source:** Feltenstein et al., 2009 around 12–30 seconds. See `remotion/SCENE03.md` for timing and rendering.
+
+**Scene 04 — Mesocorticolimbic introduction (30 seconds)**
+- **Presentation:** immediately after Scene 03; direct preview `scene04.html`.
+- **0–7 s:** Continue the particle/neuron handoff into a right-facing head, reveal a medial brain cutaway, and zoom to the full brain.
+- **7–15 s:** Highlight VTA in the ventral midbrain, then draw simplified projections to NAc and anterior PFC. Introduce the mesocorticolimbic dopamine system.
+- **15–21 s:** Emphasize mesolimbic activity and reward-related learning/motivation while retaining the rest of the brain.
+- **21–30 s:** Natural-reward icons and the capsule send conceptual pulses toward shared circuitry. End with the full brain visible and a subtle VTA-centered zoom.
+- **Sources:** Piantadosi et al., 2021 → Feltenstein et al., 2009 near 20 seconds.
+- **Reusable anatomy:** `remotion/src/BrainAnatomy.tsx`; coordinate references and Scene 05 handoff in `remotion/SCENE04.md`.
+
+**Scene 05 — Dopamine reward prediction errors (80 seconds)**
+- **Presentation:** immediately after Scene 04; direct preview `scene05.html`.
+- **0–20 s:** Continue the VTA camera movement, reveal a heterogeneous neuronal inset, then trace the established VTA → NAc pathway.
+- **20–40 s:** Contrast background and burst firing, then introduce conceptual expected/actual reward bars and the simple prediction-error relationship.
+- **40–60 s:** Food-delivery trials transfer a burst from unexpected food to a learned bell cue; omitted food produces a firing pause.
+- **60–69 s:** Show expectation updating, a computational analogy, and explicitly schematic rodent stimulation/inhibition conditions.
+- **69–80 s:** Return to the same brain, add blue PFC/vHPC/BLA inputs to NAc, and update a conceptual motivational-value indicator. Hold the final second for Scene 06.
+- **Sources and validation:** `remotion/SCENE05.md`; deterministic timing checks align bursts and pauses with cue/reward events.
 
 **2b Addiction & reward learning — definition**
 - **Stage:** Timeline from *recreational use* → *regular use* → *compulsive use*; goal-directed arrows thinning while a habit loop thickens.

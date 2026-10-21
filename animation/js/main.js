@@ -21,6 +21,25 @@ let current = 0;
      leave(sceneEl)                                                        */
 const sceneHooks = (window.sceneHooks = window.sceneHooks || {});
 
+// Embedded scenes follow presentation navigation and pause when hidden.
+for (const [sceneId, playerId, prefix] of [
+  ['human-and-computer', 'scene01Player', 'scene01'],
+  ['risk-and-addiction', 'scene02Player', 'scene02'],
+  ['addiction-and-reward-learning', 'scene03Player', 'scene03'],
+  ['mesocorticolimbic-introduction', 'scene04Player', 'scene04'],
+  ['dopamine-reward-prediction-errors', 'scene05Player', 'scene05'],
+]) {
+  const send = (action) => document.getElementById(playerId)?.contentWindow?.postMessage({type: `${prefix}:${action}`}, location.origin);
+  sceneHooks[sceneId] = {enter() { send('play'); }, leave() { send('pause'); }};
+  document.getElementById(playerId)?.addEventListener('load', () => {
+    if (scenes[current]?.id === sceneId) send('play');
+  });
+  window.addEventListener('message', (event) => {
+    if (event.origin !== location.origin || event.source !== document.getElementById(playerId)?.contentWindow) return;
+    if (event.data?.type === `${prefix}:ready` && scenes[current]?.id === sceneId) send('play');
+  });
+}
+
 const beatsOf = (scene) => Array.from(scene.querySelectorAll('.beat'));
 
 function showBeats(scene, count) {

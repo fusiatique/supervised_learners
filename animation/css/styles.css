@@ -370,3 +370,7 @@ ul.beats, ol.beats { padding-left: 1.2em; margin: 0 0 16px; }
 @media (prefers-reduced-motion: reduce) {
   :root { --t-scene: 0ms; --t-beat: 0ms; }
 }
+
+/* Remotion maintains its own deterministic 16:9 timeline. */
+.scene--video { justify-items: center; align-content: center; padding: 65px 3vw 75px; }
+.scene--video iframe { width: min(100%, calc((100vh - 150px) * 16 / 9)); aspect-ratio: 16 / 9; border: 0; border-radius: 12px; background: #101827; }
