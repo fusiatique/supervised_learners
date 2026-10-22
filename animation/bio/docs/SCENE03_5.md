@@ -2,7 +2,7 @@
 
 70 seconds · 2100 frames · 30 FPS · 1920 × 1080 · silent.
 
-Inserted between Scene 03 and Scene 04 in `animation/index.html`. Standalone preview: `animation/scene035.html`. Studio composition: `Scene03-5-DopamineIntroduction`; React component: `Scene03_5_DopamineIntroduction`.
+Inserted between Scene 03 and Scene 04 in `animation/index.html`. Standalone preview: `animation/bio/html/scene035.html`. Studio composition: `Scene03-5-DopamineIntroduction`; React component: `Scene03_5_DopamineIntroduction`.
 
 | Time | Frames | Visual story |
 | --- | --- | --- |
@@ -26,4 +26,4 @@ npm run build:scene035
 npm run render:scene035 -- --browser-executable="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 ```
 
-Export: `animation/media/scene035-dopamine-introduction.mp4`.
+Export: `animation/bio/video/scene035-dopamine-introduction.mp4`.

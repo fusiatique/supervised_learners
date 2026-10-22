@@ -1,0 +1,45 @@
+{
+  "name": "neuroai-animation",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "studio": "remotion studio src/index.tsx",
+    "typecheck": "tsc --noEmit",
+    "build:scene01": "esbuild src/player01.tsx --bundle --minify --outfile=../player/scene01-player.js",
+    "render:scene01": "remotion render src/index.tsx Scene01-HumanVsComputer ../video/scene01-human-vs-computer.mp4 --codec=h264 --muted",
+    "build:scene02": "esbuild src/player02.tsx --bundle --minify --outfile=../player/scene02-player.js",
+    "render:scene02": "remotion render src/index.tsx Scene02-RiskAndAddiction ../video/scene02-risk-and-addiction.mp4 --codec=h264 --muted",
+    "check:scene02": "esbuild scripts/check-scene02.tsx --bundle --platform=node --packages=external --outfile=node_modules/.cache/check-scene02.cjs && node node_modules/.cache/check-scene02.cjs",
+    "build:scene03": "esbuild src/player03.tsx --bundle --minify --outfile=../player/scene03-player.js",
+    "render:scene03": "remotion render src/index.tsx Scene03-AddictionAndRewardLearning ../video/scene03-addiction-and-reward-learning.mp4 --codec=h264 --muted",
+    "check:scene03": "esbuild scripts/check-scene03.tsx --bundle --platform=node --packages=external --outfile=node_modules/.cache/check-scene03.cjs && node node_modules/.cache/check-scene03.cjs",
+    "build:scene04": "esbuild src/player04.tsx --bundle --minify --outfile=../player/scene04-player.js",
+    "render:scene04": "remotion render src/index.tsx Scene04-MesocorticolimbicIntroduction ../video/scene04-mesocorticolimbic-introduction.mp4 --codec=h264 --muted",
+    "check:scene04": "esbuild scripts/check-scene04.tsx --bundle --platform=node --packages=external --outfile=node_modules/.cache/check-scene04.cjs && node node_modules/.cache/check-scene04.cjs",
+    "build:scene05": "esbuild src/player05.tsx --bundle --minify --outfile=../player/scene05-player.js",
+    "render:scene05": "remotion render src/index.tsx Scene05-DopamineRewardPredictionErrors ../video/scene05-dopamine-reward-prediction-errors.mp4 --codec=h264 --muted",
+    "check:scene05": "esbuild scripts/check-scene05.tsx --bundle --platform=node --packages=external --outfile=node_modules/.cache/check-scene05.cjs && node node_modules/.cache/check-scene05.cjs",
+    "build:scene035": "esbuild src/player035.tsx --bundle --minify --outfile=../player/scene035-player.js",
+    "render:scene035": "remotion render src/index.tsx Scene03-5-DopamineIntroduction ../video/scene035-dopamine-introduction.mp4 --codec=h264 --muted",
+    "check:scene035": "esbuild scripts/check-scene035.tsx --bundle --platform=node --packages=external --outfile=node_modules/.cache/check-scene035.cjs && node node_modules/.cache/check-scene035.cjs",
+    "build:scene06": "esbuild src/player06.tsx --bundle --minify --outfile=../player/scene06-player.js",
+    "render:scene06": "remotion render src/index.tsx Scene06-MesocorticalPathwayAndPlanning ../video/scene06-mesocortical-planning.mp4 --codec=h264 --muted",
+    "check:scene06": "esbuild scripts/check-scene06.tsx --bundle --platform=node --packages=external --outfile=node_modules/.cache/check-scene06.cjs && node node_modules/.cache/check-scene06.cjs",
+    "build:scene07": "esbuild src/player07.tsx --bundle --minify --outfile=../player/scene07-player.js",
+    "render:scene07": "remotion render src/index.tsx Scene07-PrefrontalControlAndAddiction ../video/scene07-prefrontal-control-addiction.mp4 --codec=h264 --muted",
+    "check:scene07": "esbuild scripts/check-scene07.tsx --bundle --platform=node --packages=external --outfile=node_modules/.cache/check-scene07.cjs && node node_modules/.cache/check-scene07.cjs"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.484",
+    "@remotion/player": "4.0.484",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "remotion": "4.0.484"
+  },
+  "devDependencies": {
+    "@types/react": "19.0.0",
+    "@types/react-dom": "19.0.0",
+    "esbuild": "0.25.5",
+    "typescript": "5.8.3"
+  }
+}

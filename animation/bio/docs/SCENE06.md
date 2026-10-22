@@ -2,7 +2,7 @@
 
 60 seconds · 1800 frames · 30 FPS · 1920 × 1080 · silent.
 
-Follows Scene 05 in `animation/index.html`; standalone preview: `animation/scene06.html`. React component: `Scene06_MesocorticalPathwayAndPlanning`; Studio composition: `Scene06-MesocorticalPathwayAndPlanning`.
+Follows Scene 05 in `animation/index.html`; standalone preview: `animation/bio/html/scene06.html`. React component: `Scene06_MesocorticalPathwayAndPlanning`; Studio composition: `Scene06-MesocorticalPathwayAndPlanning`.
 
 | Time | Frames | Story |
 | --- | --- | --- |
@@ -24,4 +24,4 @@ npm run build:scene06
 npm run render:scene06 -- --browser-executable="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 ```
 
-Export: `animation/media/scene06-mesocortical-planning.mp4`.
+Export: `animation/bio/video/scene06-mesocortical-planning.mp4`.

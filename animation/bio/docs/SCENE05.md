@@ -1,10 +1,10 @@
 # Scene 05 — Dopamine reward prediction errors
 
-Open `animation/index.html#dopamine-reward-prediction-errors` in Live Server. This page follows Scene 04 in the same presentation. The standalone player is `animation/scene05.html`.
+Open `animation/index.html#dopamine-reward-prediction-errors` in Live Server. This page follows Scene 04 in the same presentation. The standalone player is `animation/bio/html/scene05.html`.
 
 80 seconds · 2400 frames · 30 FPS · 1920 × 1080 · silent.
 
-From `animation/remotion` with Node.js 22+:
+From `animation/bio/remotion` with Node.js 22+:
 
 ```sh
 npm run studio
@@ -15,7 +15,7 @@ npm run render:scene05
 ```
 
 Studio composition: `Scene05-DopamineRewardPredictionErrors`.
-Output: `animation/media/scene05-dopamine-reward-prediction-errors.mp4`.
+Output: `animation/bio/video/scene05-dopamine-reward-prediction-errors.mp4`.
 To use an installed Chrome:
 
 ```sh
@@ -37,7 +37,7 @@ npm run render:scene05 -- --browser-executable="/Applications/Google Chrome.app/
 
 ## Reusable components
 
-`src/dopamine-learning-components.tsx` exports `DopamineNeuron`, `DopamineSpikeTrain`, `RewardPredictionError`, `FoodDeliveryExample`, `CueRewardTimeline`, `RodentExperimentIllustration`, `NeuralInputPathway`, and `MotivationalValueIndicator`.
+`bio/remotion/src/dopamine-learning-components.tsx` exports `DopamineNeuron`, `DopamineSpikeTrain`, `RewardPredictionError`, `FoodDeliveryExample`, `CueRewardTimeline`, `RodentExperimentIllustration`, `NeuralInputPathway`, and `MotivationalValueIndicator`.
 
 Spike trains use sparse, burst, and pause modes. All individual spikes have the same upward height. The dip removes events relative to background activity; it never represents negative action potentials. A caller can supply explicit spike times for compound cue-burst/omission-pause trials.
 

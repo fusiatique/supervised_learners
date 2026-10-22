@@ -1,10 +1,10 @@
 # Scene 03 — Addiction and reward learning
 
-Open `animation/index.html` in Live Server. Scene 03 follows Scene 02 in the presentation and pauses when you leave its page. Its direct link is `#addiction-and-reward-learning`. `animation/scene03.html` also provides standalone playback and scrubbing.
+Open `animation/index.html` in Live Server. Scene 03 follows Scene 02 in the presentation and pauses when you leave its page. Its direct link is `#addiction-and-reward-learning`. `animation/bio/html/scene03.html` also provides standalone playback and scrubbing.
 
 60 seconds · 1800 frames · 30 FPS · 1920 × 1080 · silent.
 
-From `animation/remotion` with Node.js 22+:
+From `animation/bio/remotion` with Node.js 22+:
 
 ```sh
 npm run studio
@@ -15,7 +15,7 @@ npm run render:scene03
 ```
 
 Studio composition: `Scene03-AddictionAndRewardLearning`.
-MP4 output: `animation/media/scene03-addiction-and-reward-learning.mp4`.
+MP4 output: `animation/bio/video/scene03-addiction-and-reward-learning.mp4`.
 To render using an installed Chrome:
 
 ```sh
@@ -32,8 +32,8 @@ npm run render:scene03 -- --browser-executable="/Applications/Google Chrome.app/
 | 1380–1739 | Compare natural- and drug-associated learning diagrams, with differently sized conceptual reinforcement signals. |
 | 1740–1799 | Diagrams fade; yellow particles organize around an incomplete neuron outline. No large title remains. |
 
-`T03` in `src/Scene03_AddictionAndRewardLearning.tsx` defines timing boundaries. `getAddictionPose` and `getNaturalLearningPose` are pure frame-based position functions. Drug-seeking choices follow the existing crossroads cubic geometry; all repeated trips include a visible return rather than a teleport. Shared characters, palettes, apples, capsules, warnings, arrows and citations are reused.
+`T03` in `bio/remotion/src/Scene03_AddictionAndRewardLearning.tsx` defines timing boundaries. `getAddictionPose` and `getNaturalLearningPose` are pure frame-based position functions. Drug-seeking choices follow the existing crossroads cubic geometry; all repeated trips include a visible return rather than a teleport. Shared characters, palettes, apples, capsules, warnings, arrows and citations are reused.
 
-`src/reward-components.tsx` contains reusable reward pulses, association strokes, a bell cue and a simple neuron. `DopamineHandoff` is exported for Scene 04: begin it at `frame={1680}` and continue that value for uninterrupted particle motion.
+`bio/remotion/src/reward-components.tsx` contains reusable reward pulses, association strokes, a bell cue and a simple neuron. `DopamineHandoff` is exported for Scene 04: begin it at `frame={1680}` and continue that value for uninterrupted particle motion.
 
 The provided attribution `Feltenstein et al., 2009` fades in around 12 seconds and out around 30 seconds. No attribution is added to the unsourced remainder. Association thickness and pulse sizes are conceptual illustrations, not measured neural quantities; the narrative depicts positive reinforcement as a contributing mechanism rather than a complete explanation of addiction.

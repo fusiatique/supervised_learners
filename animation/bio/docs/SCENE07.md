@@ -2,7 +2,7 @@
 
 60 seconds · 1800 frames · 30 FPS · 1920 × 1080 · silent.
 
-Immediately follows Scene 06 in `animation/index.html`. Standalone preview: `animation/scene07.html`. Studio composition: `Scene07-PrefrontalControlAndAddiction`; React component: `Scene07_PrefrontalControlAndAddiction`.
+Immediately follows Scene 06 in `animation/index.html`. Standalone preview: `animation/bio/html/scene07.html`. Studio composition: `Scene07-PrefrontalControlAndAddiction`; React component: `Scene07_PrefrontalControlAndAddiction`.
 
 | Time | Frames | Visual story |
 | --- | --- | --- |
@@ -34,4 +34,4 @@ npm run build:scene07
 npm run render:scene07 -- --browser-executable="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 ```
 
-Export: `animation/media/scene07-prefrontal-control-addiction.mp4`.
+Export: `animation/bio/video/scene07-prefrontal-control-addiction.mp4`.
