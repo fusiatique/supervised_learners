@@ -88,11 +88,76 @@ function ceilingExplorer() {
 // --- Immediate reward of each action ---------------------------------------
 
 function rewardExplorer() {
-  const rows = $('reward-rows');
-  if (!rows) return;
+  const boxes = $('reward-rows');
+  if (!boxes) return;
   const p = config();
   const LIMIT = 40; // bars span -LIMIT to +LIMIT reward points
+  // Same left-to-right order, symbols and colours as the Environment panel.
+  const ORDER = [NATURAL, NOTHING, DRUG];
   const classes = { [NOTHING]: 'nothing', [NATURAL]: 'natural', [DRUG]: 'drug' };
+  const icons = {
+    [NATURAL]: '<circle class="action-icon-natural" cx="0" cy="1" r="9" /><path class="action-icon-stem" d="M 0 -7 L 3 -12" />',
+    [NOTHING]: '<circle class="action-icon-nothing" cx="0" cy="0" r="9" />',
+    [DRUG]: '<g transform="rotate(-36)"><rect class="action-icon-capsule" x="-12" y="-5" width="24" height="10" rx="5" /><path class="action-icon-drug" d="M 0 -5 H 7 A 5 5 0 0 1 7 5 H 0 Z" /></g>',
+  };
+  const signed = (v) => `${v >= 0 ? '+' : '−'}${fmt(Math.abs(v), 2)}`;
+
+  // The agent's face as the Environment panel draws it (environmentView.js
+  // drawFace): mood 1 with H at the setpoint, -1 when H is 20 or more away.
+  function face(H) {
+    const mood = 1 - 2 * Math.min(1, Math.abs(H - p.S) / 20);
+    const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    const mix = (a, b, t) => {
+      const channel = (hex, i) => parseInt(hex.slice(1 + 2 * i, 3 + 2 * i), 16);
+      return `rgb(${[0, 1, 2].map((i) => Math.round(channel(a, i) + (channel(b, i) - channel(a, i)) * t)).join(', ')})`;
+    };
+    const fill = mood < 0 ? mix(css('--face-neutral'), css('--face-sad'), -mood) : mix(css('--face-neutral'), css('--face-happy'), mood);
+    const worry = Math.max(0, -mood) * 2.5;
+    const arch = Math.max(0, mood) * 1.5;
+    const brows = [-1, 1].map((side) => {
+      const outer = side * 7.5;
+      const inner = side * 2;
+      return `M ${outer} ${-7 + worry} Q ${(outer + inner) / 2} ${-8.5 - arch} ${inner} ${-8 - worry}`;
+    }).join(' ');
+    const mouthY = 5 - Math.max(0, -mood) * 2;
+    return `<svg class="agent-face" viewBox="-15 -15 30 30" role="img" aria-label="The agent">
+      <circle r="13" fill="${fill}" />
+      <path d="${brows} M -6 ${mouthY} Q 0 ${mouthY + 7 * mood} 6 ${mouthY}" />
+      <circle class="face-eye" cx="-4.5" cy="-2.5" r="1.7" /><circle class="face-eye" cx="4.5" cy="-2.5" r="1.7" />
+    </svg>`;
+  }
+
+  // The Environment panel's H bar (environmentView.js drawMeter), drawn at
+  // the same pixel sizes, with a triangle where each option would take H.
+  function meter(H, B, results) {
+    const width = $('reward-meter').clientWidth || 600;
+    const left = 30;
+    const right = width - 30;
+    const barY = 42;
+    const xOf = scale([p.hMin, p.hMax], [left, right]);
+    const top = Math.min(p.hMax, naturalCeiling(B, p));
+    const markers = results.map(({ action, H: nextH }) =>
+      `<path class="meter-target ${classes[action]}" d="M ${xOf(nextH) - 6} ${barY - 12} L ${xOf(nextH) + 6} ${barY - 12} L ${xOf(nextH)} ${barY - 4} Z" />`).join('');
+    // Each triangle's value straight above it.
+    const values = results.map(({ action, H: nextH }) =>
+      `<text class="meter-value ${classes[action]}" x="${xOf(nextH)}" y="${barY - 17}" text-anchor="middle">${fmt(nextH)}</text>`).join('');
+    const labelY = barY + 30;
+    const ends = [p.hMin, p.hMax].map((v) =>
+      `<text class="meter-label" x="${xOf(v)}" y="${labelY}" text-anchor="middle">${v}</text>`).join('');
+    const showB = Math.abs(xOf(B) - xOf(p.S)) > 44 && xOf(B) - xOf(p.hMin) > 16;
+    return `<svg viewBox="0 0 ${width} ${labelY + 6}" width="${width}" height="${labelY + 6}" role="img" aria-label="Internal level H is ${H}, baseline B is ${B}">
+      <text class="meter-title" x="${left}" y="10">Internal level H</text>
+      <rect class="meter-track" x="${left}" y="${barY}" width="${right - left}" height="12" rx="6" />
+      <rect class="meter-band" x="${xOf(B)}" y="${barY}" width="${Math.max(0, xOf(top) - xOf(B))}" height="12" />
+      <line class="meter-setpoint" x1="${xOf(p.S)}" y1="${barY - 5}" x2="${xOf(p.S)}" y2="${barY + 17}" />
+      <rect class="meter-b" x="${xOf(B) - 1.5}" y="${barY - 4}" width="3" height="20" />
+      ${markers}${values}
+      <circle class="meter-h" cx="${xOf(H)}" cy="${barY + 6}" r="7" />
+      ${ends}
+      <text class="meter-label" x="${xOf(p.S)}" y="${labelY}" text-anchor="middle">setpoint</text>
+      ${showB ? `<text class="meter-label b" x="${xOf(B)}" y="${labelY}" text-anchor="middle">B</text>` : ''}
+    </svg>`;
+  }
 
   function render() {
     const H = Number($('reward-h').value);
@@ -100,21 +165,25 @@ function rewardExplorer() {
     const results = ACTIONS.map((_, action) => ({ action, ...step({ H, B }, action, p) }));
     const best = results.reduce((a, b) => (b.reward > a.reward ? b : a));
 
-    rows.innerHTML = results.map(({ action, H: nextH, reward, driveReduction, drugTerm }) => {
+    boxes.innerHTML = ORDER.map((action) => {
+      const { H: nextH, reward, driveReduction, drugTerm } = results[action];
       const width = (Math.min(Math.abs(reward), LIMIT) / LIMIT) * 50;
       const left = reward >= 0 ? 50 : 50 - width;
-      const detail = action === DRUG
-        ? `drive change ${fmt(driveReduction)}, pleasure − harm ${drugTerm >= 0 ? '+' : ''}${fmt(drugTerm)}`
-        : `drive change ${fmt(driveReduction)}`;
-      return `<div class="reward-row${action === best.action ? ' best' : ''}">
-        <span class="reward-name">${ACTIONS[action].name}</span>
-        <span class="reward-track" aria-hidden="true">
-          <span class="reward-bar ${classes[action]}" style="left:${left}%;width:${width}%"></span>
-        </span>
-        <span class="reward-value">${reward >= 0 ? '+' : ''}${fmt(reward)}</span>
-        <span class="reward-detail">H ${H} → ${fmt(nextH)} · ${detail}</span>
+      const isBest = action === best.action;
+      const parts = action === DRUG
+        ? `H change ${signed(driveReduction)} · pleasure − harm ${signed(drugTerm)}`
+        : '';
+      return `<div class="option-box ${classes[action]}${isBest ? ' best' : ''}">
+        <div class="option-name"><svg class="action-icon" viewBox="-13 -13 26 26" aria-hidden="true">${icons[action]}</svg>${ACTIONS[action].name}</div>
+        <div class="option-move">H ${H} → ${fmt(nextH)}</div>
+        <div class="option-track" aria-hidden="true"><span class="option-bar ${classes[action]}" style="left:${left}%;width:${width}%"></span></div>
+        <div class="option-reward">Reward <strong>${signed(reward)}</strong></div>
+        <div class="option-parts">${parts}</div>
+        <div class="option-best">${isBest ? 'Best choice' : ''}</div>
       </div>`;
     }).join('');
+    $('reward-agent').innerHTML = `<div style="grid-column: ${ORDER.indexOf(best.action) + 1}">${face(H)}</div>`;
+    $('reward-meter').innerHTML = meter(H, B, results);
 
     const distance = Math.abs(p.S - H);
     $('reward-readout').innerHTML = distance < 1 && best.action !== DRUG
@@ -134,6 +203,14 @@ function rewardExplorer() {
     });
   });
   h.update();
+  b.update();
+  // Redraw at the new pixel width when the figure is resized.
+  let shownWidth = $('reward-meter').clientWidth;
+  new ResizeObserver(() => {
+    if ($('reward-meter').clientWidth === shownWidth) return;
+    shownWidth = $('reward-meter').clientWidth;
+    render();
+  }).observe($('reward-meter'));
 }
 
 // --- Embedded simulation panels -------------------------------------------

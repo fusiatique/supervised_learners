@@ -12,6 +12,10 @@
 
   --agent: #9bbce8;
   --agent-core: #f3dc91;
+  --agent-ink: #3b3526;
+  --face-happy: #8fd18a;
+  --face-neutral: #f3dc91;
+  --face-sad: #ef8f80;
   --diagram-blue: #4b83bd;
   --diagram-gold: #a77b0b;
   --diagram-green: #43825f;
@@ -23,6 +27,8 @@
   --act-nothing: #d9d7d0;
   --act-natural: #1baf7a;
   --act-drug: #e34948;
+  --line-h: #2a78d6;
+  --line-b: #a8791c;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -50,6 +56,8 @@
     --act-nothing: #4a4945;
     --act-natural: #2fc28c;
     --act-drug: #ee6463;
+    --line-h: #6aa5ec;
+    --line-b: #e5c46a;
   }
 }
 :root[data-theme="dark"] {
@@ -87,6 +95,8 @@
     --act-nothing: #4a4945;
     --act-natural: #2fc28c;
     --act-drug: #ee6463;
+    --line-h: #6aa5ec;
+    --line-b: #e5c46a;
   }
 
 
@@ -168,6 +178,10 @@ h3 {
   margin-top: 10px;
 }
 
+.tutorial-content .reading + p {
+  margin-top: 18px;
+}
+
 .tutorial-content ul,
 .tutorial-content ol {
   padding-left: 22px;
@@ -190,6 +204,70 @@ h3 {
 }
 
 .equation code {
+  white-space: nowrap;
+}
+
+/* A word that shows extra detail in a popup on hover or keyboard focus. */
+.hover-info {
+  position: relative;
+  border-bottom: 1px dotted currentColor;
+  cursor: help;
+}
+
+.hover-info-popup {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  z-index: 10;
+  width: max-content;
+  max-width: min(320px, 80vw);
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 4px 16px #0002;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.hover-info-note {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+.hover-info:hover .hover-info-popup,
+.hover-info:focus .hover-info-popup {
+  display: block;
+}
+
+.formula {
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--page);
+  font-family: Georgia, serif;
+  white-space: nowrap;
+}
+
+/* In a popup, a formula gets its own line and may wrap to fit the box. */
+.hover-info-popup .formula {
+  display: block;
+  margin-top: 6px;
+  padding: 4px 8px;
+  white-space: normal;
+}
+
+/* The part of a formula a popup is about. */
+.formula-mark {
+  padding: 0 3px;
+  border-radius: 3px;
+  background: var(--diagram-risk);
+  color: var(--text-primary);
+  font-weight: 700;
   white-space: nowrap;
 }
 
@@ -266,6 +344,32 @@ h3 {
 .diagram-current-dot { stroke: var(--surface); stroke-width: 2.5; }
 .diagram-current-dot.ok { fill: var(--diagram-green); }
 .diagram-current-dot.short { fill: var(--diagram-red); }
+
+/* Legend under a tutorial figure, drawn with the figure's own classes. */
+.figure-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin: 8px 0 4px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.figure-key span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Overrides .tutorial-visual svg, which stretches figures to full width. */
+.tutorial-visual .figure-key svg {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 12px;
+  min-width: 0;
+  height: 12px;
+  overflow: visible;
+}
 .diagram-status-dependent { stroke: var(--diagram-red); }
 .diagram-status-risk { stroke: var(--diagram-gold); }
 .diagram-status-clean { stroke: var(--diagram-green); }
@@ -286,44 +390,125 @@ h3 {
   margin-bottom: 10px;
 }
 
+.figure-toolbar button {
+  padding: 3px 9px;
+  font-size: 12px;
+}
+
+.figure-toolbar-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
 .figure-readout {
   margin-top: 8px;
   min-height: 2.9em;
 }
 
-.reward-rows {
+/* Section 4's options, styled like the Environment panel's boxes. */
+.option-boxes {
   display: grid;
-  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 6px;
 }
 
-.reward-row {
+.option-box {
   display: grid;
-  grid-template-columns: 110px 1fr 56px;
-  align-items: center;
-  gap: 2px 10px;
-  font-size: 13px;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  font-size: 12px;
+  color: var(--text-secondary);
 }
 
-.reward-row.best .reward-name,
-.reward-row.best .reward-value { font-weight: 650; }
+.option-box.best { border-width: 3px; padding: 8px 10px; }
+.option-box.best.natural { border-color: var(--act-natural); }
+.option-box.best.drug { border-color: var(--act-drug); }
+.option-box.best.nothing { border-color: var(--text-muted); }
 
-.reward-track {
+.option-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.option-track {
   position: relative;
-  height: 16px;
-  border-radius: 4px;
-  background: linear-gradient(var(--axis), var(--axis)) center / 1px 100% no-repeat, var(--surface);
+  height: 10px;
+  background: linear-gradient(var(--text-secondary), var(--text-secondary)) center / 1px 100% no-repeat, var(--grid);
 }
 
-.reward-bar {
+.option-bar {
   position: absolute;
-  top: 2px;
-  bottom: 2px;
-  border-radius: 3px;
+  top: 0;
+  bottom: 0;
 }
 
-.reward-bar.nothing { background: var(--text-muted); }
-.reward-bar.natural { background: var(--diagram-green); }
-.reward-bar.drug { background: var(--diagram-red); }
+.option-bar.natural { background: var(--act-natural); }
+.option-bar.drug { background: var(--act-drug); }
+.option-bar.nothing { background: var(--text-muted); }
+
+.option-reward strong {
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.option-parts,
+.option-best { min-height: 1.4em; color: var(--text-muted); }
+.option-best { font-weight: 600; color: var(--text-primary); }
+
+/* The agent, standing under the option it would pick. */
+.agent-lane {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed var(--border);
+}
+
+.agent-lane > div { display: flex; justify-content: center; }
+.tutorial-visual .agent-face { display: block; width: 32px; min-width: 0; height: 32px; }
+.agent-face > circle:first-child { stroke: var(--agent-ink); stroke-width: 1.5; }
+.agent-face path { fill: none; stroke: var(--agent-ink); stroke-width: 1.6; stroke-linecap: round; }
+.agent-face .face-eye { fill: var(--agent-ink); }
+
+.reward-meter { margin-top: 10px; }
+.meter-track { fill: var(--grid); }
+.meter-band { fill: var(--act-natural); opacity: 0.35; }
+.meter-setpoint { stroke: var(--text-primary); stroke-width: 1; stroke-dasharray: 3 3; }
+.meter-b { fill: var(--line-b); }
+.meter-h { fill: var(--line-h); stroke: var(--surface); stroke-width: 2; }
+.meter-target.natural { fill: var(--act-natural); }
+.meter-target.drug { fill: var(--act-drug); }
+.meter-target.nothing { fill: var(--text-muted); }
+.meter-value { font-size: 10px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.meter-value.natural { fill: var(--act-natural); }
+.meter-value.drug { fill: var(--act-drug); }
+.meter-value.nothing { fill: var(--text-muted); }
+.meter-label { fill: var(--text-muted); font-size: 11px; }
+.meter-title { fill: var(--text-secondary); font-size: 11px; }
+.meter-label.b { fill: var(--line-b); }
+
+/* .tutorial-visual svg stretches figures to full width; keep icons small. */
+.tutorial-visual .option-name .action-icon {
+  display: inline-block;
+  width: 1.15em;
+  min-width: 0;
+  height: 1.15em;
+  margin-right: 6px;
+  vertical-align: -0.25em;
+}
+
+.tutorial-visual .reward-meter svg { width: auto; min-width: 0; max-width: none; }
+
+@media (max-width: 640px) {
+  .option-boxes { grid-template-columns: minmax(0, 1fr); }
+  .agent-lane { grid-template-columns: minmax(0, 1fr); }
+  .agent-lane > div { grid-column: 1 !important; }
+}
 
 /* Inline versions of the Environment panel's action icons. */
 .action-icon { width: 0.9em; height: 0.9em; margin: 0 0.15em 0 0.05em; vertical-align: -0.1em; }
@@ -332,23 +517,6 @@ h3 {
 .action-icon-stem { fill: none; stroke: var(--text-secondary); stroke-width: 2; }
 .action-icon-capsule { fill: var(--surface); stroke: var(--act-drug); stroke-width: 2; }
 .action-icon-drug { fill: var(--act-drug); }
-
-.reward-value {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-
-.reward-detail {
-  grid-column: 2 / -1;
-  font-size: 12px;
-  color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-}
-
-@media (max-width: 640px) {
-  .reward-row { grid-template-columns: 84px 1fr 48px; }
-  .reward-detail { grid-column: 1 / -1; }
-}
 
 /* --- Layout -------------------------------------------------------------- */
 
@@ -701,12 +869,90 @@ summary {
 .reveal[open] summary,
 .reading[open] summary { margin-bottom: 6px; }
 .reveal p + p { margin-top: 8px; }
-
 .tutorial-note {
   padding: 8px 12px;
   border-radius: 8px;
   background: var(--page);
   color: var(--text-secondary);
+}
+
+/* Inline copies of the Environment panel's key: H, B, setpoint and the natural-reward band. */
+.key-icon { height: 1em; vertical-align: -0.15em; }
+.key-h { fill: var(--line-h); }
+.key-b { fill: var(--line-b); }
+.key-s { stroke: var(--text-secondary); stroke-width: 2; stroke-dasharray: 3 2; }
+.key-band { fill: var(--act-natural); opacity: 0.35; }
+
+/* Inline copies of the agent's face (js/environmentView.js drawFace) at
+   mood 1, 0 and -1. */
+.face-icon { width: 1.3em; height: 1.3em; vertical-align: -0.3em; }
+.face-icon circle:not(.face-eye) { stroke: var(--agent-ink); stroke-width: 1.5; }
+.face-icon path { fill: none; stroke: var(--agent-ink); stroke-width: 1.6; stroke-linecap: round; }
+.face-icon .face-eye { fill: var(--agent-ink); }
+.face-icon .face-happy { fill: var(--face-happy); }
+.face-icon .face-neutral { fill: var(--face-neutral); }
+.face-icon .face-sad { fill: var(--face-sad); }
+
+.action-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+/* Inline replicas of the tutorial's controls, for naming them in the text. */
+.ui-button {
+  display: inline-block;
+  padding: 1px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.ui-button-primary {
+  background: var(--agent);
+  border-color: var(--agent);
+  color: #fff;
+}
+
+@media (prefers-color-scheme: dark) {
+  .ui-button-primary { color: #0b0b0b; }
+}
+
+.ui-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.ui-check::before {
+  content: "";
+  width: 11px;
+  height: 11px;
+  border: 1px solid var(--text-muted);
+  border-radius: 3px;
+  background: var(--surface);
+}
+
+.ui-reveal {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--diagram-blue);
+  white-space: nowrap;
+}
+
+.ui-reveal::before { content: "▸ "; }
+
+.ui-try {
+  padding: 1px 8px;
+  border-left: 3px solid var(--diagram-blue);
+  border-radius: 0 6px 6px 0;
+  background: var(--page);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .embed-restart {

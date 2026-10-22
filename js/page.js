@@ -354,7 +354,7 @@ function drawPolicy() {
   ctx.translate(12, pad.top + (hBins * cellH) / 2);
   ctx.rotate(-Math.PI / 2);
   ctx.textAlign = 'center';
-  ctx.fillText('Current State (D)', 0, 0);
+  ctx.fillText('Internal level H', 0, 0);
   ctx.restore();
 
   // The last TRAIL states, oldest faintest, ending at the dot.
