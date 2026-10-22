@@ -31,6 +31,7 @@ for (const [sceneId, playerId, prefix] of [
   ['dopamine-reward-prediction-errors', 'scene05Player', 'scene05'],
   ['mesocortical-planning', 'scene06Player', 'scene06'],
   ['prefrontal-control-addiction', 'scene07Player', 'scene07'],
+  ['synaptic-plasticity-addiction', 'scene08Player', 'scene08'],
 ]) {
   const send = (action) => document.getElementById(playerId)?.contentWindow?.postMessage({type: `${prefix}:${action}`}, location.origin);
   sceneHooks[sceneId] = {enter() { send('play'); }, leave() { send('pause'); }};

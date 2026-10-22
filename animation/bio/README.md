@@ -11,6 +11,7 @@
 
 | 06 Mesocortical pathway and planning | [html/scene06.html](html/scene06.html) | [docs/SCENE06.md](docs/SCENE06.md) |
 | 07 Prefrontal control and addiction | [html/scene07.html](html/scene07.html) | [docs/SCENE07.md](docs/SCENE07.md) |
+| 08 Synaptic plasticity and addiction | [html/scene08.html](html/scene08.html) | [docs/SCENE08.md](docs/SCENE08.md) |
 
 - `html/sceneNN.html` loads `player/sceneNN-player.js`, a bundled, scrubbable Remotion Player. Watching needs no install.
 - `video/` holds the rendered MP4 of each scene.
