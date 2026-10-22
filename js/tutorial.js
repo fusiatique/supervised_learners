@@ -235,5 +235,22 @@ for (const figure of document.querySelectorAll('.simulation-embed')) {
   figure.querySelector('figcaption').prepend(restart);
 }
 
+// Keeps hover popups inside the window: a popup that would stick out on the
+// right is shifted left, and one that would stick out on the left, right.
+for (const word of document.querySelectorAll('.hover-info')) {
+  const popup = word.querySelector('.hover-info-popup');
+  const place = () => {
+    popup.style.left = '0px';
+    const box = popup.getBoundingClientRect();
+    const margin = 8;
+    let shift = 0;
+    if (box.right > window.innerWidth - margin) shift = window.innerWidth - margin - box.right;
+    if (box.left + shift < margin) shift = margin - box.left;
+    popup.style.left = `${shift}px`;
+  };
+  word.addEventListener('mouseenter', place);
+  word.addEventListener('focusin', place);
+}
+
 ceilingExplorer();
 rewardExplorer();

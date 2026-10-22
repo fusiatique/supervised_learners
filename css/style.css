@@ -29,6 +29,7 @@
   --act-drug: #e34948;
   --line-h: #2a78d6;
   --line-b: #a8791c;
+  --unlearned: #f3f2ee;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -58,6 +59,7 @@
     --act-drug: #ee6463;
     --line-h: #6aa5ec;
     --line-b: #e5c46a;
+    --unlearned: #232321;
   }
 }
 :root[data-theme="dark"] {
@@ -97,6 +99,7 @@
     --act-drug: #ee6463;
     --line-h: #6aa5ec;
     --line-b: #e5c46a;
+    --unlearned: #232321;
   }
 
 
@@ -370,6 +373,11 @@ h3 {
   height: 12px;
   overflow: visible;
 }
+/* Status labels named in the tutorial, in the Now panel's colours. */
+.status-word.clean { color: var(--act-natural); }
+.status-word.risk { color: var(--diagram-gold); }
+.status-word.dependent { color: var(--act-drug); }
+
 .diagram-status-dependent { stroke: var(--diagram-red); }
 .diagram-status-risk { stroke: var(--diagram-gold); }
 .diagram-status-clean { stroke: var(--diagram-green); }
@@ -398,6 +406,12 @@ h3 {
 .figure-toolbar-label {
   font-size: 12px;
   color: var(--text-secondary);
+}
+
+.figure-title {
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .figure-readout {
@@ -869,6 +883,61 @@ summary {
 .reveal[open] summary,
 .reading[open] summary { margin-bottom: 6px; }
 .reveal p + p { margin-top: 8px; }
+/* Section 8: the parameters as soft tiles, one under the other. */
+.tutorial-content .param-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  margin: 16px 0 20px;
+  padding: 0;
+  list-style: none;
+}
+
+.tutorial-content .param-list > li {
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--page);
+}
+
+.param-default {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  vertical-align: 1px;
+}
+
+/* The explanation fills the tile; Raising it and Lowering it sit at its right edge. */
+.param-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px;
+  align-items: start;
+}
+
+.param-effects { text-align: right; white-space: nowrap; }
+.param-effects .hover-info-popup { white-space: normal; text-align: left; }
+
+
+@media (max-width: 640px) {
+  .param-body { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+}
+
+.tutorial-content .param-main > p {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.param-effects p { font-size: 13px; color: var(--text-secondary); }
+.param-effects .param-default { margin: 0 0 6px; }
+
+.tutorial-content .param-effects p + p { margin-top: 4px; }
 .tutorial-note {
   padding: 8px 12px;
   border-radius: 8px;
@@ -882,6 +951,22 @@ summary {
 .key-b { fill: var(--line-b); }
 .key-s { stroke: var(--text-secondary); stroke-width: 2; stroke-dasharray: 3 2; }
 .key-band { fill: var(--act-natural); opacity: 0.35; }
+.key-square {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  vertical-align: -1px;
+}
+.key-square.nothing { background: var(--act-nothing); }
+.key-square.natural { background: var(--act-natural); }
+.key-square.drug { background: var(--act-drug); }
+.key-square.unlearned { background: var(--unlearned); border: 1px solid var(--border); }
+.key-line-h { stroke: var(--line-h); stroke-width: 3; stroke-linecap: round; }
+.key-line-b { stroke: var(--line-b); stroke-width: 3; stroke-linecap: round; }
+.key-dash { stroke: var(--text-secondary); stroke-width: 2; stroke-dasharray: 4 3; }
+.key-tick-drug { fill: var(--act-drug); }
+.key-tick-forced { fill: var(--text-primary); }
 
 /* Inline copies of the agent's face (js/environmentView.js drawFace) at
    mood 1, 0 and -1. */
@@ -918,6 +1003,17 @@ summary {
 
 @media (prefers-color-scheme: dark) {
   .ui-button-primary { color: #0b0b0b; }
+}
+
+.ui-select::after { content: " ▾"; color: var(--text-muted); }
+
+/* The dotted, bold hover words of the simulation, such as "Explore the graph". */
+.ui-hover-word {
+  border-bottom: 1px dotted currentColor;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .ui-check {
@@ -977,6 +1073,8 @@ summary {
 .simulation-embed {
   padding: 12px;
 }
+
+.simulation-embed figcaption { display: flow-root; }
 
 .simulation-embed iframe {
   display: block;

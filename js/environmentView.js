@@ -266,8 +266,10 @@ function drawMeter(ctx, life, width, top) {
   ctx.textAlign = 'center';
   ctx.fillStyle = cssVar('--text-muted');
   ctx.fillText('setpoint', xOf(p.S), barY + 30);
+  ctx.fillText(String(p.hMin), xOf(p.hMin), barY + 30);
+  ctx.fillText(String(p.hMax), xOf(p.hMax), barY + 30);
   ctx.fillStyle = cssVar('--line-b');
-  if (Math.abs(xOf(B) - xOf(p.S)) > 44) ctx.fillText('B', xOf(B), barY + 30);
+  if (Math.abs(xOf(B) - xOf(p.S)) > 44 && xOf(B) - xOf(p.hMin) > 16) ctx.fillText('B', xOf(B), barY + 30);
 }
 
 // Draws the panel. Returns true while the agent is still walking, so the
