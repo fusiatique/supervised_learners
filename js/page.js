@@ -354,7 +354,7 @@ function drawPolicy() {
   ctx.translate(12, pad.top + (hBins * cellH) / 2);
   ctx.rotate(-Math.PI / 2);
   ctx.textAlign = 'center';
-  ctx.fillText('Current State (D)', 0, 0);
+  ctx.fillText('Internal level H', 0, 0);
   ctx.restore();
 
   // The last TRAIL states, oldest faintest, ending at the dot.
@@ -579,8 +579,35 @@ document.addEventListener('keydown', (event) => {
     closeStateInfo();
   }
 });
+// Embedded in the tutorial: index.html?panels=playback,trace&learn=20000&drug=1
+// shows only the listed panels, first lets the agent learn drug-free for
+// `learn` steps, then sets whether the drug is available.
+const embed = new URLSearchParams(location.search);
+if (embed.has('panels')) {
+  const shown = new Set(embed.get('panels').split(','));
+  document.body.classList.add('embedded');
+  for (const panel of document.querySelectorAll('[data-panel]')) panel.hidden = !shown.has(panel.dataset.panel);
+  for (const group of document.querySelectorAll('.controls, .overview-row')) {
+    group.hidden = !group.querySelector('[data-panel]:not([hidden])');
+  }
+  // Lets the tutorial size its iframe to fit.
+  new ResizeObserver(() => {
+    parent.postMessage({ type: 'simulation-height', height: document.documentElement.scrollHeight }, '*');
+  }).observe(document.body);
+}
+
 xSpan = Number($('window').value);
 reset();
+if (embed.has('learn')) {
+  life.p.drugAvailable = false;
+  for (let i = 0; i < Number(embed.get('learn')); i++) tick();
+  life.p.drugAvailable = $('drug-available').checked;
+}
+if (embed.has('drug')) {
+  $('drug-available').checked = embed.get('drug') === '1';
+  life.p.drugAvailable = $('drug-available').checked;
+}
+render();
 updateSpeedLabel();
 
 $('play').addEventListener('click', () => {

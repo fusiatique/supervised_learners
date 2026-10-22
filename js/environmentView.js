@@ -124,7 +124,65 @@ function drawStations(ctx, life, view, shares, { cardW, centers }, advanced) {
   });
 }
 
-function drawAgent(ctx, view, centers, floorY, now) {
+// How content the agent is: 1 with H at the setpoint, 0 when H is
+// MOOD_RANGE / 2 away, -1 when it is MOOD_RANGE or more away, either way.
+const MOOD_RANGE = 20;
+const moodOf = (H, S) => 1 - 2 * Math.min(1, Math.abs(H - S) / MOOD_RANGE);
+
+// Mixes two #rrggbb colours, t = 0 giving a and t = 1 giving b.
+function mix(a, b, t) {
+  const channel = (hex, i) => parseInt(hex.slice(1 + 2 * i, 3 + 2 * i), 16);
+  const rgb = [0, 1, 2].map((i) => Math.round(channel(a, i) + (channel(b, i) - channel(a, i)) * t));
+  return `rgb(${rgb.join(', ')})`;
+}
+
+// Face colour: red when distressed (mood -1), yellow when neutral, green when content (1).
+const faceColor = (mood) => mood < 0
+  ? mix(cssVar('--face-neutral'), cssVar('--face-sad'), -mood)
+  : mix(cssVar('--face-neutral'), cssVar('--face-happy'), mood);
+
+// The agent as a face whose mouth curves from a smile (mood 1) to a frown (-1),
+// with brows that arch when content and pull up in the middle when distressed.
+function drawFace(ctx, x, y, mood) {
+  const ink = cssVar('--agent-ink');
+  ctx.fillStyle = faceColor(mood);
+  ctx.strokeStyle = ink;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(x, y, 13, 0, 2 * Math.PI);
+  ctx.fill();
+  ctx.stroke();
+
+  const worry = Math.max(0, -mood) * 2.5;
+  const arch = Math.max(0, mood) * 1.5;
+  ctx.lineCap = 'round';
+  for (const side of [-1, 1]) {
+    const outer = x + side * 7.5;
+    const inner = x + side * 2;
+    ctx.beginPath();
+    ctx.moveTo(outer, y - 7 + worry);
+    ctx.quadraticCurveTo((outer + inner) / 2, y - 8.5 - arch, inner, y - 8 - worry);
+    ctx.stroke();
+  }
+
+  ctx.fillStyle = ink;
+  for (const dx of [-4.5, 4.5]) {
+    ctx.beginPath();
+    ctx.arc(x + dx, y - 2.5, 1.7, 0, 2 * Math.PI);
+    ctx.fill();
+  }
+  // A frown sits a little higher so it stays inside the face.
+  const mouthY = y + 5 - Math.max(0, -mood) * 2;
+  ctx.lineWidth = 1.8;
+  ctx.beginPath();
+  ctx.moveTo(x - 6, mouthY);
+  ctx.quadraticCurveTo(x, mouthY + 7 * mood, x + 6, mouthY);
+  ctx.stroke();
+  ctx.lineCap = 'butt';
+  ctx.lineWidth = 1;
+}
+
+function drawAgent(ctx, view, centers, floorY, now, mood) {
   const t = view.duration > 0 ? Math.min(1, (now - view.at) / view.duration) : 1;
   const ease = t * t * (3 - 2 * t);
   const x = centers[view.from] + (centers[view.to] - centers[view.from]) * ease;
@@ -145,14 +203,7 @@ function drawAgent(ctx, view, centers, floorY, now) {
     ctx.stroke();
   }
 
-  ctx.fillStyle = cssVar('--agent');
-  ctx.beginPath();
-  ctx.arc(x, y, 13, 0, 2 * Math.PI);
-  ctx.fill();
-  ctx.fillStyle = cssVar('--agent-core');
-  ctx.beginPath();
-  ctx.arc(x, y, 6, 0, 2 * Math.PI);
-  ctx.fill();
+  drawFace(ctx, x, y, mood);
 
   // A forced dose shows briefly as a tag above the agent.
   if (now - view.forcedAt < 900) {
@@ -182,7 +233,7 @@ function drawMeter(ctx, life, width, top) {
   ctx.font = `11px ${CANVAS_FONT}`;
   ctx.textAlign = 'left';
   ctx.fillStyle = cssVar('--text-secondary');
-  ctx.fillText('Current State (D)', left, top + 8);
+  ctx.fillText('Internal level H', left, top + 8);
 
   roundRect(ctx, left, barY, right - left, 12, 6);
   ctx.fillStyle = cssVar('--grid');
@@ -226,7 +277,8 @@ export function drawEnvironment(canvas, life, view, shares, now, advanced = fals
   const geometry = layout(width);
   const floorY = CARD_TOP + CARD_H + 34;
   drawStations(ctx, life, view, shares, geometry, advanced);
-  const moving = drawAgent(ctx, view, geometry.centers, floorY, now);
+  const mood = moodOf(life.state.H, life.p.S);
+  const moving = drawAgent(ctx, view, geometry.centers, floorY, now, mood);
   drawMeter(ctx, life, width, height - 52);
   return moving;
 }

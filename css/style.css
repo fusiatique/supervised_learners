@@ -12,6 +12,23 @@
 
   --agent: #9bbce8;
   --agent-core: #f3dc91;
+  --agent-ink: #3b3526;
+  --face-happy: #8fd18a;
+  --face-neutral: #f3dc91;
+  --face-sad: #ef8f80;
+  --diagram-blue: #4b83bd;
+  --diagram-gold: #a77b0b;
+  --diagram-green: #43825f;
+  --diagram-red: #b84d4d;
+  --diagram-risk: #f7e8dc;
+  --diagram-grid: #deded8;
+  --diagram-feedback: #76766f;
+
+  --act-nothing: #d9d7d0;
+  --act-natural: #1baf7a;
+  --act-drug: #e34948;
+  --line-h: #2a78d6;
+  --line-b: #a8791c;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -28,6 +45,19 @@
 
     --agent: #9bbce8;
     --agent-core: #f3dc91;
+    --diagram-blue: #91bdea;
+    --diagram-gold: #f0c96c;
+    --diagram-green: #8fc8a2;
+    --diagram-red: #f09393;
+    --diagram-risk: #633c2f;
+    --diagram-grid: #454542;
+    --diagram-feedback: #b8b7b0;
+
+    --act-nothing: #4a4945;
+    --act-natural: #2fc28c;
+    --act-drug: #ee6463;
+    --line-h: #6aa5ec;
+    --line-b: #e5c46a;
   }
 }
 :root[data-theme="dark"] {
@@ -54,6 +84,19 @@
     --on-item: #34313d;
     --harm: #e66767;
     --target: #e5c46a;
+    --diagram-blue: #91bdea;
+    --diagram-gold: #f0c96c;
+    --diagram-green: #8fc8a2;
+    --diagram-red: #f09393;
+    --diagram-risk: #633c2f;
+    --diagram-grid: #454542;
+    --diagram-feedback: #b8b7b0;
+
+    --act-nothing: #4a4945;
+    --act-natural: #2fc28c;
+    --act-drug: #ee6463;
+    --line-h: #6aa5ec;
+    --line-b: #e5c46a;
   }
 
 
@@ -125,10 +168,18 @@ h3 {
   padding: 0 20px;
 }
 
+.tutorial-content > .panel {
+  min-width: 0;
+}
+
 .tutorial-content p + p,
 .tutorial-content ul + p,
 .tutorial-content ol + p {
   margin-top: 10px;
+}
+
+.tutorial-content .reading + p {
+  margin-top: 18px;
 }
 
 .tutorial-content ul,
@@ -155,6 +206,317 @@ h3 {
 .equation code {
   white-space: nowrap;
 }
+
+/* A word that shows extra detail in a popup on hover or keyboard focus. */
+.hover-info {
+  position: relative;
+  border-bottom: 1px dotted currentColor;
+  cursor: help;
+}
+
+.hover-info-popup {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  z-index: 10;
+  width: max-content;
+  max-width: min(320px, 80vw);
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 4px 16px #0002;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.hover-info-note {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+.hover-info:hover .hover-info-popup,
+.hover-info:focus .hover-info-popup {
+  display: block;
+}
+
+.formula {
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--page);
+  font-family: Georgia, serif;
+  white-space: nowrap;
+}
+
+/* In a popup, a formula gets its own line and may wrap to fit the box. */
+.hover-info-popup .formula {
+  display: block;
+  margin-top: 6px;
+  padding: 4px 8px;
+  white-space: normal;
+}
+
+/* The part of a formula a popup is about. */
+.formula-mark {
+  padding: 0 3px;
+  border-radius: 3px;
+  background: var(--diagram-risk);
+  color: var(--text-primary);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.tutorial-visual {
+  margin: 16px 0 4px;
+  padding: 14px 16px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--page);
+}
+
+.tutorial-visual svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  font-family: inherit;
+}
+
+.tutorial-diagram-scroll {
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.tutorial-diagram-scroll:focus-visible {
+  outline: 2px solid var(--agent);
+  outline-offset: 3px;
+}
+
+.tutorial-visual figcaption {
+  margin-top: 8px;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+@media (max-width: 640px) {
+  .tutorial-visual svg { min-width: 560px; }
+}
+
+.diagram-card {
+  fill: var(--surface);
+  stroke: var(--border);
+  stroke-width: 1.5;
+}
+
+.diagram-card-state { stroke: var(--diagram-blue); }
+.diagram-card-learn { stroke: var(--diagram-green); }
+.diagram-heading { fill: var(--text-primary); font-size: 15px; font-weight: 650; }
+.diagram-copy { fill: var(--text-secondary); font-size: 13px; }
+.diagram-note,
+.diagram-tick { fill: var(--text-muted); font-size: 12px; }
+.diagram-label,
+.diagram-axis-label { fill: var(--text-primary); font-size: 13px; }
+.diagram-arrow,
+.diagram-feedback { fill: none; stroke: var(--diagram-feedback); stroke-width: 1.8; }
+.diagram-feedback { stroke-dasharray: 4 4; }
+.diagram-arrowhead { fill: var(--diagram-feedback); }
+.diagram-risk-zone { fill: var(--diagram-risk); }
+.diagram-grid { stroke: var(--diagram-grid); stroke-width: 1; }
+.diagram-setpoint { stroke: var(--diagram-red); stroke-width: 1.7; stroke-dasharray: 6 5; }
+.diagram-threshold { stroke: var(--diagram-red); stroke-width: 1.4; stroke-dasharray: 4 5; }
+.diagram-ceiling { fill: none; stroke: var(--diagram-green); stroke-width: 3; }
+.diagram-threshold-dot { fill: var(--diagram-red); stroke: var(--surface); stroke-width: 2; }
+.diagram-axis { stroke: var(--axis); stroke-width: 1.3; }
+.diagram-risk-label,
+.diagram-threshold-label { fill: var(--diagram-red); font-size: 12px; font-weight: 600; }
+.diagram-h-line { fill: none; stroke: var(--diagram-blue); stroke-width: 3; }
+.diagram-b-line { fill: none; stroke: var(--diagram-gold); stroke-width: 3; }
+.diagram-dose-mark { stroke: var(--diagram-red); stroke-width: 1.5; stroke-dasharray: 3 4; }
+.diagram-current { stroke: var(--text-muted); stroke-width: 1.2; stroke-dasharray: 2 4; }
+.diagram-gap { stroke: var(--diagram-red); stroke-width: 3; }
+.diagram-current-dot { stroke: var(--surface); stroke-width: 2.5; }
+.diagram-current-dot.ok { fill: var(--diagram-green); }
+.diagram-current-dot.short { fill: var(--diagram-red); }
+
+/* Legend under a tutorial figure, drawn with the figure's own classes. */
+.figure-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin: 8px 0 4px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.figure-key span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Overrides .tutorial-visual svg, which stretches figures to full width. */
+.tutorial-visual .figure-key svg {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 12px;
+  min-width: 0;
+  height: 12px;
+  overflow: visible;
+}
+.diagram-status-dependent { stroke: var(--diagram-red); }
+.diagram-status-risk { stroke: var(--diagram-gold); }
+.diagram-status-clean { stroke: var(--diagram-green); }
+
+/* Interactive tutorial figures */
+
+.figure-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0 20px;
+}
+
+.figure-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.figure-toolbar button {
+  padding: 3px 9px;
+  font-size: 12px;
+}
+
+.figure-toolbar-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.figure-readout {
+  margin-top: 8px;
+  min-height: 2.9em;
+}
+
+/* Section 4's options, styled like the Environment panel's boxes. */
+.option-boxes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.option-box {
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.option-box.best { border-width: 3px; padding: 8px 10px; }
+.option-box.best.natural { border-color: var(--act-natural); }
+.option-box.best.drug { border-color: var(--act-drug); }
+.option-box.best.nothing { border-color: var(--text-muted); }
+
+.option-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.option-track {
+  position: relative;
+  height: 10px;
+  background: linear-gradient(var(--text-secondary), var(--text-secondary)) center / 1px 100% no-repeat, var(--grid);
+}
+
+.option-bar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+
+.option-bar.natural { background: var(--act-natural); }
+.option-bar.drug { background: var(--act-drug); }
+.option-bar.nothing { background: var(--text-muted); }
+
+.option-reward strong {
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.option-parts,
+.option-best { min-height: 1.4em; color: var(--text-muted); }
+.option-best { font-weight: 600; color: var(--text-primary); }
+
+/* The agent, standing under the option it would pick. */
+.agent-lane {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed var(--border);
+}
+
+.agent-lane > div { display: flex; justify-content: center; }
+.tutorial-visual .agent-face { display: block; width: 32px; min-width: 0; height: 32px; }
+.agent-face > circle:first-child { stroke: var(--agent-ink); stroke-width: 1.5; }
+.agent-face path { fill: none; stroke: var(--agent-ink); stroke-width: 1.6; stroke-linecap: round; }
+.agent-face .face-eye { fill: var(--agent-ink); }
+
+.reward-meter { margin-top: 10px; }
+.meter-track { fill: var(--grid); }
+.meter-band { fill: var(--act-natural); opacity: 0.35; }
+.meter-setpoint { stroke: var(--text-primary); stroke-width: 1; stroke-dasharray: 3 3; }
+.meter-b { fill: var(--line-b); }
+.meter-h { fill: var(--line-h); stroke: var(--surface); stroke-width: 2; }
+.meter-target.natural { fill: var(--act-natural); }
+.meter-target.drug { fill: var(--act-drug); }
+.meter-target.nothing { fill: var(--text-muted); }
+.meter-value { font-size: 10px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.meter-value.natural { fill: var(--act-natural); }
+.meter-value.drug { fill: var(--act-drug); }
+.meter-value.nothing { fill: var(--text-muted); }
+.meter-label { fill: var(--text-muted); font-size: 11px; }
+.meter-title { fill: var(--text-secondary); font-size: 11px; }
+.meter-label.b { fill: var(--line-b); }
+
+/* .tutorial-visual svg stretches figures to full width; keep icons small. */
+.tutorial-visual .option-name .action-icon {
+  display: inline-block;
+  width: 1.15em;
+  min-width: 0;
+  height: 1.15em;
+  margin-right: 6px;
+  vertical-align: -0.25em;
+}
+
+.tutorial-visual .reward-meter svg { width: auto; min-width: 0; max-width: none; }
+
+@media (max-width: 640px) {
+  .option-boxes { grid-template-columns: minmax(0, 1fr); }
+  .agent-lane { grid-template-columns: minmax(0, 1fr); }
+  .agent-lane > div { grid-column: 1 !important; }
+}
+
+/* Inline versions of the Environment panel's action icons. */
+.action-icon { width: 0.9em; height: 0.9em; margin: 0 0.15em 0 0.05em; vertical-align: -0.1em; }
+.action-icon-nothing { fill: none; stroke: var(--text-muted); stroke-width: 2; stroke-dasharray: 3 3; }
+.action-icon-natural { fill: var(--act-natural); }
+.action-icon-stem { fill: none; stroke: var(--text-secondary); stroke-width: 2; }
+.action-icon-capsule { fill: var(--surface); stroke: var(--act-drug); stroke-width: 2; }
+.action-icon-drug { fill: var(--act-drug); }
 
 /* --- Layout -------------------------------------------------------------- */
 
@@ -471,4 +833,154 @@ summary {
 }
 @media (max-width: 1200px) {
   .minimal-content .overview-row { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Try-it boxes, answers and notes */
+
+.try {
+  margin-top: 14px;
+  padding: 12px 16px;
+  border-left: 3px solid var(--diagram-blue);
+  border-radius: 0 8px 8px 0;
+  background: var(--page);
+}
+
+.tutorial-content .try h3 {
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.try + .try { margin-top: 12px; }
+.try + p { margin-top: 14px; }
+
+.reveal,
+.reading {
+  margin-top: 10px;
+}
+
+.reveal summary,
+.reading summary {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--diagram-blue);
+}
+
+.reveal[open] summary,
+.reading[open] summary { margin-bottom: 6px; }
+.reveal p + p { margin-top: 8px; }
+.tutorial-note {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--page);
+  color: var(--text-secondary);
+}
+
+/* Inline copies of the Environment panel's key: H, B, setpoint and the natural-reward band. */
+.key-icon { height: 1em; vertical-align: -0.15em; }
+.key-h { fill: var(--line-h); }
+.key-b { fill: var(--line-b); }
+.key-s { stroke: var(--text-secondary); stroke-width: 2; stroke-dasharray: 3 2; }
+.key-band { fill: var(--act-natural); opacity: 0.35; }
+
+/* Inline copies of the agent's face (js/environmentView.js drawFace) at
+   mood 1, 0 and -1. */
+.face-icon { width: 1.3em; height: 1.3em; vertical-align: -0.3em; }
+.face-icon circle:not(.face-eye) { stroke: var(--agent-ink); stroke-width: 1.5; }
+.face-icon path { fill: none; stroke: var(--agent-ink); stroke-width: 1.6; stroke-linecap: round; }
+.face-icon .face-eye { fill: var(--agent-ink); }
+.face-icon .face-happy { fill: var(--face-happy); }
+.face-icon .face-neutral { fill: var(--face-neutral); }
+.face-icon .face-sad { fill: var(--face-sad); }
+
+.action-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+/* Inline replicas of the tutorial's controls, for naming them in the text. */
+.ui-button {
+  display: inline-block;
+  padding: 1px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.ui-button-primary {
+  background: var(--agent);
+  border-color: var(--agent);
+  color: #fff;
+}
+
+@media (prefers-color-scheme: dark) {
+  .ui-button-primary { color: #0b0b0b; }
+}
+
+.ui-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.ui-check::before {
+  content: "";
+  width: 11px;
+  height: 11px;
+  border: 1px solid var(--text-muted);
+  border-radius: 3px;
+  background: var(--surface);
+}
+
+.ui-reveal {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--diagram-blue);
+  white-space: nowrap;
+}
+
+.ui-reveal::before { content: "▸ "; }
+
+.ui-try {
+  padding: 1px 8px;
+  border-left: 3px solid var(--diagram-blue);
+  border-radius: 0 6px 6px 0;
+  background: var(--page);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.embed-restart {
+  float: right;
+  margin: 0 0 6px 12px;
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+/* --- Embedded in the tutorial (index.html?panels=...) ------------------- */
+
+.embedded .app-header { display: none; }
+.embedded [hidden] { display: none !important; }
+.embedded .layout.with-sidebar { grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 0; }
+.embedded .minimal-content { gap: 12px; }
+.embedded .with-sidebar > .controls { position: static; max-height: none; overflow: visible; }
+.embedded .sidebar-scroll { overflow-y: visible; }
+.embedded .playback-sidebar .simulation-toolbar .speed { display: flex; width: auto; margin-left: 6px; }
+.embedded .playback-sidebar .simulation-toolbar .speed input { width: 140px; }
+.embedded .playback-sidebar .simulation-toolbar .speed output { min-width: 96px; }
+
+.simulation-embed {
+  padding: 12px;
+}
+
+.simulation-embed iframe {
+  display: block;
+  width: 100%;
+  height: 480px;
+  border: 0;
 }
