@@ -4,7 +4,7 @@ import {renderToStaticMarkup} from 'react-dom/server';
 import {SCENE08,T08,CAMERA08,Scene08Artwork,state08,strengths08} from '../src/Scene08_SynapticPlasticityAndAddiction';
 import {DRUG_STRENGTHS,LEARNED_STRENGTHS,NETWORK_NODES,NETWORK_EDGES,PlasticSynapse,postsynapticResponse} from '../src/plasticity-components';
 import {anatomyToScreen,BRAIN_REGIONS} from '../src/BrainAnatomy';
-assert.deepEqual(SCENE08,{width:1920,height:1080,fps:30,durationInFrames:2100});
+assert.deepEqual(SCENE08,{width:1920,height:1080,fps:30,durationInFrames:2550});
 assert.equal(T08.learnedBoundary,900);
 assert.equal(T08.drug,45*30);
 for(let f=0;f<=900;f++)assert.equal(state08(f).dopamine,false,'No dopamine before the completed learning boundary');

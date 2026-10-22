@@ -8,7 +8,7 @@ import {RewardSymbol} from './risk-components';
 import {curvePoint,draw,ease,mix,progress} from './motion';
 import {DRUG_STRENGTHS,REWARDED_STRENGTHS,LEARNED_STRENGTHS,NETWORK_EDGES,PlasticNeuralNetwork,PlasticSynapse,interpolateStrengths} from './plasticity-components';
 
-export const SCENE08={width:1920,height:1080,fps:30,durationInFrames:2100} as const;
+export const SCENE08={width:1920,height:1080,fps:30,durationInFrames:2550} as const;
 export const T08={network:0,pair:90,synapse:150,coactivity:240,ltp:450,ltd:660,stored:810,learnedBoundary:900,dopamine:901,expectation:990,modulation:1080,association:1170,drug:1350,adaptation:1440,anatomy:1530,cueComparison:1620,persistent:1830,timePasses:1890,craving:1950,final:2010,hold:2070,end:2100} as const;
 const baseline=NETWORK_EDGES.map(()=>.45);
 export const strengths08=(f:number)=>{
@@ -173,6 +173,10 @@ export const Scene08Artwork:React.FC<{frame:number}>=({frame})=>{
  </svg>;
 };
 export const Scene08_SynapticPlasticityAndAddiction:React.FC=()=>{
- const frame=useCurrentFrame();
+ const presentationFrame=useCurrentFrame();
+ // Extend craving and relapse by half a second each, then slow the final message by eight seconds.
+ const displayedFrame=presentationFrame<2130?presentationFrame:presentationFrame<2175?2130+(presentationFrame-2130)*(30/45):presentationFrame<2220?2160+(presentationFrame-2175)*(30/45):presentationFrame<2520?2190+(presentationFrame-2220)*.2:presentationFrame-270;
+ const playbackFrame=displayedFrame<390?displayedFrame:displayedFrame<510?390+(displayedFrame-390)*(90/120):displayedFrame<780?480+(displayedFrame-510)*(210/270):displayedFrame<990?690+(displayedFrame-780)*(150/210):displayedFrame-150;
+ const frame=playbackFrame<150?playbackFrame:playbackFrame<240?150+(playbackFrame-150)*(60/90):playbackFrame-30;
  return <AbsoluteFill style={{backgroundColor:C.bg}}><Scene08Artwork frame={frame}/></AbsoluteFill>;
 };
