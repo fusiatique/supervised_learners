@@ -8,7 +8,7 @@ import {DopamineHandoff} from './Scene03_AddictionAndRewardLearning';
 import {CocaineContainer, Cookie, CookiePlate, DopamineCircuitBridge, DopamineMessenger, Pair, ShoppingBag, Smile} from './dopamine-introduction-components';
 
 export const SCENE03_5={width:1920,height:1080,fps:30,durationInFrames:2100} as const;
-export const T035={bridge:0,messenger:150,everyday:360,cookie:600,cocaine:810,beyondPleasure:990,notQuite:1080,complex:1170,motivation:1410,seek:1500,avoid:1590,combine:1680,prediction:1770,actual:1860,error:1890,formula:1950,handoff:2010,brain:2070,end:2100} as const;
+export const T035={bridge:0,messenger:150,everyday:360,cookie:630,cocaine:810,beyondPleasure:990,notQuite:1080,complex:1170,motivation:1410,seek:1500,avoid:1590,combine:1680,prediction:1770,actual:1860,error:1890,formula:1950,handoff:2010,brain:2070,end:2100} as const;
 export const getDopamineIntroductionState=(frame:number)=>({
   pleasureVisible:frame>=T035.beyondPleasure&&frame<T035.motivation,
   predictionVisible:frame>=T035.prediction&&frame<T035.handoff+30,
@@ -43,24 +43,26 @@ export const NeurotransmitterIllustration:React.FC<{f:number}>=({f})=>{
 };
 
 export const EverydayRewardExamples:React.FC<{f:number}>=({f})=>{
-  const focus=ease(f,510,570),cookieX=mix(1450,1200,focus),cookieY=mix(520,565,focus);
-  return <g opacity={stage(f,360,600)}>
-    {[470,960,1450].map((x,i)=>{const a=progress(f,360+i*10,395+i*10);const hi=fade(f,420+i*30,430+i*30,452+i*30);return <g key={i} opacity={a*(i<2?1-focus:1)} transform={`translate(${i===2?cookieX:x} ${i===2?cookieY:520}) scale(${i===2?mix(1,1.3,focus):1-.12*focus})`}>
+  const focus=ease(f,465,525),cookieX=mix(1450,1200,focus),cookieY=mix(520,565,focus);
+  return <g opacity={stage(f,360,T035.cookie)}>
+    {[470,960,1450].map((x,i)=>{const a=progress(f,360+i*10,395+i*10);const start=420+i*15;const hi=progress(f,start,start+5)*(1-progress(f,start+10,start+15));return <g key={i} opacity={a*(i<2?1-focus:1)} transform={`translate(${i===2?cookieX:x} ${i===2?cookieY:520}) scale(${i===2?mix(1,1.3,focus):1-.12*focus})`}>
       <circle r={170} stroke={C.white} strokeWidth={2} fill={C.yellow} fillOpacity={.04*hi} opacity={.35}/><circle r={175} stroke={C.yellow} strokeWidth={2} fill="none" opacity={hi*.5}/>
       {i===0?<Pair frame={f} amount={a}/>:i===1?<ShoppingBag amount={a}/>:<CookiePlate amount={a} frame={f}/>}
       {[0,1,2,3].map(j=><circle key={j} cx={Math.cos(j*1.8+i)*142} cy={Math.sin(j*1.8+i)*142-7*Math.sin(f*.04+j)} r={4+j%2} fill={C.yellow} opacity={hi}/>)}
     </g>;})}
-    <HumanCharacter x={760} y={730} scale={.85} frame={f} amount={progress(f,570,600)} naturalMotion expression="curious" look={5}/>
+    <HumanCharacter x={760} y={730} scale={.85} frame={f} amount={progress(f,600,T035.cookie)} naturalMotion expression="curious" look={5}/>
   </g>;
 };
 
-export const CookieReinforcementExample:React.FC<{f:number}>=({f})=>{
+export const CookieReinforcementExample:React.FC<{f:number}>=({f:frame})=>{
+  // Start at 21 seconds and retain the 27-second handoff to cocaine.
+  const f=frame<810?600+(frame-T035.cookie)*(210/(810-T035.cookie)):frame;
   const first=ease(f,610,638)*(1-ease(f,655,672));
   const second=ease(f,722,742)*(1-ease(f,758,775));
   const reach=Math.max(first,second);
   const personX=mix(760,1030,ease(f,600,630));
   const eating=Math.max(fade(f,638,645,657),fade(f,742,750,762));
-  return <g opacity={stage(f,600,810)}>
+  return <g opacity={stage(frame,T035.cookie,810)}>
     <HumanCharacter x={personX} y={730} scale={.85} frame={f} naturalMotion rightHand={{x:(mix(1160,personX+10,reach)-personX)/.85,y:(mix(570,628,eating)-730)/.85}} expression={f>640?'satisfied':'curious'} look={5}/>
     <CookiePlate x={1200} y={565} scale={1.3} frame={f}/>
     <g opacity={progress(f,610,625)*(1-progress(f,780,800))}>
@@ -143,7 +145,7 @@ export const RewardPredictionErrorIntroduction:React.FC<{f:number}>=({f})=>{
   </g>;
 };
 
-const sections=[{start:0,end:150,component:Bridge},{start:150,end:360,component:NeurotransmitterIllustration},{start:360,end:600,component:EverydayRewardExamples},{start:600,end:810,component:CookieReinforcementExample},{start:810,end:990,component:CocaineReinforcementExample},{start:990,end:1410,component:DopamineBeyondPleasure},{start:1410,end:1770,component:RewardAvoidanceExample},{start:1770,end:2100,component:RewardPredictionErrorIntroduction}];
+const sections=[{start:0,end:150,component:Bridge},{start:150,end:360,component:NeurotransmitterIllustration},{start:360,end:T035.cookie,component:EverydayRewardExamples},{start:T035.cookie,end:810,component:CookieReinforcementExample},{start:810,end:990,component:CocaineReinforcementExample},{start:990,end:1410,component:DopamineBeyondPleasure},{start:1410,end:1770,component:RewardAvoidanceExample},{start:1770,end:2100,component:RewardPredictionErrorIntroduction}];
 export const Scene03_5_DopamineIntroduction:React.FC=()=>{
   const f=useCurrentFrame();const state=getDopamineIntroductionState(f);
   return <AbsoluteFill style={{backgroundColor:C.bg}}><svg viewBox="0 0 1920 1080" width="100%" height="100%" role="img" aria-label="Dopamine as a chemical messenger in reinforcement, learning and motivation; expected versus actual reward introduces reward prediction errors.">

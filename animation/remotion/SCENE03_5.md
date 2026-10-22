@@ -8,8 +8,8 @@ Inserted between Scene 03 and Scene 04 in `animation/index.html`. Standalone pre
 | --- | --- | --- |
 | 0–5 s | 0–149 | Continue Scene 03's particle/neuron artwork, ask what happens inside the brain, introduce dopamine. |
 | 5–12 s | 150–359 | Simplified neural communication; dopamine as neurotransmitter and chemical messenger. |
-| 12–20 s | 360–599 | Two people with a heart, shopping bag, aromatic cookies; focus transfers to the cookies. |
-| 20–27 s | 600–809 | Repeated cookie-reaching/eating gestures, reward pulses and a strengthened association. |
+| 12–21 s | 360–629 | Two people with a heart, shopping bag, aromatic cookies; highlights run sequentially during 14–15.5 seconds, then focus transfers to the cookies and holds before reinforcement starts at 21 seconds. |
+| 21–27 s | 630–809 | Repeated cookie-reaching/eating gestures, reward pulses and a strengthened association. |
 | 27–33 s | 810–989 | Neutral cocaine container, conceptual stronger reinforcement and warning; addiction statement completes by frame 989. |
 | 33–47 s | 990–1409 | Question the pleasure-only interpretation and open two learning pathways. Volkow et al., 2011. |
 | 47–59 s | 1410–1769 | Approach an apple, turn away from a warning, connect learning and motivation. Bromberg-Martin et al., 2010. |
