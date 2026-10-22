@@ -9,14 +9,17 @@ Same layout as [`../bio`](../bio/README.md), with Manim in place of Remotion:
 
 ## Rendering
 
-With Python 3.10+ and Manim's system dependencies (see the [Manim install guide](https://docs.manim.community/en/stable/installation.html)), from `animation/maths/manim`:
+`manim/` is a [uv](https://docs.astral.sh/uv/) project: `pyproject.toml` and `uv.lock` pin Manim, and `.python-version` pins Python 3.12. Run every command from `animation/maths/manim`:
 
 ```sh
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-manim -pql scenes/scene01_bellman.py Scene01Bellman   # quick low-quality preview
+uv sync                                                      # first time: installs Python 3.12 and Manim into .venv
+uv run manim -pql scenes/scene01_bellman.py Scene01Bellman   # quick low-quality preview
 ./render.sh scenes/scene01_bellman.py Scene01Bellman scene01-bellman
 ```
+
+Use `uv add <package>` to add a dependency. It only works in this folder, because uv looks for the nearest `pyproject.toml`.
+
+`MathTex` and `Tex` need a LaTeX install. On macOS, run `brew install --cask mactex-no-gui`, then open a new terminal. `Text`, shapes and graphs work without it.
 
 `render.sh` renders at 1080p60 and copies the MP4 to `video/`. Manim's working files go to `manim/build/`, which git ignores.
 
