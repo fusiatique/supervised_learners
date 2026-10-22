@@ -19,7 +19,7 @@ export const ImaginedTrajectory:React.FC<{frame:number;start:number;end:number;r
     <g opacity={progress(frame,end-32,end-18)} transform={`translate(${route==='reward'?-400:400} -310)`}><path d={route==='reward'?'M-20 0L-3 17 28 -20':'M-20 -18L20 18M20 -18L-20 18'} stroke={route==='reward'?C.green:C.red} strokeWidth={5} fill="none" strokeLinecap="round"/></g>
   </g>;
 };
-export const PlanningPreview:React.FC<{frame:number;x?:number;y?:number;scale?:number;opacity?:number;unknown?:boolean;title?:boolean}>=({frame:f,x=960,y=650,scale=1,opacity=1,unknown=false,title=true})=>{
+export const PlanningPreview:React.FC<{frame:number;x?:number;y?:number;scale?:number;opacity?:number;unknown?:boolean;title?:boolean;titleFrom?:number;titleUntil?:number}>=({frame:f,x=960,y=650,scale=1,opacity=1,unknown=false,title=true,titleFrom=1140,titleUntil=1200})=>{
   const pose=getPlanningPose(f),chosen=progress(f,1140,1190);
   return <g transform={`translate(${x} ${y}) scale(${scale})`} opacity={opacity}>
     <path d={path(PLANNING_ROUTES.reward)} stroke={C.white} strokeWidth={3} opacity={.4} fill="none" {...draw(progress(f,90,150))}/>
@@ -30,7 +30,7 @@ export const PlanningPreview:React.FC<{frame:number;x?:number;y?:number;scale?:n
     <HumanCharacter x={pose.x} y={pose.y} scale={.8} frame={f} walking={pose.walking} naturalMotion expression={pose.actual>.95?'satisfied':'curious'} look={f<1050?-5:5}/>
     {f<270&&<g opacity={fade(f,180,200,245)}><Label x={0} y={-80} size={45} color={C.yellow}>?</Label></g>}
     {!unknown&&<><ImaginedTrajectory frame={f} start={960} end={1050} route="reward"/><ImaginedTrajectory frame={f} start={1050} end={1140} route="risk"/></>}
-    {title&&<g opacity={progress(f,1140,1170)*(1-progress(f,1200,1245))}><Label x={0} y={315} size={30}>PREDICT → EVALUATE → CHOOSE</Label></g>}
+    {title&&<g opacity={progress(f,titleFrom,titleFrom+30)*(1-progress(f,titleUntil,titleUntil+45))}><Label x={0} y={315} size={30}>PREDICT → EVALUATE → CHOOSE</Label></g>}
     <g opacity={progress(f,1250,1270)} transform="translate(-400 -315)"><path d="M-18 0L-3 15 25 -18" stroke={C.green} strokeWidth={5} fill="none" strokeLinecap="round"/></g>
   </g>;
 };

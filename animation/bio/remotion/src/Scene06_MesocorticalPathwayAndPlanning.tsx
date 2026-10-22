@@ -1,15 +1,22 @@
 import React from 'react';
 import {AbsoluteFill,Sequence,useCurrentFrame} from 'remotion';
 import {anatomyToScreen,BrainAnatomy,BrainRegionLabel,BRAIN_REGIONS,type BrainCamera} from './BrainAnatomy';
-import {AccumbensInputsArtwork,ENDING_CAMERA05} from './Scene05_DopamineRewardPredictionErrors';
+import {ENDING_CAMERA05} from './Scene05_DopamineRewardPredictionErrors';
 import {AnimatedArrow,C,Label,SourceCitation} from './components';
 import {draw,ease,fade,mix,progress} from './motion';
 import {CocaineContainer} from './dopamine-introduction-components';
 import {RewardSymbol,WarningSymbol} from './risk-components';
+import {RodentPathwayComparison} from './rodent-pathway-comparison';
+import {Scene06Opening} from './scene06-opening';
 import {GoalRepresentation,PlanningPreview,ProjectionNeuronInset} from './planning-components';
 
-export const SCENE06={width:1920,height:1080,fps:30,durationInFrames:1800} as const;
-export const T06={values:0,decision:90,question:180,pathway:270,projection:360,pfc:450,pathwayTitle:510,planning:570,goal:660,steps:750,plan:810,prediction:870,imagineReward:960,imagineRisk:1050,choose:1140,selection:1200,recenter:1260,selectionTitle:1320,comparison:1380,rewarding:1470,aversive:1560,sideBySide:1650,returnToBrain:1720,hold:1770,end:1800} as const;
+export const SCENE06={width:1920,height:1080,fps:30,durationInFrames:1680} as const;
+export const T06={values:0,decision:90,question:180,pathway:270,projection:360,pfc:450,pathwayTitle:390,planning:570,goal:660,steps:750,plan:810,prediction:870,imagineReward:960,imagineRisk:1050,choose:1140,selection:1200,recenter:1260,selectionTitle:1320,comparison:1380,rewarding:1470,aversive:1560,sideBySide:1650,returnToBrain:1720,hold:1770,end:1800} as const;
+export const BRAIN_START06=13*30;
+// Delay the brain to 13s; at 20s skip to the former 25-second point.
+export const scene06ContentFrame=(frame:number)=>frame<BRAIN_START06?Math.min(frame,225):frame<600?frame-120:frame<990?frame+30:frame<1590?1019:frame+120;
+// Complete imagined reward, imagined risk and the chosen movement before the 33s cut.
+export const scene06PreviewFrame=(contentFrame:number)=>contentFrame<900?contentFrame:contentFrame<=1020?900+(contentFrame-900)*(355/120):contentFrame;
 const blend=(a:BrainCamera,b:BrainCamera,t:number):BrainCamera=>({x:mix(a.x,b.x,t),y:mix(a.y,b.y,t),scale:mix(a.scale,b.scale,t),anteriorRight:true});
 export const getScene06Camera=(frame:number):BrainCamera=>{
   const f=Math.min(frame,T06.hold);
@@ -22,7 +29,7 @@ export const getScene06Camera=(frame:number):BrainCamera=>{
 };
 export const getScene06State=(frame:number)=>{
   const f=Math.min(frame,T06.hold);
-  return {frame:f,camera:getScene06Camera(f),corticalPath:mix(.15,1,progress(f,T06.projection,T06.pfc)),pfc:mix(.35,1,progress(f,T06.pfc,T06.pathwayTitle)),nac:mix(1,.45,ease(f,T06.pathway,T06.projection)),corticalActivity:fade(f,390,420,1380)*.6,limbicActivity:0,
+  return {frame:f,camera:getScene06Camera(f),corticalPath:mix(.15,1,progress(f,T06.projection,T06.pfc)),pfc:mix(.35,1,progress(f,T06.pfc,T06.pfc+30)),nac:mix(1,.45,ease(f,T06.pathway,T06.projection)),corticalActivity:fade(f,390,420,1380)*.6,limbicActivity:0,
     citation:f>=270&&f<570?'Cooper et al., 2017':f>=570&&f<1200?'Alkam et al., 2025':f>=1380?'Cooper et al., 2017':null};
 };
 const Title:React.FC<{f:number;from:number;until?:number;text:string;y?:number;color?:string;size?:number}>=({f,from,until,text,y=120,color=C.white,size=36})=><g opacity={fade(f,from,from+25,until)} transform={`translate(0 ${12*(1-ease(f,from,from+25))})`}><Label x={960} y={y} size={size} color={color}>{text}</Label></g>;
@@ -36,25 +43,13 @@ export const MesocorticalPlanningArtwork:React.FC<{frame:number}>=({frame})=>{
   return <g opacity={anatomy}>
     <BrainAnatomy {...s.camera} cortexOpacity={.6} frame={f} highlights={{VTA:1,NAc:s.nac,PFC:s.pfc}} pathwayProgress={{mesolimbic:1,mesocortical:s.corticalPath}} pathwayOpacity={{mesolimbic:mix(.2,.8,ease(f,1380,1470)),mesocortical:1}} activity={{mesolimbic:s.limbicActivity,mesocortical:s.corticalActivity}}/>
     <BrainRegionLabel region="VTA" camera={s.camera} x={730} y={850} opacity={Math.max(labels,last)}/>
-    <BrainRegionLabel region="PFC" camera={s.camera} x={1600} y={420} fullName opacity={Math.max(labels*progress(f,450,490),last)}/>
+    <BrainRegionLabel region="PFC" camera={s.camera} x={1600} y={420} fullName opacity={Math.max(labels*progress(f,450,480),last)}/>
     <BrainRegionLabel region="NAc" camera={s.camera} x={1270} y={850} opacity={last}/>
   </g>;
 };
 
-const ValueToAction:React.FC<{f:number}>=({f})=>{
-  const [nx,ny]=anatomyToScreen(BRAIN_REGIONS.NAc.center,ENDING_CAMERA05);
-  const t=progress(f,20,80);
-  return <g>
-    <g opacity={1-progress(f,90,270)}><AccumbensInputsArtwork frame={2370}/></g>
-    <circle cx={mix(nx,1670,t)} cy={mix(ny,620,t)} r={5} fill={C.yellow} opacity={Math.sin(t*Math.PI)}/>
-    <g opacity={fade(f,30,60,90)}><Label x={1670} y={840} size={27} color={C.yellow}>WHAT IS VALUABLE?</Label></g>
-    <g opacity={progress(f,90,135)*(1-progress(f,240,300))}><PlanningPreview frame={f} x={1530} y={630} scale={.52} unknown title={false}/></g>
-    <g opacity={fade(f,180,205,260)}><Label x={1480} y={300} size={33}>WHAT SHOULD I DO?</Label></g>
-  </g>;
-};
 const PathwayAndGoal:React.FC<{f:number}>=({f})=><g>
-  <Title f={f} from={270} until={360} text="VENTRAL TEGMENTAL AREA (VTA)"/>
-  <Title f={f} from={510} until={570} text="MESOCORTICAL PATHWAY" color={C.yellow} y={960} size={31}/>
+  <Title f={f} from={270} until={360} text="VENTRAL TEGMENTAL AREA (VTA)" y={960} size={31}/>
   <Title f={f} from={570} until={810} text="PLANNING & CONTROL"/>
   <GoalRepresentation frame={f} x={1370} y={530} opacity={progress(f,660,690)*(1-progress(f,870,915))}/>
   <g opacity={fade(f,660,690,870)}><path d="M930 380Q1100 330 1160 430" stroke={C.gray} strokeWidth={2} fill="none" {...draw(progress(f,660,705))}/></g>
@@ -62,7 +57,7 @@ const PathwayAndGoal:React.FC<{f:number}>=({f})=><g>
 const PlanningAndSelection:React.FC<{f:number}>=({f})=>{
   const enter=progress(f,870,915),exit=1-progress(f,1260,1320),shrink=ease(f,1200,1290);
   return <g>
-    <PlanningPreview frame={f} x={mix(960,1430,shrink)} y={mix(640,560,shrink)} scale={mix(.9,.38,shrink)} opacity={enter*exit}/>
+    <PlanningPreview frame={scene06PreviewFrame(f)} titleFrom={900} titleUntil={1255} x={mix(960,1430,shrink)} y={mix(640,560,shrink)} scale={mix(.9,.38,shrink)} opacity={enter*exit}/>
     <Title f={f} from={870} until={960} text="POSSIBLE ACTIONS"/>
     <g opacity={fade(f,870,900,1200)}><Label x={300} y={425} size={22} color={C.gray}>Planning analogy</Label></g>
     <g opacity={progress(f,1260,1290)*(1-progress(f,1380,1410))}>
@@ -93,13 +88,14 @@ export const PathwayComparison:React.FC<{frame:number}>=({frame:f})=>{
   </g>;
 };
 export const Scene06_MesocorticalPathwayAndPlanning:React.FC=()=>{
-  const f=Math.min(useCurrentFrame(),T06.hold),s=getScene06State(f);
+  const frame=useCurrentFrame(),f=Math.min(scene06ContentFrame(frame),T06.hold),s=getScene06State(f);
   return <AbsoluteFill style={{backgroundColor:C.bg}}><svg viewBox="0 0 1920 1080" width="100%" height="100%" role="img" aria-label="From learned value to action selection: the VTA to prefrontal cortex mesocortical pathway, goals and imagined consequences, and schematic rodent findings about inputs to projection-defined VTA neurons.">
-    <MesocorticalPlanningArtwork frame={f}/>
-    <Sequence from={0} durationInFrames={300} layout="none"><ValueToAction f={f}/></Sequence>
-    <Sequence from={270} durationInFrames={660} layout="none"><PathwayAndGoal f={f}/></Sequence>
-    <Sequence from={870} durationInFrames={540} layout="none"><PlanningAndSelection f={f}/></Sequence>
-    <Sequence from={1380} durationInFrames={420} layout="none"><PathwayComparison frame={f}/></Sequence>
-    {s.citation&&<g opacity={f<570?fade(f,270,300,540):f<1200?fade(f,570,600,1170):progress(f,1380,1410)}><SourceCitation frame={f} source={s.citation}/></g>}
+    {frame>=BRAIN_START06&&(frame<990||frame>=1590)&&<MesocorticalPlanningArtwork frame={f}/>}
+    <Sequence from={0} durationInFrames={390} layout="none"><Scene06Opening frame={frame} pathwayTarget={anatomyToScreen(BRAIN_REGIONS.VTA.center,getScene06Camera(270))}/></Sequence>
+    <Sequence from={390} durationInFrames={510} layout="none"><PathwayAndGoal f={f}/></Sequence>
+    <Sequence from={840} durationInFrames={150} layout="none"><PlanningAndSelection f={f}/></Sequence>
+    <Sequence from={990} durationInFrames={600} layout="none"><RodentPathwayComparison frame={frame-990} startingCamera={getScene06Camera(1019)} endingCamera={getScene06Camera(1710)}/><g opacity={1-progress(frame,990,1010)}><PlanningAndSelection f={1019}/></g></Sequence>
+    <Title f={f} from={T06.pathway} until={T06.planning} text="MESOCORTICAL PATHWAY" color={C.yellow}/>
+    {frame>=BRAIN_START06&&(frame<990||frame>=1590)&&s.citation&&<g opacity={f<570?fade(f,270,300,540):f<1200?fade(f,570,600,1170):progress(f,1380,1410)}><SourceCitation frame={f} source={s.citation}/></g>}
   </svg></AbsoluteFill>;
 };
