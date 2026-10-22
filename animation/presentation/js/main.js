@@ -32,6 +32,12 @@ for (const [sceneId, playerId, prefix] of [
   ['mesocortical-planning', 'scene06Player', 'scene06'],
   ['prefrontal-control-addiction', 'scene07Player', 'scene07'],
   ['maths-agent-environment', 'maths01Player', 'maths01'],
+  ['maths-actions-transitions', 'maths02Player', 'maths02'],
+  ['maths-random-policy', 'maths03Player', 'maths03'],
+  ['maths-reward-function', 'maths04Player', 'maths04'],
+  ['maths-state-value', 'maths05Player', 'maths05'],
+  ['maths-bellman', 'maths06Player', 'maths06'],
+  ['maths-policy-improvement', 'maths07Player', 'maths07'],
 ]) {
   const send = (action) => document.getElementById(playerId)?.contentWindow?.postMessage({type: `${prefix}:${action}`}, location.origin);
   sceneHooks[sceneId] = {enter() { send('play'); }, leave() { send('pause'); }};

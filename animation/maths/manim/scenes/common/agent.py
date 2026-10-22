@@ -1,34 +1,40 @@
-"""The agent glyph: a round face whose expression can change, with a 'brain' that
-equations can be absorbed into."""
+"""The agent glyph: a round face whose expression can change, with a
+'brain' that equations can be absorbed into."""
 
+import numpy as np
 from manim import (
     DOWN,
     LEFT,
     RIGHT,
     UP,
     ArcBetweenPoints,
+    CapStyleType,
     Circle,
-    Dot,
+    Ellipse,
     Flash,
     Line,
     Succession,
     VGroup,
+    VMobject,
     rush_into,
+    there_and_back,
 )
 
-from .theme import BG, INK, MODEL
+from .theme import INK, MODEL
 
 EXPRESSIONS = ("blank", "happy", "sad")
+FACE = "#1a1530"  # head fill: background tinted towards violet
 
 
 class Agent(VGroup):
     def __init__(self, radius=1.0, expression="blank", **kwargs):
         super().__init__(**kwargs)
-        self.head = Circle(radius=radius, stroke_color=MODEL, stroke_width=5, fill_color=BG, fill_opacity=1)
-        self.eyes = VGroup(
-            Dot(radius=0.09 * radius, color=INK).move_to(radius * (0.35 * LEFT + 0.12 * UP)),
-            Dot(radius=0.09 * radius, color=INK).move_to(radius * (0.35 * RIGHT + 0.12 * UP)),
-        )
+        self.head = Circle(radius=radius, stroke_color=MODEL, stroke_width=4, fill_color=FACE, fill_opacity=1)
+        self.eyes = VGroup(*[
+            Ellipse(width=0.15 * radius, height=0.24 * radius, stroke_width=0, fill_color=INK, fill_opacity=1)
+            .move_to(radius * (0.33 * side + 0.12 * UP))
+            for side in (LEFT, RIGHT)
+        ])
         self.mouth = self.make_mouth(expression)
         self.add(self.head, self.eyes, self.mouth)
 
@@ -40,8 +46,8 @@ class Agent(VGroup):
         """A mouth for the head's current size and position; Transform self.mouth into it."""
         r = self.radius
         c = self.head.get_center()
-        left = c + r * (0.3 * LEFT + 0.42 * DOWN)
-        right = c + r * (0.3 * RIGHT + 0.42 * DOWN)
+        left = c + r * (0.26 * LEFT + 0.4 * DOWN)
+        right = c + r * (0.26 * RIGHT + 0.4 * DOWN)
         if expression == "blank":
             mouth = Line(left, right)
         elif expression == "happy":
@@ -50,7 +56,31 @@ class Agent(VGroup):
             mouth = ArcBetweenPoints(left + 0.1 * r * DOWN, right + 0.1 * r * DOWN, angle=-0.9)
         else:
             raise ValueError(f"expression must be one of {EXPRESSIONS}")
-        return mouth.set_stroke(INK, width=4)
+        mouth.set_stroke(INK, width=3.5)
+        mouth.cap_style = CapStyleType.ROUND
+        return mouth
+
+    def blink(self):
+        """Close and reopen the eyes."""
+        return self.eyes.animate(rate_func=there_and_back, run_time=0.3).stretch(0.1, 1)
+
+    def make_hands(self):
+        """Shrugging arms, like ¯\\_(ツ)_/¯: out from each side of the head, then up."""
+        r, c = self.radius, self.head.get_center()
+        hands = VGroup()
+        for side in (-1, 1):
+            corners = [c + r * np.array(p) for p in ((side * 0.95, -0.32, 0), (side * 1.45, -0.32, 0), (side * 1.85, 0.3, 0))]
+            hand = VMobject().set_points_as_corners(corners).set_stroke(INK, width=4.5)
+            hand.cap_style = CapStyleType.ROUND
+            hands.add(hand)
+        return hands.set_z_index(self.z_index)
+
+    def shrug(self, hands, times=2):
+        """Bob the hands up and back, `times` times."""
+        lift = 0.14 * self.radius * np.array((0, 1, 0))
+        return Succession(*[
+            hands.animate(rate_func=there_and_back, run_time=0.35).shift(lift) for _ in range(times)
+        ])
 
     def brain_point(self):
         return self.head.get_center() + 0.55 * self.radius * UP
