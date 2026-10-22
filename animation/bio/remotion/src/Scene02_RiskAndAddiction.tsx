@@ -4,7 +4,9 @@ import {AnimatedArrow, C, HumanCharacter, type HumanExpression, Label, SourceCit
 import {curvePoint, draw, ease, fade, mix, pop, progress} from './motion';
 import {CapsuleSymbol, CROSSROADS, CrossroadsPaths, MysteryBox, RewardSymbol, Scene01ClosingArtwork, ThoughtBubble, WarningSymbol} from './risk-components';
 
-export const SCENE02 = {width:1920,height:1080,fps:30,durationInFrames:690,holdFrom:660} as const;
+export const SCENE02 = {width:1920,height:1080,fps:30,durationInFrames:960,holdFrom:660,openingHold:270} as const;
+// Keep the opening question on screen for nine additional seconds before the transition.
+export const scene02TimelineFrame=(frame:number)=>Math.max(0,frame-SCENE02.openingHold);
 
 /** Pure frame-to-pose function: forward playback and reverse scrubbing agree. */
 export const getRiskScenePose = (frame: number) => {
@@ -75,23 +77,20 @@ export const RiskAndAddictionArtwork: React.FC<{frame: number}> = ({frame}) => {
     <g opacity={fade(f,510,521,548)} transform="translate(790 560) rotate(-143)"><AnimatedArrow x={0} y={0} length={110} amount={progress(f,510,528)} color={C.green}/></g>
     <g opacity={fade(f,540,552,579)} transform="translate(1130 560) rotate(-37)"><AnimatedArrow x={0} y={0} length={110} amount={progress(f,540,558)} color={C.red}/></g>
     <g opacity={fade(f,450,475,615)}><Label x={960} y={145} size={43}>ADDICTION</Label></g>
-    <g opacity={progress(f,630,660)} transform={`translate(0 ${20*(1-ease(f,630,660))})`}>
-      <text x={960} y={150} textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize={40} fill={C.white}>WHEN CONSEQUENCES NO LONGER <tspan fill={C.red}>GUIDE BEHAVIOUR</tspan></text>
-    </g>
   </g>;
 };
 
 const OpeningTransition: React.FC = () => {
-  const f=useCurrentFrame();
+  const f=scene02TimelineFrame(useCurrentFrame());
   const a=ease(f,0,65);
   return <g opacity={1-a} transform={`translate(960 600) scale(${mix(1,.78,a)}) translate(-960 -600)`}><Scene01ClosingArtwork/></g>;
 };
 
 export const Scene02_RiskAndAddiction: React.FC = () => {
-  const frame=useCurrentFrame();
+  const frame=scene02TimelineFrame(useCurrentFrame());
   return <AbsoluteFill style={{backgroundColor:C.bg}}>
     <svg viewBox="0 0 1920 1080" width="100%" height="100%" role="img" aria-label="A person encounters a harmful uncertain outcome, learns to choose a safer apple, then approaches a drug-associated option despite remembered harm. One example of impaired behavioral flexibility.">
-      <Sequence from={0} durationInFrames={66} layout="none"><OpeningTransition/></Sequence>
+      <Sequence from={0} durationInFrames={SCENE02.openingHold+66} layout="none"><OpeningTransition/></Sequence>
       <RiskAndAddictionArtwork frame={frame}/>
       <g opacity={1-progress(frame,435,465)}><SourceCitation frame={frame} source="Yates & Stone, 1992"/></g>
       <g opacity={progress(frame,435,465)}><SourceCitation frame={frame} source="Piantadosi et al., 2021"/></g>

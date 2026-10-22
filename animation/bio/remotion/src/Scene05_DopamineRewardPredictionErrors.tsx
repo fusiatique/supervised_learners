@@ -1,14 +1,19 @@
 import React from 'react';
 import {AbsoluteFill,Sequence,useCurrentFrame} from 'remotion';
 import {anatomyToScreen,BrainAnatomy,BRAIN_REGIONS,BrainRegionLabel,DopaminePathway,type BrainCamera} from './BrainAnatomy';
-import {getScene04Camera,MesocorticolimbicArtwork} from './Scene04_MesocorticolimbicIntroduction';
+import {getScene04Camera} from './Scene04_MesocorticolimbicIntroduction';
 import {AnimatedArrow,C,Label,ProcessorIllustration,SourceCitation} from './components';
 import {curvePoint,draw,ease,fade,mix,pop,progress} from './motion';
 import {CueSymbol,RewardPulse} from './reward-components';
 import {RewardSymbol} from './risk-components';
 import {CueRewardTimeline,DopamineNeuron,DopamineSpikeTrain,FoodDeliveryExample,getFoodEvents,getFoodSpikeTimes,getSpikeTimes,MotivationalValueIndicator,NAc_INPUTS,NeuralInputPathway,RewardPredictionError,RodentExperimentIllustration} from './dopamine-learning-components';
 
-export const SCENE05={width:1920,height:1080,fps:30,durationInFrames:2400} as const;
+export const SCENE05={width:1920,height:1080,fps:30,durationInFrames:3600,bridgeFrames:270,experimentBridgeFrom:2250,experimentBridgeFrames:210,contextBridgeFrom:2640,contextBridgeFrames:360} as const;
+export const scene05ContentFrame=(frame:number)=>{
+  const f=frame<1920?frame:Math.max(1920,frame-SCENE05.experimentBridgeFrames);
+  // Spread the extra second across the update animation instead of freezing a pose.
+  return f<1800?f:f<1920?1800+(f-1800)*.75:f-30;
+};
 export const T05={vta:0,inset:90,dopamineCells:180,accumbens:300,projection:390,pathActivity:480,tonic:600,phasic:690,splitFiring:780,predictionError:900,equation:990,positiveBurst:1080,food:1200,paired:1290,learned:1380,comparison:1470,omission:1560,dip:1660,negative:1740,update:1800,stimulation:1890,inhibition:1980,inputs:2070,otherInputs:2160,inputSignals:2250,learnedValue:2340,hold:2370,end:2400} as const;
 export const CITATIONS05=[
   {from:0,to:390,source:'Cooper et al., 2017'},
@@ -32,7 +37,8 @@ export const getScene05IntroCamera=(f:number):BrainCamera=>{
 };
 
 const AnatomicalIntroduction:React.FC=()=>{
-  const f=useCurrentFrame();
+  const frame=useCurrentFrame();
+  const f=frame<300?frame:frame<660?300+(frame-300)*(300/360):frame-60;
   const camera=getScene05IntroCamera(f);
   const [vx,vy]=anatomyToScreen(BRAIN_REGIONS.VTA.center,camera);
   const inset=progress(f,90,135)*(1-progress(f,300,390));
@@ -44,7 +50,6 @@ const AnatomicalIntroduction:React.FC=()=>{
       highlights={{VTA:1,NAc:mix(mix(1,.6,ease(f,0,180)),1,ease(f,300,390)),PFC:mix(1,.15,ease(f,0,90))}}
       pathwayProgress={{mesolimbic:1,mesocortical:1}} pathwayOpacity={{mesolimbic:mix(1,.3,ease(f,300,390)),mesocortical:mix(.4,.15,ease(f,0,90))}}
       activity={{mesolimbic:f<300?mix(1,.5,ease(f,0,90)):progress(f,480,510),mesocortical:mix(.22,.1,ease(f,0,90))}}/>
-    <g opacity={1-progress(f,0,65)}><MesocorticolimbicArtwork frame={900+f} showBrain={false}/></g>
     <g transform={`translate(${camera.x} ${camera.y}) scale(${camera.scale}) translate(-500 -330) translate(1000 0) scale(-1 1)`}>
       <DopaminePathway pathway="mesolimbic" amount={progress(f,390,480)} opacity={progress(f,390,420)} frame={Math.max(0,f-480)} activity={progress(f,480,510)}/>
     </g>
@@ -111,11 +116,12 @@ const FoodLearning:React.FC=()=>{
 };
 
 const UpdatingAndExperiments:React.FC=()=>{
-  const f=useCurrentFrame()+1800;
-  const updateOpacity=1-progress(f,1890,1920);
+  const frame=useCurrentFrame()+1800;
+  const f=scene05ContentFrame(frame);
+  const updateOpacity=frame>=1920+SCENE05.experimentBridgeFrames?0:1-progress(f,1890,1920);
   const p=curvePoint(progress(f,1825,1880),[[1460,400],[1420,200],[1050,200],[960,360]]);
   return <g opacity={opacityFor(f,1800,2070)}>
-    <g opacity={updateOpacity}>
+    {frame<1920&&<g opacity={updateOpacity}>
       {header('UPDATE EXPECTATIONS')}
       <CueSymbol x={420} y={445}/><RewardSymbol x={960} y={445} scale={mix(.65,.38,ease(f,1820,1880))}/><RewardSymbol x={1500} y={445} opacity={.25}/>
       <AnimatedArrow x={530} y={445} length={310} amount={progress(f,1800,1830)}/><AnimatedArrow x={1070} y={445} length={310} amount={progress(f,1800,1830)}/>
@@ -124,7 +130,7 @@ const UpdatingAndExperiments:React.FC=()=>{
       <Label x={420} y={560} size={26} color={C.gray}>CUE</Label><Label x={960} y={560} size={26} color={C.gray}>EXPECTATION</Label><Label x={1500} y={560} size={26} color={C.gray}>OUTCOME</Label>
       <DopamineNeuron x={650} y={770} scale={.42} frame={f}/><AnimatedArrow x={850} y={770} length={300} amount={progress(f,1830,1880)} color={C.blue}/><ProcessorIllustration x={1270} y={770} scale={.42} frame={f} signal={.7}/>
       <Label x={960} y={955} size={28} color={C.blue}>BIOLOGICAL LEARNING ↔ COMPUTATIONAL LEARNING</Label>
-    </g>
+    </g>}
     <g opacity={progress(f,1890,1920)}>
       <RodentExperimentIllustration frame={f}/>
       {f<1980?header('NEURAL STIMULATION CAN SUPPORT LEARNING',150,C.white,32):header('INHIBITION CAN MIMIC A NEGATIVE SIGNAL',150,C.red,32)}
@@ -159,20 +165,104 @@ export const AccumbensInputsArtwork:React.FC<{frame:number}>=({frame})=>{
   </g>;
 };
 const InputsEnding:React.FC=()=>{
-  const f=useCurrentFrame()+2070;
+  const frame=useCurrentFrame();
+  const f=2070+Math.min(frame*(300/570),300);
   return <g opacity={progress(f,2070,2100)}><AccumbensInputsArtwork frame={f}/></g>;
 };
 
-export const Scene05_DopamineRewardPredictionErrors:React.FC=()=>{
+const SystemToSignalsBridge:React.FC=()=>{
   const f=useCurrentFrame();
+  const camera=getScene04Camera(900);
+  const [vx,vy]=anatomyToScreen(BRAIN_REGIONS.VTA.center,camera);
+  const focus=ease(f,60,150);
+  const pulse=(Math.max(0,f-75)%60)/60;
+  const textOpacity=progress(f,0,20)*(1-progress(f,245,270));
+  return <g>
+    <BrainAnatomy {...camera} cortexOpacity={.65} frame={540+f}
+      highlights={{VTA:1,NAc:1,PFC:1}}
+      pathwayProgress={{mesolimbic:1,mesocortical:1}}
+      pathwayOpacity={{mesolimbic:1,mesocortical:.4}}
+      activity={{mesolimbic:.6,mesocortical:.22}}/>
+    <BrainRegionLabel region="VTA" camera={camera} x={1320} y={895} fullName/>
+    <g opacity={textOpacity}>
+      <Label x={960} y={100} size={30} color={C.yellow}>FROM THE SYSTEM TO ITS SIGNALS</Label>
+      <Label x={960} y={165} size={42}>How does this brain system work?</Label>
+      <g opacity={progress(f,65,100)}>
+        <Label x={960} y={1010} size={28}>Start where many dopamine signals originate.</Label>
+      </g>
+      <circle cx={vx} cy={vy} r={25+28*pulse} fill="none" stroke={C.yellow} strokeWidth={2.5} opacity={focus*(1-pulse)*.8}/>
+      <circle cx={vx} cy={vy} r={19} fill={C.yellow} opacity={focus*(.08+.04*Math.sin(f*.08))}/>
+    </g>
+    <SourceCitation frame={f} source="Feltenstein et al., 2009"/>
+  </g>;
+};
+
+const ExpectationsToExperimentBridge:React.FC=()=>{
+  const f=useCurrentFrame();
+  const settle=ease(f,45,155);
+  const opacity=ease(f,0,35)*(1-ease(f,180,210));
+  return <g>
+    <rect width={1920} height={1080} fill={C.bg} opacity={ease(f,0,35)}/>
+    <g opacity={opacity}>
+    <Label x={960} y={235} size={32} color={C.yellow}>DOPAMINE HELPS US LEARN</Label>
+    {[-1,1].map(i=><rect key={i} x={600+i*65*(1-settle)} y={410+i*32*(1-settle)} width={720} height={250} rx={24} fill="none" stroke={C.blue} strokeWidth={2} opacity={.25*(1-settle)}/>) }
+    <rect x={600} y={410} width={720} height={250} rx={24} fill={C.bg} stroke={C.blue} strokeWidth={2} opacity={.4+.6*settle}/>
+    <g opacity={progress(f,30,80)}>
+      <Label x={960} y={515} size={25} color={C.gray}>EXPERIENCE SHAPES</Label>
+      <g transform={`translate(0 ${18*(1-settle)})`}><Label x={960} y={585} size={44}>WHAT TO EXPECT</Label></g>
+    </g>
+    <path d="M790 620H1130" fill="none" stroke={C.yellow} strokeWidth={3} strokeLinecap="round" {...draw(settle)}/>
+    <g opacity={progress(f,135,165)}><Label x={960} y={850} size={30}>Next: testing this experimentally</Label></g>
+    </g>
+  </g>;
+};
+
+const ContextToAccumbensBridge:React.FC=()=>{
+  const f=useCurrentFrame();
+  const inputs=[{text:'SITUATION',detail:'Where we are',x:440,y:400,color:C.blue},{text:'EXPERIENCE',detail:'What we remember',x:960,y:330,color:C.green},{text:'GOALS',detail:'What we want',x:1480,y:400,color:C.yellow}];
+  return <g>
+    <rect width={1920} height={1080} fill={C.bg}/>
+    <g opacity={ease(f,0,25)*(1-ease(f,335,360))}>
+      <Label x={960} y={150} size={36}>Dopamine is part of the picture.</Label>
+      <Label x={960} y={215} size={27} color={C.gray}>The brain also needs context.</Label>
+      {inputs.map(({text,detail,x,y,color},i)=>{
+        const a=progress(f,35+i*35,65+i*35),flow=progress(f,155+i*15,230+i*15);
+        return <g key={text} opacity={a}>
+          <rect x={x-185} y={y-55} width={370} height={125} rx={20} stroke={color} strokeWidth={2} fill={C.bg}/>
+          <Label x={x} y={y-5} size={29} color={color}>{text}</Label><Label x={x} y={y+38} size={23} color={C.gray}>{detail}</Label>
+          <path d={`M${x} ${y+85}Q${x} 620 960 685`} fill="none" stroke={color} strokeWidth={2} opacity={.65} {...draw(progress(f,135+i*15,210+i*15))}/>
+          <circle cx={mix(x,960,flow)} cy={mix(y+85,685,flow)} r={5} fill={color} opacity={Math.sin(flow*Math.PI)}/>
+        </g>;
+      })}
+      <g opacity={progress(f,215,255)}>
+        <circle cx={960} cy={710} r={48} fill={C.blue} opacity={.1}/>
+        <circle cx={960} cy={710} r={26} fill="none" stroke={C.blue} strokeWidth={2}/>
+        <Label x={960} y={825} size={37} color={C.blue}>NUCLEUS ACCUMBENS</Label>
+        <Label x={960} y={885} size={26} color={C.gray}>Bringing these signals together</Label>
+      </g>
+    </g>
+  </g>;
+};
+
+export const Scene05_DopamineRewardPredictionErrors:React.FC=()=>{
+  const frameInScene=useCurrentFrame();
+  const playbackFrame=frameInScene<3000?frameInScene:frameInScene<3570?3000+(frameInScene-3000)*(300/570):frameInScene-270;
+  const sceneFrame=playbackFrame<570?playbackFrame:playbackFrame<930?570+(playbackFrame-570)*(300/360):playbackFrame-60;
+  const frame=(sceneFrame<SCENE05.contextBridgeFrom-60?sceneFrame:Math.max(SCENE05.contextBridgeFrom-60,sceneFrame-SCENE05.contextBridgeFrames))-SCENE05.bridgeFrames;
+  const f=scene05ContentFrame(frame);
   return <AbsoluteFill style={{backgroundColor:C.bg}}>
     <svg viewBox="0 0 1920 1080" width="100%" height="100%" role="img" aria-label="VTA projections to nucleus accumbens, illustrative tonic and phasic dopamine firing, reward prediction errors, food-delivery cue learning, omitted-reward firing pauses, schematic rodent manipulations, and multiple inputs that shape learned motivational value.">
-      <Sequence from={0} durationInFrames={660} layout="none"><AnatomicalIntroduction/></Sequence>
-      <Sequence from={600} durationInFrames={630} layout="none"><NeuronalLearning/></Sequence>
-      <Sequence from={1200} durationInFrames={630} layout="none"><FoodLearning/></Sequence>
-      <Sequence from={1800} durationInFrames={300} layout="none"><UpdatingAndExperiments/></Sequence>
-      <Sequence from={2070} durationInFrames={330} layout="none"><InputsEnding/></Sequence>
+      <Sequence from={0} durationInFrames={SCENE05.bridgeFrames} layout="none"><SystemToSignalsBridge/></Sequence>
+      <Sequence from={SCENE05.bridgeFrames} durationInFrames={3330} layout="none">
+      <Sequence from={0} durationInFrames={720} layout="none"><AnatomicalIntroduction/></Sequence>
+      <Sequence from={660} durationInFrames={630} layout="none"><NeuronalLearning/></Sequence>
+      <Sequence from={1260} durationInFrames={630} layout="none"><FoodLearning/></Sequence>
+      <Sequence from={1860} durationInFrames={540} layout="none"><UpdatingAndExperiments/></Sequence>
+      <Sequence from={2730} durationInFrames={600} layout="none"><InputsEnding/></Sequence>
+      </Sequence>
       {CITATIONS05.map(({from,to,source})=><g key={from} opacity={progress(f,from,from+12)*(1-progress(f,to-12,to))}><SourceCitation frame={f} source={source}/></g>)}
+      <Sequence from={SCENE05.experimentBridgeFrom} durationInFrames={SCENE05.experimentBridgeFrames} layout="none"><ExpectationsToExperimentBridge/></Sequence>
+      <Sequence from={SCENE05.contextBridgeFrom} durationInFrames={SCENE05.contextBridgeFrames} layout="none"><ContextToAccumbensBridge/></Sequence>
     </svg>
   </AbsoluteFill>;
 };

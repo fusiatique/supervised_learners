@@ -22,7 +22,7 @@ animation/
     ├── html/           Standalone scene pages, embedded by index.html
     ├── video/          Rendered MP4s
     ├── docs/           One SCENEnn.md per scene
-    └── manim/          Source project (requirements.txt, scenes/)
+    └── manim/          Source project (pyproject.toml, scenes/)
 ```
 
 `bio/` and `maths/` share the same shape: `html/` for pages, `video/` for renders, `docs/` for notes, and one source folder per tool. Maths has no `player/` folder because Manim scenes play as video.
