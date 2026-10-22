@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hacking the Reward Learner</title>
+
+  <!-- KaTeX for equations -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+  <!-- GSAP drives the Manim-style canvas scenes -->
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+  <link rel="stylesheet" href="presentation/css/styles.css" />
+  <script defer src="presentation/js/scenes/dopamine.js"></script>
+  <script defer src="presentation/js/main.js"></script>
+</head>
+<body>
+
+  <!-- ============ Chrome: progress + chapter nav ============ -->
+  <header class="hud">
+    <div class="hud__progress"><div class="hud__progress-bar" id="progressBar"></div></div>
+    <nav class="hud__chapters" id="chapterNav" aria-label="Chapters"></nav>
+  </header>
+
+  <main class="deck" id="deck">
+
+    <!-- ================= 0 · TITLE ================= -->
+    <section class="scene scene--title" id="title" data-chapter="0" data-label="Title">
+      <div class="scene__stage">
+        <div class="placeholder">Particle → network → brain outline</div>
+      </div>
+      <div class="scene__content">
+        <p class="eyebrow">Neuroscience × Reinforcement Learning</p>
+        <h1>Hacking the Reward Learner</h1>
+        <p class="subtitle">From dopamine to Homeostatic Reinforcement Learning</p>
+        <p class="hint">Press <kbd>→</kbd> or <kbd>Space</kbd> to begin</p>
+      </div>
+    </section>
+
+    <!-- ================= 1 · INTRODUCTION ================= -->
+    <section class="scene scene--split" id="intro-hook" data-chapter="1" data-label="Introduction">
+      <div class="scene__stage">
+        <div class="placeholder">Agent presses lever → reward glow; drug pellet → oversized glow, learning saturates</div>
+      </div>
+      <div class="scene__content">
+        <p class="eyebrow">1 · Introduction</p>
+        <h2>Addiction: a hacked learning system</h2>
+        <ul class="beats">
+          <li class="beat">Learning from reward normally makes behaviour better adapted.</li>
+          <li class="beat">Addictive drugs act <em>directly</em> on the brain's teaching signal.</li>
+          <li class="beat">What if addiction is learning working <strong>too well</strong> on the wrong signal?</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="scene scene--title" id="intro-roadmap" data-chapter="1" data-label="Roadmap">
+      <div class="scene__content">
+        <p class="eyebrow">Roadmap</p>
+        <h2>The journey</h2>
+        <ol class="roadmap">
+          <li class="beat">Biology</li>
+          <li class="beat">Reinforcement learning</li>
+          <li class="beat">Homeostatic RL</li>
+          <li class="beat">Harm</li>
+          <li class="beat">Model ↔ brain</li>
+          <li class="beat">Limitations</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- Frame-based Remotion opening animation. -->
+    <section class="scene scene--video" id="human-and-computer" data-chapter="1" data-label="Introduction">
+      <iframe id="scene01Player" src="bio/html/scene01.html" title="Human versus computer: a 31-second educational animation" allow="autoplay; fullscreen" allowfullscreen></iframe>
+    </section>
+
+    <section class="scene scene--video" id="risk-and-addiction" data-chapter="1" data-label="Introduction">
+      <iframe id="scene02Player" src="bio/html/scene02.html" title="Risk, learning, and addiction: a 23-second educational animation" allow="autoplay; fullscreen" allowfullscreen></iframe>
+    </section>
+
+    <section class="scene scene--video" id="addiction-and-reward-learning" data-chapter="1" data-label="Introduction">
+      <iframe id="scene03Player" src="bio/html/scene03.html" title="Addiction and reward learning: a 60-second educational animation" allow="autoplay; fullscreen" allowfullscreen></iframe>
+    </section>
+
+    <section class="scene scene--video" id="dopamine-introduction" data-chapter="1" data-label="Introduction">
+      <iframe id="scene035Player" src="bio/html/scene035.html" title="Dopamine and reward learning: a 70-second educational animation" allow="autoplay; fullscreen" allowfullscreen></iframe>
+    </section>
+
+    <section class="scene scene--video" id="mesocorticolimbic-introduction" data-chapter="1" data-label="Introduction">
+      <iframe id="scene04Player" src="bio/html/scene04.html" title="The mesocorticolimbic dopamine system: a 30-second educational animation" allow="autoplay; fullscreen" allowfullscreen></iframe>
+    </section>
+
+    <section class="scene scene--video" id="dopamine-reward-prediction-errors" data-chapter="1" data-label="Introduction">
+      <iframe id="scene05Player" src="bio/html/scene05.html" title="Dopamine and reward prediction errors: an 80-second educational animation" allow="autoplay; fullscreen" allowfullscreen></iframe>
+    </section>
+
+    <section class="scene scene--video" id="mesocortical-planning" data-chapter="1" data-label="Introduction">
+      <iframe id="scene06Player" src="bio/html/scene06.html" title="The mesocortical pathway, planning and action selection: a 60-second educational animation" allow="autoplay; fullscreen" allowfullscreen></iframe>
+    </section>
+
+    <section class="scene scene--video" id="prefrontal-control-addiction" data-chapter="1" data-label="Introduction">
+      <iframe id="scene07Player" src="bio/html/scene07.html" title="Prefrontal cortex, impulse control and addiction: a 60-second educational animation" allow="autoplay; fullscreen" allowfullscreen></iframe>
+    </section>
+
+    <!-- ================= 2 · BIOLOGICAL PROCESSES ================= -->
+    <section class="scene scene--split" id="bio-decision" data-chapter="2" data-label="Biology">
+      <div class="scene__stage">
+        <div class="placeholder">Agent at a fork: safe vs risky path; choice-frequency bars shift over trials</div>
+      </div>
+      <div class="scene__content">
+        <p class="eyebrow">2a · Biological processes</p>
+        <h2>Risk &amp; decision making</h2>
+        <ul class="beats">
+          <li class="beat">Choose between options with uncertain outcomes.</li>
+          <li class="beat">Experience the consequences: reward or punishment.</li>
+          <li class="beat">Update preferences. Behaviour is shaped by consequences.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="scene scene--split" id="bio-addiction" data-chapter="2" data-label="Biology">
+      <div class="scene__stage">
+        <div class="placeholder">Timeline: recreational → regular → compulsive; goal-directed arrows thin, habit loop thickens</div>
+      </div>
+      <div class="scene__content">
+        <p class="eyebrow">2b · Biological processes</p>
+        <h2>Addiction &amp; reward learning</h2>
+        <blockquote class="definition beat">
+          A chronic, relapsing disorder of compulsive drug seeking and use
+          <strong>despite adverse consequences</strong>.
+        </blockquote>
+        <ul class="beats">
+          <li class="beat">Escalation of intake</li>
+          <li class="beat">Tolerance</li>
+          <li class="beat">Craving &amp; relapse</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 2c is a full-canvas, Manim-style scene; animation lives in presentation/js/scenes/dopamine.js -->
+    <section class="scene scene--canvas" id="bio-dopamine" data-chapter="2" data-label="Biology">
+      <div class="scene__stage mn-stage">
+        <svg class="mn-svg" id="daSvg" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet"
+             role="img" aria-label="Midsagittal brain zooming into the VTA and its dopamine pathways">
+
+          <!-- Brain anatomy (midsagittal, frontal pole on the left) -->
+          <g id="daBrain">
+            <path class="mn-fill" id="daBrainFill"
+                  d="M 588 460 C 600 452, 625 448, 660 452 C 720 460, 790 470, 830 440 C 875 400, 880 320, 835 245 C 780 150, 670 90, 540 82 C 420 75, 290 105, 210 175 C 120 250, 120 370, 175 440 C 205 468, 260 472, 320 475 C 380 480, 440 470, 470 458 L 588 460 Z" />
+            <path class="mn-fill" id="daStemFill"
+                  d="M 470 458 C 455 490, 440 530, 450 570 C 455 595, 475 615, 486 662 L 555 662 C 565 600, 576 520, 588 460 Z" />
+            <path class="mn-fill" id="daCbFill"
+                  d="M 602 478 C 640 462, 720 464, 790 486 C 832 503, 822 556, 775 576 C 720 598, 650 588, 605 556 C 580 538, 580 492, 602 478 Z" />
+
+            <!-- regions (stroke draws, fill fades) -->
+            <path class="mn-line mn-draw mn-region mn-region--pfc" id="daPfc" fill-opacity="0"
+                  d="M 175 440 C 120 370, 120 250, 210 175 C 260 132, 320 106, 385 92 C 360 150, 320 210, 305 290 C 295 360, 300 420, 320 475 C 260 472, 205 468, 175 440 Z" />
+            <path class="mn-line mn-draw mn-region mn-region--nac" id="daNac" fill-opacity="0"
+                  d="M 374 418 a 24 14 0 1 0 48 0 a 24 14 0 1 0 -48 0" />
+
+            <!-- outlines -->
+            <path class="mn-line mn-draw" id="daCortex"
+                  d="M 588 460 C 600 452, 625 448, 660 452 C 720 460, 790 470, 830 440 C 875 400, 880 320, 835 245 C 780 150, 670 90, 540 82 C 420 75, 290 105, 210 175 C 120 250, 120 370, 175 440 C 205 468, 260 472, 320 475 C 380 480, 440 470, 470 458" />
+            <path class="mn-line mn-draw da-struct" d="M 470 458 C 455 490, 440 530, 450 570 C 455 595, 475 615, 486 662" />
+            <path class="mn-line mn-draw da-struct" d="M 588 460 C 576 520, 565 600, 555 662" />
+            <path class="mn-line mn-draw da-struct" id="daCerebellum"
+                  d="M 602 478 C 640 462, 720 464, 790 486 C 832 503, 822 556, 775 576 C 720 598, 650 588, 605 556 C 580 538, 580 492, 602 478 Z" />
+            <path class="mn-line mn-draw da-struct mn-line--soft mn-line--thick" id="daCC"
+                  d="M 370 350 C 335 340, 322 300, 345 268 C 390 222, 470 212, 540 215 C 620 218, 680 250, 692 292 C 698 315, 680 322, 668 310" />
+            <path class="mn-line mn-draw da-struct mn-line--soft" id="daThalamus"
+                  d="M 463 365 a 52 32 0 1 0 104 0 a 52 32 0 1 0 -104 0" />
+
+            <!-- sulci & cerebellar folia (thin detail lines) -->
+            <path class="mn-line mn-draw mn-line--detail da-sulcus" d="M 300 330 C 300 230, 420 175, 540 175 C 640 175, 710 210, 740 260" />
+            <path class="mn-line mn-draw mn-line--detail da-sulcus" d="M 560 85 C 555 110, 572 130, 560 160" />
+            <path class="mn-line mn-draw mn-line--detail da-sulcus" d="M 790 180 C 770 230, 740 270, 720 300" />
+            <path class="mn-line mn-draw mn-line--detail da-sulcus" d="M 852 360 C 800 360, 750 345, 710 322" />
+            <path class="mn-line mn-draw mn-line--detail da-sulcus" d="M 262 150 C 272 180, 252 210, 266 240" />
+            <path class="mn-line mn-draw mn-line--detail da-sulcus" d="M 440 86 C 446 112, 430 135, 440 158" />
+            <path class="mn-line mn-draw mn-line--detail da-sulcus" d="M 680 112 C 668 140, 690 160, 676 190" />
+            <path class="mn-line mn-draw mn-line--detail da-folia" d="M 612 502 C 660 490, 740 492, 802 508" />
+            <path class="mn-line mn-draw mn-line--detail da-folia" d="M 604 526 C 660 516, 740 518, 808 532" />
+            <path class="mn-line mn-draw mn-line--detail da-folia" d="M 615 550 C 670 546, 735 549, 792 556" />
+          </g>
+
+          <!-- glow overlays that pulse when dopamine arrives -->
+          <path class="da-glow da-glow--pfc" id="daPfcGlow"
+                d="M 175 440 C 120 370, 120 250, 210 175 C 260 132, 320 106, 385 92 C 360 150, 320 210, 305 290 C 295 360, 300 420, 320 475 C 260 472, 205 468, 175 440 Z" />
+          <path class="da-glow da-glow--nac" id="daNacGlow" d="M 374 418 a 24 14 0 1 0 48 0 a 24 14 0 1 0 -48 0" />
+
+          <path class="mn-line mn-draw mn-region mn-region--vta" id="daVta" fill-opacity="0"
+                d="M 492 472 a 20 12 0 1 0 40 0 a 20 12 0 1 0 -40 0" />
+
+          <g id="daAxons"></g>
+          <g id="daNeurons"></g>
+          <g id="daParticles"></g>
+
+          <!-- labels -->
+          <g id="daLabels">
+            <text class="mn-label" id="daLblPfc" x="222" y="330" text-anchor="middle">Prefrontal cortex</text>
+            <path class="mn-line mn-draw mn-line--detail" id="daLdNac" d="M 366 528 L 392 434" />
+            <text class="mn-label" id="daLblNac" x="372" y="552" text-anchor="end">Nucleus accumbens</text>
+            <path class="mn-line mn-draw mn-line--detail" id="daLdVta" d="M 446 598 L 502 484" />
+            <text class="mn-label" id="daLblVta" x="452" y="622" text-anchor="end">Ventral tegmental area (VTA)</text>
+            <text class="mn-label mn-label--small" id="daLblNeurons" x="512" y="494" text-anchor="middle">dopamine neurons</text>
+            <text class="mn-label mn-label--path" id="daLblLimbic" x="452" y="418" text-anchor="middle">mesolimbic</text>
+            <text class="mn-label mn-label--path" id="daLblCortical" x="282" y="236" text-anchor="end">mesocortical</text>
+          </g>
+        </svg>
+      </div>
+
+      <p class="mn-eyebrow">2c · Dopamine &amp; the mesocorticolimbic system</p>
+
+      <div class="mn-captions">
+        <p class="mn-caption mn-caption--intro">The human brain, viewed from the midline</p>
+        <p class="mn-caption beat">Deep in the midbrain lies the ventral tegmental area</p>
+        <p class="mn-caption beat">It is packed with dopamine-producing neurons</p>
+        <p class="mn-caption beat">When they fire, signals race down their axons</p>
+        <p class="mn-caption beat">Mesolimbic pathway: VTA → nucleus accumbens</p>
+        <p class="mn-caption beat">Mesocortical pathway: VTA → prefrontal cortex</p>
+        <p class="mn-caption beat">Together: the mesocorticolimbic dopamine system</p>
+      </div>
+    </section>
+
+    <section class="scene scene--split" id="bio-rpe" data-chapter="2" data-label="Biology">
+      <div class="scene__stage">
+        <div class="placeholder">Three Schultz-style rasters (unexpected / predicted / omitted reward) + drug panel</div>
+      </div>
+      <div class="scene__content">
+        <p class="eyebrow">2d · Mesolimbic pathway</p>
+        <h2>VTA, nucleus accumbens &amp; prediction errors</h2>
+        <ul class="beats">
+          <li class="beat">Unexpected reward → dopamine burst</li>
+          <li class="beat">Predicted reward → burst moves to the cue</li>
+          <li class="beat">Omitted reward → dip below baseline</li>
+          <li class="beat">Drugs → dopamine surge <em>regardless</em> of prediction</li>
+        </ul>
+        <div class="equation beat">$$\delta = \text{actual} - \text{expected}$$</div>
+      </div>
+    </section>
+
+    <section class="scene scene--split" id="bio-pfc" data-chapter="2" data-label="Biology">
+      <div class="scene__stage">
+        <div class="placeholder">PFC "brake" arrows onto striatum dim in the addicted state; striatal loop brightens</div>
+      </div>
+      <div class="scene__content">
+        <p class="eyebrow">2e · Mesocortical pathway</p>
+        <h2>Prefrontal cortex &amp; control</h2>
+        <ul class="beats">
+          <li class="beat">OFC: valuation of outcomes</li>
+          <li class="beat">ACC / dlPFC: conflict monitoring, inhibitory control</li>
+          <li class="beat">In addiction: weakened top-down control (hypofrontality)</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ================= 3 · REINFORCEMENT LEARNING ================= -->
+    <section class="scene scene--split" id="rl-loop" data-chapter="3" data-label="RL">
+      <div class="scene__stage">
+        <div class="placeholder">Agent–environment loop: s → a → r, s′</div>
+      </div>
+      <div class="scene__content">
+        <p class="eyebrow">3 · Reinforcement learning</p>
+        <h2>The agent–environment loop</h2>
+        <ul class="beats">
+          <li class="beat">The agent observes a state \(s\)</li>
+          <li class="beat">It takes an action \(a\)</li>
+          <li class="beat">The environment returns reward \(r\) and next state \(s'\)</li>
+          <li class="beat">Goal: maximise discounted future reward</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="scene scene--equation" id="rl-bellman" data-chapter="3" data-label="RL">
+      <div class="scene__stage">
+        <div class="placeholder">Grid world: value spreads backward from the goal as a colour wash</div>
+      </div>
+      <div class="scene__content">
+        <p class="eyebrow">3 · Reinforcement learning</p>
+        <h2>The Bellman equation</h2>
+        <div class="equation beat">$$V(s) = \max_a \Big[ R(s,a) + \gamma \sum_{s'} P(s' \mid s,a)\, V(s') \Big]$$</div>
+        <p class="beat">A state's value = immediate reward + discounted value of where it leads.</p>
+      </div>
+    </section>
+
+    <section class="scene scene--equation" id="rl-qlearning" data-chapter="3" data-label="RL">
+      <div class="scene__stage">
+        <div class="placeholder">Q-table cells update; δ shown as the same amber pulse as dopamine</div>
+      </div>
+      <div class="scene__content">
+        <p class="eyebrow">3 · Reinforcement learning</p>
+        <h2>Q-learning &amp; the TD error</h2>
+        <div class="equation beat">$$Q(s,a) \leftarrow Q(s,a) + \alpha\,\underbrace{\big[r + \gamma \max_{a'} Q(s',a') - Q(s,a)\big]}_{\delta}$$</div>
+        <p class="beat">The TD error \(\delta\) behaves like the dopamine prediction error.</p>
+      </div>
+    </section>
+
+    <section class="scene scene--split" id="rl-limits" data-chapter="3" data-label="RL">
+      <div class="scene__stage">
+        <div class="placeholder">Drug-value curve climbing without bound</div>
+      </div>
+      <div class="scene__content">
+        <p class="eyebrow">3 · Reinforcement learning</p>
+        <h2>Limitation for addiction</h2>
+        <div class="equation beat">$$\delta = \max\!\big(r + \gamma V(s') - V(s) + D,\; D\big)$$</div>
+        <p class="caption beat">Drug as a non-compensable dopamine boost (Redish, 2004)</p>
+        <ul class="beats">
+          <li class="beat">Reward is an external, fixed scalar with no internal state</li>
+          <li class="beat">Cannot explain satiation, tolerance or escalation</li>
+          <li class="beat">Drug value grows without bound</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ================= 5 · HOMEOSTATIC RL ================= -->
+    <section class="scene scene--split" id="hrl-state" data-chapter="5" data-label="HRL">
+      <div class="scene__stage">
+        <div class="placeholder">Internal-state gauge H with set-point notch H*; distance = drive</div>
+      </div>
+      <div class="scene__content">
+        <p class="eyebrow">5 · Homeostatic RL</p>
+        <h2>Internal state &amp; set-point</h2>
+        <p class="beat">The agent has an internal state \(H\) and a set-point \(H^*\).</p>
+        <div class="equation beat">$$D(H) = \Big( \sum_i \lvert h^*_i - h_i \rvert^{\,n} \Big)^{1/m}$$</div>
+        <p class="beat">Drive = distance from the set-point.</p>
+      </div>
+    </section>
+
+    <section class="scene scene--equation" id="hrl-reward" data-chapter="5" data-label="HRL">
+      <div class="scene__stage">
+        <div class="placeholder">Outcome K moves H toward H*; reward = drop in drive (deprived vs sated)</div>
+      </div>
+      <div class="scene__content">
+        <p class="eyebrow">5 · Homeostatic RL (Keramati &amp; Gutkin, 2014)</p>
+        <h2>Reward = drive reduction</h2>
+        <div class="equation beat">$$r(H_t, K_t) = D(H_t) - D(H_t + K_t)$$</div>
+        <ul class="beats">
+          <li class="beat">The same outcome is rewarding when deprived and neutral or aversive when sated</li>
+          <li class="beat">Maximising reward ≡ staying close to the set-point</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="scene scene--split" id="hrl-drugs" data-chapter="5" data-label="HRL">
+      <div class="scene__stage">
+        <div class="placeholder">Set-point notch drifts with repeated use; same dose → less reward; intake escalates</div>
+      </div>
+      <div class="scene__content">
+        <p class="eyebrow">5 · Homeostatic RL (Keramati et al., 2017)</p>
+        <h2>Drugs in HRL</h2>
+        <ul class="beats">
+          <li class="beat">Repeated intake shifts the set-point (allostasis)</li>
+          <li class="beat">Tolerance: the same dose yields less reward</li>
+          <li class="beat">Escalation: intake rises to compensate</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ================= 6 · HARM ================= -->
+    <section class="scene scene--equation" id="harm-formula" data-chapter="6" data-label="Harm">
+      <div class="scene__stage">
+        <div class="placeholder">Red harm term docks onto the HRL reward equation</div>
+      </div>
+      <div class="scene__content">
+        <p class="eyebrow">6 · Adding harm</p>
+        <h2>Harm as an influence on learning</h2>
+        <div class="equation beat">$$r_t = \big[D(H_t) - D(H_t + K_t)\big] - \lambda\,\text{harm}_t$$</div>
+        <p class="beat">\(\lambda\) sets how strongly harm is weighed against homeostatic reward.</p>
+      </div>
+    </section>
+
+    <section class="scene scene--split" id="harm-time" data-chapter="6" data-label="Harm">
+      <div class="scene__stage">
+        <div class="placeholder">Timeline: immediate reward vs delayed harm shrinking by γᵏ; two agents' choice curves diverge</div>
+      </div>
+      <div class="scene__content">
+        <p class="eyebrow">6 · Adding harm</p>
+        <h2>Immediate reward, delayed harm</h2>
+        <ul class="beats">
+          <li class="beat">Reward arrives now; harm arrives later</li>
+          <li class="beat">Delayed harm is discounted by \(\gamma^k\)</li>
+          <li class="beat">If harm is under-weighted, use continues despite consequences</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ================= 7 · MODEL ↔ BIOLOGY ================= -->
+    <section class="scene scene--split" id="mapping" data-chapter="7" data-label="Mapping">
+      <div class="scene__stage">
+        <div class="placeholder">Brain outline returns; model terms fly in and dock on regions</div>
+      </div>
+      <div class="scene__content">
+        <p class="eyebrow">7 · Model ↔ biology</p>
+        <h2>Where the model lives in the brain</h2>
+        <table class="mapping">
+          <tbody>
+            <tr class="beat"><td>\(\delta\) (prediction error)</td><td>VTA dopamine</td></tr>
+            <tr class="beat"><td>\(Q(s,a)\) action values</td><td>Striatum / NAc</td></tr>
+            <tr class="beat"><td>\(H,\ D(H)\) internal state, drive</td><td>Hypothalamus, insula</td></tr>
+            <tr class="beat"><td>harm, negative outcomes</td><td>Lateral habenula, amygdala</td></tr>
+            <tr class="beat"><td>\(\lambda\), valuation, control</td><td>PFC (OFC, ACC, dlPFC)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ================= 8 · LIMITATIONS ================= -->
+    <section class="scene scene--wide" id="limitations" data-chapter="8" data-label="Limitations">
+      <div class="scene__content">
+        <p class="eyebrow">8 · Limitations of HRL</p>
+        <h2>What it shows, and what it doesn't</h2>
+        <div class="columns">
+          <div class="col col--good">
+            <h3>✓ Captures</h3>
+            <ul class="beats">
+              <li class="beat">Satiation &amp; dose-dependence</li>
+              <li class="beat">Tolerance &amp; escalation via set-point shift</li>
+              <li class="beat">Bounded values</li>
+              <li class="beat">Unifies homeostasis and reward</li>
+            </ul>
+          </div>
+          <div class="col col--bad">
+            <h3>✗ Misses</h3>
+            <ul class="beats">
+              <li class="beat">Cue-induced craving &amp; relapse</li>
+              <li class="beat">Shift from goal-directed control to habit</li>
+              <li class="beat">Individual vulnerability</li>
+              <li class="beat">Social &amp; environmental context</li>
+              <li class="beat">Free parameters (\(\lambda\), set-point dynamics)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 9 · CONCLUSION ================= -->
+    <section class="scene scene--split" id="conclusion" data-chapter="9" data-label="Conclusion">
+      <div class="scene__stage">
+        <div class="placeholder">Brain + RL loop overlay; agent balances on the set-point gauge</div>
+      </div>
+      <div class="scene__content">
+        <p class="eyebrow">9 · Conclusion</p>
+        <h2>Take-aways</h2>
+        <ol class="beats">
+          <li class="beat">Addiction exploits the brain's reward-learning machinery.</li>
+          <li class="beat">Standard RL misses the agent's internal state.</li>
+          <li class="beat">HRL grounds reward in homeostasis.</li>
+          <li class="beat">Adding harm helps explain use despite consequences.</li>
+        </ol>
+        <details class="refs beat">
+          <summary>References</summary>
+          <ul>
+            <li>Schultz, Dayan &amp; Montague (1997). A neural substrate of prediction and reward. <em>Science</em>.</li>
+            <li>Redish (2004). Addiction as a computational process gone awry. <em>Science</em>.</li>
+            <li>Keramati &amp; Gutkin (2014). Homeostatic reinforcement learning for integrating reward collection and physiological stability. <em>eLife</em>.</li>
+            <li>Keramati, Durand, Girardeau, Gutkin &amp; Ahmed (2017). Cocaine addiction as a homeostatic reinforcement learning disorder. <em>Psychological Review</em>.</li>
+          </ul>
+        </details>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============ Footer controls ============ -->
+  <footer class="controls">
+    <button class="controls__btn" id="prevBtn" aria-label="Previous">←</button>
+    <span class="controls__counter" id="counter">1 / 1</span>
+    <button class="controls__btn" id="nextBtn" aria-label="Next">→</button>
+  </footer>
+
+</body>
+</html>
