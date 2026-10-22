@@ -8,7 +8,7 @@ import {CueSymbol,RewardPulse} from './reward-components';
 import {RewardSymbol} from './risk-components';
 import {CueRewardTimeline,DopamineNeuron,DopamineSpikeTrain,FoodDeliveryExample,getFoodEvents,getFoodSpikeTimes,getSpikeTimes,MotivationalValueIndicator,NAc_INPUTS,NeuralInputPathway,RewardPredictionError,RodentExperimentIllustration} from './dopamine-learning-components';
 
-export const SCENE05={width:1920,height:1080,fps:30,durationInFrames:3600,bridgeFrames:270,experimentBridgeFrom:2250,experimentBridgeFrames:210,contextBridgeFrom:2640,contextBridgeFrames:360} as const;
+export const SCENE05={width:1920,height:1080,fps:30,durationInFrames:3990,bridgeFrames:270,experimentBridgeFrom:2370,experimentBridgeFrames:210,contextBridgeFrom:2880,contextBridgeFrames:390} as const;
 export const scene05ContentFrame=(frame:number)=>{
   const f=frame<1920?frame:Math.max(1920,frame-SCENE05.experimentBridgeFrames);
   // Spread the extra second across the update animation instead of freezing a pose.
@@ -38,7 +38,7 @@ export const getScene05IntroCamera=(f:number):BrainCamera=>{
 
 const AnatomicalIntroduction:React.FC=()=>{
   const frame=useCurrentFrame();
-  const f=frame<300?frame:frame<660?300+(frame-300)*(300/360):frame-60;
+  const f=frame<300?frame:frame<690?300+(frame-300)*(300/390):frame-90;
   const camera=getScene05IntroCamera(f);
   const [vx,vy]=anatomyToScreen(BRAIN_REGIONS.VTA.center,camera);
   const inset=progress(f,90,135)*(1-progress(f,300,390));
@@ -72,7 +72,8 @@ const AnatomicalIntroduction:React.FC=()=>{
 };
 
 const NeuronalLearning:React.FC=()=>{
-  const f=useCurrentFrame()+600;
+  const frame=useCurrentFrame();
+  const f=600+(frame<150?frame*.6:frame<285?90+(frame-150)*(90/135):frame-105);
   const bars=ease(f,900,975);
   const reveal=progress(f,630,780);
   const spikes=getSpikeTimes('burst',.68);
@@ -93,7 +94,8 @@ const NeuronalLearning:React.FC=()=>{
 };
 
 const FoodLearning:React.FC=()=>{
-  const f=useCurrentFrame()+1200;
+  const frame=useCurrentFrame();
+  const f=frame>=585?1800+(frame-585):1200+(frame<315?Math.floor(frame/105)*90+(frame%105)*(90/105):frame-45);
   const events=getFoodEvents(f);
   const compare=progress(f,1470,1500)*(1-progress(f,1560,1590));
   const roomOpacity=mix(1,.38,compare);
@@ -110,13 +112,15 @@ const FoodLearning:React.FC=()=>{
     <g opacity={fade(f,1220,1240,1290)}>{header('UNEXPECTED REWARD',140)}</g>
     <g opacity={fade(f,1390,1410,1560)}>{header('PREDICTIVE CUE',140)}</g>
     {!dip&&<RewardPulse x={1450} y={470} age={f-events.reward} opacity={f>=events.reward?1-progress(f,events.reward+25,events.reward+40):0} scale={Math.min(1,pop(f,events.reward))}/>}
-    <g opacity={fade(f,1660,1690,1740)}>{header('WORSE THAN EXPECTED',140,C.red)}</g>
-    <g opacity={progress(f,1740,1765)}>{header('NEGATIVE PREDICTION ERROR',140,C.red)}</g>
+    <g opacity={fade(f,1660,1690,1740)}>{header('WORSE THAN EXPECTED',140,C.red)}
+      <Label x={960} y={195} size={25} color={C.gray}>Negative prediction error</Label>
+    </g>
   </g>;
 };
 
 const UpdatingAndExperiments:React.FC=()=>{
-  const frame=useCurrentFrame()+1800;
+  const experimentFrame=useCurrentFrame()+1800;
+  const frame=experimentFrame<2130?experimentFrame:experimentFrame<2430?2130+(experimentFrame-2130)*.6:experimentFrame-120;
   const f=scene05ContentFrame(frame);
   const updateOpacity=frame>=1920+SCENE05.experimentBridgeFrames?0:1-progress(f,1890,1920);
   const p=curvePoint(progress(f,1825,1880),[[1460,400],[1420,200],[1050,200],[960,360]]);
@@ -166,7 +170,7 @@ export const AccumbensInputsArtwork:React.FC<{frame:number}>=({frame})=>{
 };
 const InputsEnding:React.FC=()=>{
   const frame=useCurrentFrame();
-  const f=2070+Math.min(frame*(300/570),300);
+  const f=2070+Math.min(frame*(300/690),300);
   return <g opacity={progress(f,2070,2100)}><AccumbensInputsArtwork frame={f}/></g>;
 };
 
@@ -218,7 +222,7 @@ const ExpectationsToExperimentBridge:React.FC=()=>{
 };
 
 const ContextToAccumbensBridge:React.FC=()=>{
-  const f=useCurrentFrame();
+  const f=useCurrentFrame()*(360/390);
   const inputs=[{text:'SITUATION',detail:'Where we are',x:440,y:400,color:C.blue},{text:'EXPERIENCE',detail:'What we remember',x:960,y:330,color:C.green},{text:'GOALS',detail:'What we want',x:1480,y:400,color:C.yellow}];
   return <g>
     <rect width={1920} height={1080} fill={C.bg}/>
@@ -245,20 +249,25 @@ const ContextToAccumbensBridge:React.FC=()=>{
 };
 
 export const Scene05_DopamineRewardPredictionErrors:React.FC=()=>{
-  const frameInScene=useCurrentFrame();
+  const screenFrame=useCurrentFrame();
+  const actualFrame=screenFrame<2880?screenFrame:screenFrame<3270?2880+(screenFrame-2880)*(360/390):screenFrame<3960?3240+(screenFrame-3270)*(570/690):screenFrame-150;
+  const currentFrame=actualFrame<2580?actualFrame:actualFrame<2880?2580+(actualFrame-2580)*.6:actualFrame-120;
+  const displayedFrame=currentFrame<2250?currentFrame:currentFrame+60;
+  const presentationFrame=displayedFrame<570?displayedFrame:displayedFrame<960?570+(displayedFrame-570)*(360/390):displayedFrame-30;
+  const frameInScene=presentationFrame<930?presentationFrame:presentationFrame<1080?930+(presentationFrame-930)*.6:presentationFrame<1215?1020+(presentationFrame-1080)*(90/135):presentationFrame<1635?presentationFrame-105:presentationFrame<1950?1530+Math.floor((presentationFrame-1635)/105)*90+((presentationFrame-1635)%105)*(90/105):presentationFrame-150;
   const playbackFrame=frameInScene<3000?frameInScene:frameInScene<3570?3000+(frameInScene-3000)*(300/570):frameInScene-270;
   const sceneFrame=playbackFrame<570?playbackFrame:playbackFrame<930?570+(playbackFrame-570)*(300/360):playbackFrame-60;
-  const frame=(sceneFrame<SCENE05.contextBridgeFrom-60?sceneFrame:Math.max(SCENE05.contextBridgeFrom-60,sceneFrame-SCENE05.contextBridgeFrames))-SCENE05.bridgeFrames;
+  const frame=(sceneFrame<SCENE05.contextBridgeFrom-300?sceneFrame:Math.max(SCENE05.contextBridgeFrom-300,sceneFrame-(SCENE05.contextBridgeFrames-30)))-SCENE05.bridgeFrames;
   const f=scene05ContentFrame(frame);
   return <AbsoluteFill style={{backgroundColor:C.bg}}>
     <svg viewBox="0 0 1920 1080" width="100%" height="100%" role="img" aria-label="VTA projections to nucleus accumbens, illustrative tonic and phasic dopamine firing, reward prediction errors, food-delivery cue learning, omitted-reward firing pauses, schematic rodent manipulations, and multiple inputs that shape learned motivational value.">
       <Sequence from={0} durationInFrames={SCENE05.bridgeFrames} layout="none"><SystemToSignalsBridge/></Sequence>
-      <Sequence from={SCENE05.bridgeFrames} durationInFrames={3330} layout="none">
-      <Sequence from={0} durationInFrames={720} layout="none"><AnatomicalIntroduction/></Sequence>
-      <Sequence from={660} durationInFrames={630} layout="none"><NeuronalLearning/></Sequence>
-      <Sequence from={1260} durationInFrames={630} layout="none"><FoodLearning/></Sequence>
-      <Sequence from={1860} durationInFrames={540} layout="none"><UpdatingAndExperiments/></Sequence>
-      <Sequence from={2730} durationInFrames={600} layout="none"><InputsEnding/></Sequence>
+      <Sequence from={SCENE05.bridgeFrames} durationInFrames={3720} layout="none">
+      <Sequence from={0} durationInFrames={750} layout="none"><AnatomicalIntroduction/></Sequence>
+      <Sequence from={690} durationInFrames={735} layout="none"><NeuronalLearning/></Sequence>
+      <Sequence from={1395} durationInFrames={615} layout="none"><FoodLearning/></Sequence>
+      <Sequence from={1980} durationInFrames={660} layout="none"><UpdatingAndExperiments/></Sequence>
+      <Sequence from={3000} durationInFrames={720} layout="none"><InputsEnding/></Sequence>
       </Sequence>
       {CITATIONS05.map(({from,to,source})=><g key={from} opacity={progress(f,from,from+12)*(1-progress(f,to-12,to))}><SourceCitation frame={f} source={source}/></g>)}
       <Sequence from={SCENE05.experimentBridgeFrom} durationInFrames={SCENE05.experimentBridgeFrames} layout="none"><ExpectationsToExperimentBridge/></Sequence>

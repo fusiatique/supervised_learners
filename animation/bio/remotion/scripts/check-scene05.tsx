@@ -8,13 +8,13 @@ import {getScene04Camera} from '../src/Scene04_MesocorticolimbicIntroduction';
 import {AccumbensInputsArtwork,CITATIONS05,getScene05IntroCamera,SCENE05,T05} from '../src/Scene05_DopamineRewardPredictionErrors';
 import {FOOD_TRIALS,getFoodEvents,getFoodSpikeTimes,getSpikeTimes,NAc_INPUTS,RewardPredictionError} from '../src/dopamine-learning-components';
 
-assert.equal(SCENE05.durationInFrames,3600);
-assert.equal(SCENE05.durationInFrames/SCENE05.fps,120);
+assert.equal(SCENE05.durationInFrames,3990);
+assert.equal(SCENE05.durationInFrames/SCENE05.fps,133);
 assert.equal(SCENE05.bridgeFrames/SCENE05.fps,9);
 assert.equal(SCENE05.experimentBridgeFrames/SCENE05.fps,7);
-assert.equal(SCENE05.experimentBridgeFrom,SCENE05.bridgeFrames+1890+90);
-assert.equal(SCENE05.contextBridgeFrames/SCENE05.fps,12);
-assert.equal(SCENE05.contextBridgeFrom+SCENE05.contextBridgeFrames+600,SCENE05.durationInFrames);
+assert.equal(SCENE05.experimentBridgeFrom,SCENE05.bridgeFrames+1890+210);
+assert.equal(SCENE05.contextBridgeFrames/SCENE05.fps,13);
+assert.equal(SCENE05.contextBridgeFrom+SCENE05.contextBridgeFrames+720,SCENE05.durationInFrames);
 const endCamera=getScene04Camera(900),opening=getScene05IntroCamera(0);
 for(const key of ['x','y','scale'] as const)assert.ok(Math.abs(opening[key]-endCamera[key])<1e-8,'Scene 04 camera continuity');
 for(let f=1;f<=600;f++){
