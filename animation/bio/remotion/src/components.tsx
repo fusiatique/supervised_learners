@@ -8,7 +8,7 @@ export const Label: React.FC<{x: number; y: number; children: React.ReactNode; s
 export const SourceCitation: React.FC<{frame: number; source?: string}> = ({frame, source='Bellman, 1966'}) => <g opacity={progress(frame, 0, 30)}><text x={45} y={1045} fill={C.gray} fontSize={24} fontFamily="Arial, Helvetica, sans-serif">{source}</text></g>;
 
 export type HumanExpression = 'neutral' | 'curious' | 'disappointed' | 'recognition' | 'satisfied' | 'conflicted';
-export const HumanCharacter: React.FC<Placement & {frame: number; walking?: number; shrug?: number; expression?: HumanExpression; look?: number; headTilt?: number; naturalMotion?: boolean; seated?: boolean}> = ({x=0,y=0,scale=1,color=C.white,amount=1,frame,walking=0,shrug=0,expression='neutral',look,headTilt=0,naturalMotion=false,seated=false}) => {
+export const HumanCharacter: React.FC<Placement & {frame: number; walking?: number; shrug?: number; expression?: HumanExpression; look?: number; headTilt?: number; naturalMotion?: boolean; seated?: boolean; rightHand?: {x:number;y:number}}> = ({x=0,y=0,scale=1,color=C.white,amount=1,frame,walking=0,shrug=0,expression='neutral',look,headTilt=0,naturalMotion=false,seated=false,rightHand}) => {
   const step = Math.sin(frame * .33) * 16 * walking;
   const blink = frame >= 44 && frame <= 49;
   const gaze = look ?? (frame > 120 && frame < 150 ? -5 : frame >= 150 && frame < 180 ? 5 : 0);
@@ -25,7 +25,7 @@ export const HumanCharacter: React.FC<Placement & {frame: number; walking?: numb
       {expression==='curious'&&<path d="M7 -152l13 3"/>}
     </g>
     </g>
-    <path d={`M0 -97 Q-7 -52 0 0 M-1 -72 Q-29 -61 ${-48+arm} ${-27+Math.abs(arm)*.4} M0 -72 Q29 -61 ${48+arm} ${-27+Math.abs(arm)*.4}`} {...draw(amount)} opacity={1-shrug}/>
+    <path d={`M0 -97 Q-7 -52 0 0 M-1 -72 Q-29 -61 ${-48+arm} ${-27+Math.abs(arm)*.4} M0 -72 Q${rightHand?rightHand.x*.5:29} ${rightHand?Math.min(-61,rightHand.y-12):-61} ${rightHand?.x??48+arm} ${rightHand?.y??-27+Math.abs(arm)*.4}`} {...draw(amount)} opacity={1-shrug}/>
     <path d={`M0 -97Q-7 -52 0 0 M0 -72Q-25 -43 -47 ${-60-shrug*18} M0 -72Q25 -43 47 ${-60-shrug*18}`} {...draw(amount)} opacity={shrug}/>
     <path d={seated?'M0 0L40 35V90M0 0L-15 35V90':`M0 0 L${-25+step} 64 M0 0 L${25-step} 64`} {...draw(amount)}/>
   </g>;
@@ -62,10 +62,10 @@ export const ProcessorIllustration: React.FC<Placement & {frame: number; signal?
 
 export const AnimatedArrow: React.FC<{x: number; y: number; length?: number; amount: number; color?: string}> = ({x,y,length=180,amount,color=C.white}) => <g transform={`translate(${x} ${y})`} fill="none" stroke={color} strokeWidth={4} strokeLinecap="round" strokeLinejoin="round"><path d={`M0 0H${length}l-15 -12 M${length} 0l-15 12`} {...draw(amount)}/></g>;
 
-/** Shared end composition: reuse at frame=1260 to open the next scene. */
+/** Shared end composition: reuse at its fixed internal frame=1230 to open the next scene. */
 export const LearningLoop: React.FC<{frame: number}> = ({frame}) => <g>
-  {['HOW','DO','WE','LEARN','TO','MAKE','DECISIONS?'].map((word,i)=>{
-    const positions=[424,573,685,800,987,1081,1242];
+  {['HOW','CAN','WE','UNDERSTAND','THE','HUMAN','MIND?'].map((word,i)=>{
+    const positions=[325,475,615,730,1080,1205,1410];
     const a=progress(frame,1050+i*8,1074+i*8);
     return <g key={word} opacity={a} transform={`translate(0 ${22*(1-a)})`}><Label x={positions[i]} y={545} anchor="start" size={45}>{word}</Label></g>;
   })}

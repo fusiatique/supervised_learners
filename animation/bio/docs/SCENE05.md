@@ -37,7 +37,7 @@ npm run render:scene05 -- --browser-executable="/Applications/Google Chrome.app/
 
 ## Reusable components
 
-`remotion/src/dopamine-learning-components.tsx` exports `DopamineNeuron`, `DopamineSpikeTrain`, `RewardPredictionError`, `FoodDeliveryExample`, `CueRewardTimeline`, `RodentExperimentIllustration`, `NeuralInputPathway`, and `MotivationalValueIndicator`.
+`bio/remotion/src/dopamine-learning-components.tsx` exports `DopamineNeuron`, `DopamineSpikeTrain`, `RewardPredictionError`, `FoodDeliveryExample`, `CueRewardTimeline`, `RodentExperimentIllustration`, `NeuralInputPathway`, and `MotivationalValueIndicator`.
 
 Spike trains use sparse, burst, and pause modes. All individual spikes have the same upward height. The dip removes events relative to background activity; it never represents negative action potentials. A caller can supply explicit spike times for compound cue-burst/omission-pause trials.
 
