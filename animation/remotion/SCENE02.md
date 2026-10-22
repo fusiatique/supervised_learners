@@ -31,7 +31,7 @@ npm run render:scene02 -- --browser-executable="/Applications/Google Chrome.app/
 | 450–509 | It returns to the crossroads; the box crossfades into a neutral capsule. |
 | 510–569 | Looking and small movements toward both routes show hesitation. |
 | 570–629 | It approaches the capsule while remembering the warning; no consumption is shown. |
-| 630–659 | “LEARNING CAN BECOME MALADAPTIVE” appears; both paths dim. |
+| 630–659 | “WHEN CONSEQUENCES NO LONGER GUIDE BEHAVIOUR” appears; both paths dim. |
 | 660–689 | The entire final composition holds still. |
 
 The citation crossfades around frame 450 from `Yates & Stone, 1992` to `Piantadosi et al., 2021`, as supplied in the narration.

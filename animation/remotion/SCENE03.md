@@ -2,7 +2,7 @@
 
 Open `animation/index.html` in Live Server. Scene 03 follows Scene 02 in the presentation and pauses when you leave its page. Its direct link is `#addiction-and-reward-learning`. `animation/scene03.html` also provides standalone playback and scrubbing.
 
-56 seconds · 1680 frames · 30 FPS · 1920 × 1080 · silent.
+60 seconds · 1800 frames · 30 FPS · 1920 × 1080 · silent.
 
 From `animation/remotion` with Node.js 22+:
 
@@ -29,8 +29,8 @@ npm run render:scene03 -- --browser-executable="/Applications/Google Chrome.app/
 | 480–809 | Repeated choices and reward pulses strengthen the conceptual connection. The crossroads gives way to an association diagram. |
 | 810–989 | The cue receives emphasis while warnings remain. “REWARD LEARNING GONE TOO FAR” appears during 31–33 seconds. |
 | 990–1379 | At frame 990 the climax title is still fully visible; only then does the natural-reward explanation begin to crossfade in. Bell trials lead to an apple with progressively shorter response delays, followed by Cue → Action → Reward. |
-| 1380–1619 | Compare natural- and drug-associated learning diagrams, with differently sized conceptual reinforcement signals. |
-| 1620–1679 | Diagrams fade; yellow particles organize around an incomplete neuron outline. No large title remains. |
+| 1380–1739 | Compare natural- and drug-associated learning diagrams, with differently sized conceptual reinforcement signals. |
+| 1740–1799 | Diagrams fade; yellow particles organize around an incomplete neuron outline. No large title remains. |
 
 `T03` in `src/Scene03_AddictionAndRewardLearning.tsx` defines timing boundaries. `getAddictionPose` and `getNaturalLearningPose` are pure frame-based position functions. Drug-seeking choices follow the existing crossroads cubic geometry; all repeated trips include a visible return rather than a teleport. Shared characters, palettes, apples, capsules, warnings, arrows and citations are reused.
 

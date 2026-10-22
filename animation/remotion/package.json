@@ -18,7 +18,16 @@
     "check:scene04": "esbuild scripts/check-scene04.tsx --bundle --platform=node --packages=external --outfile=node_modules/.cache/check-scene04.cjs && node node_modules/.cache/check-scene04.cjs",
     "build:scene05": "esbuild src/player05.tsx --bundle --minify --outfile=../media/scene05-player.js",
     "render:scene05": "remotion render src/index.tsx Scene05-DopamineRewardPredictionErrors ../media/scene05-dopamine-reward-prediction-errors.mp4 --codec=h264 --muted",
-    "check:scene05": "esbuild scripts/check-scene05.tsx --bundle --platform=node --packages=external --outfile=node_modules/.cache/check-scene05.cjs && node node_modules/.cache/check-scene05.cjs"
+    "check:scene05": "esbuild scripts/check-scene05.tsx --bundle --platform=node --packages=external --outfile=node_modules/.cache/check-scene05.cjs && node node_modules/.cache/check-scene05.cjs",
+    "build:scene035": "esbuild src/player035.tsx --bundle --minify --outfile=../media/scene035-player.js",
+    "render:scene035": "remotion render src/index.tsx Scene03-5-DopamineIntroduction ../media/scene035-dopamine-introduction.mp4 --codec=h264 --muted",
+    "check:scene035": "esbuild scripts/check-scene035.tsx --bundle --platform=node --packages=external --outfile=node_modules/.cache/check-scene035.cjs && node node_modules/.cache/check-scene035.cjs",
+    "build:scene06": "esbuild src/player06.tsx --bundle --minify --outfile=../media/scene06-player.js",
+    "render:scene06": "remotion render src/index.tsx Scene06-MesocorticalPathwayAndPlanning ../media/scene06-mesocortical-planning.mp4 --codec=h264 --muted",
+    "check:scene06": "esbuild scripts/check-scene06.tsx --bundle --platform=node --packages=external --outfile=node_modules/.cache/check-scene06.cjs && node node_modules/.cache/check-scene06.cjs",
+    "build:scene07": "esbuild src/player07.tsx --bundle --minify --outfile=../media/scene07-player.js",
+    "render:scene07": "remotion render src/index.tsx Scene07-PrefrontalControlAndAddiction ../media/scene07-prefrontal-control-addiction.mp4 --codec=h264 --muted",
+    "check:scene07": "esbuild scripts/check-scene07.tsx --bundle --platform=node --packages=external --outfile=node_modules/.cache/check-scene07.cjs && node node_modules/.cache/check-scene07.cjs"
   },
   "dependencies": {
     "@remotion/cli": "4.0.484",

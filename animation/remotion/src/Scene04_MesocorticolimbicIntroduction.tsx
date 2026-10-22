@@ -2,7 +2,7 @@ import React from 'react';
 import {AbsoluteFill, Sequence, useCurrentFrame} from 'remotion';
 import {anatomyToScreen, BrainAnatomy, BRAIN_REGIONS, BrainRegionLabel, type BrainCamera} from './BrainAnatomy';
 import {C, Label, SourceCitation} from './components';
-import {DopamineHandoff} from './Scene03_AddictionAndRewardLearning';
+import {DopamineCircuitBridge} from './dopamine-introduction-components';
 import {curvePoint, draw, ease, fade, mix, pop, progress} from './motion';
 import {CapsuleSymbol} from './risk-components';
 import {NaturalRewardIcons} from './natural-reward-icons';
@@ -23,7 +23,7 @@ export const getScene04State=(frame:number)=>{
   const stimulation=Math.max(fade(frame,805,818,836),fade(frame,865,878));
   return {
     camera:getScene04Camera(frame),
-    brainAmount:progress(frame,T04.brain,T04.zoom),
+    brainAmount:mix(.35,1,progress(frame,0,T04.zoom)),
     vta:Math.min(1,pop(frame,T04.system)),
     nac:progress(frame,T04.projections,330),
     pfc:progress(frame,295,360),
@@ -42,7 +42,7 @@ const EnteringBrain:React.FC=()=>{
   const ratio=cam.scale/.7;
   const gather=ease(f,0,115);
   return <g>
-    <DopamineHandoff frame={1680+f} neuronOpacity={1-progress(f,0,60)} particleOpacity={1-progress(f,120,180)} particleTransform={`translate(${-180*gather} ${-135*gather})`}/>
+    <g opacity={1-progress(f,90,150)}><DopamineCircuitBridge frame={30+f} showBrain={false}/></g>
     <g transform={`translate(${cam.x-700*ratio} ${cam.y-405*ratio}) scale(${ratio})`} opacity={1-progress(f,120,195)}>
       <path d="M480 800L480 680C410 610 400 480 425 380C450 260 560 190 700 190C860 180 960 280 970 390C975 420 1005 430 1005 450L1055 470Q1075 480 1054 493L1005 500L1015 530Q1020 542 1001 549L990 550Q1035 580 1000 610Q980 640 915 640L880 645Q875 710 900 775" fill="none" stroke={C.white} strokeWidth={3.5/ratio} strokeLinecap="round" strokeLinejoin="round" {...draw(progress(f,5,115))}/>
     </g>
@@ -62,7 +62,7 @@ export const MesocorticolimbicArtwork:React.FC<{frame:number;showBrain?:boolean}
   const s=getScene04State(f);
   const vtaLabel=progress(f,225,260);
   return <g>
-    {showBrain&&<BrainAnatomy {...s.camera} amount={s.brainAmount} opacity={progress(f,60,85)} cortexOpacity={s.cortexOpacity} frame={Math.max(0,f-T04.signals)}
+    {showBrain&&<BrainAnatomy {...s.camera} amount={s.brainAmount} opacity={1} cortexOpacity={s.cortexOpacity} frame={Math.max(0,f-T04.signals)}
       highlights={{VTA:s.vta,NAc:s.nac,PFC:s.pfc}}
       pathwayProgress={{mesolimbic:s.limbicPath,mesocortical:s.corticalPath}}
       pathwayOpacity={{mesolimbic:1,mesocortical:mix(1,.4,ease(f,450,510))}}

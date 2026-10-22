@@ -1,0 +1,37 @@
+import assert from 'node:assert/strict';
+import React from 'react';
+import {renderToStaticMarkup} from 'react-dom/server';
+import {SCENE06,T06,getScene06Camera,getScene06State,MesocorticalPlanningArtwork,PathwayComparison} from '../src/Scene06_MesocorticalPathwayAndPlanning';
+import {getPlanningPose,ImaginedTrajectory} from '../src/planning-components';
+import {ENDING_CAMERA05} from '../src/Scene05_DopamineRewardPredictionErrors';
+import {BRAIN_PATHWAYS,BRAIN_REGIONS,anatomyToScreen} from '../src/BrainAnatomy';
+assert.deepEqual(SCENE06,{width:1920,height:1080,fps:30,durationInFrames:1800});
+assert.deepEqual(getScene06Camera(0),ENDING_CAMERA05);
+assert.deepEqual([T06.pathway,T06.planning,T06.prediction,T06.selection,T06.comparison],[270,570,870,1200,1380]);
+assert.equal(getScene06State(300).citation,'Cooper et al., 2017');
+assert.equal(getScene06State(700).citation,'Alkam et al., 2025');
+assert.equal(getScene06State(1400).citation,'Cooper et al., 2017');
+assert.deepEqual(BRAIN_PATHWAYS.mesocortical[0],[...BRAIN_REGIONS.VTA.center]);
+assert.deepEqual(BRAIN_PATHWAYS.mesocortical.at(-1),[...BRAIN_REGIONS.PFC.center]);
+for(let f=870;f<1140;f++)assert.equal(getPlanningPose(f).actual,0,'Actual movement waits until both previews finish');
+assert.equal(getPlanningPose(1255).actual,1);
+const forward=new Map<number,string>();
+for(let f=0;f<1800;f++){
+ const camera=getScene06Camera(f),prev=getScene06Camera(Math.max(0,f-1));
+ assert.ok(Math.hypot(camera.x-prev.x,camera.y-prev.y)<20,'No camera jump');
+ assert.ok(Math.abs(camera.scale-prev.scale)<.04);
+ const vta=anatomyToScreen(BRAIN_REGIONS.VTA.center,camera),pfc=anatomyToScreen(BRAIN_REGIONS.PFC.center,camera);
+ assert.ok(pfc[0]>vta[0],'Anterior orientation is preserved');
+ forward.set(f,JSON.stringify(getScene06State(f)));
+}
+for(let f=1799;f>=0;f--)assert.equal(JSON.stringify(getScene06State(f)),forward.get(f));
+assert.deepEqual(getScene06State(1770),getScene06State(1799),'Final second is a complete hold');
+const render=(node:React.ReactNode)=>renderToStaticMarkup(<svg>{node}</svg>);
+const imagined=render(<ImaginedTrajectory frame={1010} start={960} end={1050} route="reward"/>);
+assert.ok(imagined.includes('stroke-dasharray="9 12"'));
+assert.ok(!imagined.includes('RewardPulse'));
+const comparison=render(<PathwayComparison frame={1700}/>);
+assert.ok(comparison.includes('INCOMING CONNECTIONS'));
+assert.ok(comparison.includes('Schematic · rodent findings'));
+assert.ok(render(<MesocorticalPlanningArtwork frame={1799}/>).includes('Prefrontal cortex'));
+console.log('PASS: 60 seconds, 1080p30; exact Scene 05 camera handoff; fixed anatomy; imagined futures precede action; input-change schematic; citations; deterministic scrubbing; final one-second hold.');

@@ -76,7 +76,7 @@ export const RiskAndAddictionArtwork: React.FC<{frame: number}> = ({frame}) => {
     <g opacity={fade(f,540,552,579)} transform="translate(1130 560) rotate(-37)"><AnimatedArrow x={0} y={0} length={110} amount={progress(f,540,558)} color={C.red}/></g>
     <g opacity={fade(f,450,475,615)}><Label x={960} y={145} size={43}>ADDICTION</Label></g>
     <g opacity={progress(f,630,660)} transform={`translate(0 ${20*(1-ease(f,630,660))})`}>
-      <text x={960} y={150} textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize={40} fill={C.white}>LEARNING CAN BECOME <tspan fill={C.red}>MALADAPTIVE</tspan></text>
+      <text x={960} y={150} textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize={40} fill={C.white}>WHEN CONSEQUENCES NO LONGER <tspan fill={C.red}>GUIDE BEHAVIOUR</tspan></text>
     </g>
   </g>;
 };
