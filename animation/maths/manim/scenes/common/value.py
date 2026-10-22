@@ -160,6 +160,48 @@ def policy_arrow(grid, s, action, color=MODEL):
                  max_tip_length_to_length_ratio=0.35, color=color).set_z_index(5)
 
 
+TIE_ORDER = ["up", "right", "left", "down"]  # how ties are broken when choosing the arg max
+
+
+def evaluate_policy(policy, grid, gamma, rewards=REWARDS_5X5):
+    """V^pi for a deterministic policy (state -> action), with the same convention as
+    discounted_value: follow the policy from s; a reward r reached after d steps is worth
+    gamma^d * r, and a policy that loops (or bumps forever) without reaching one is worth 0."""
+    V = {}
+    for s in range(1, grid.rows * grid.cols + 1):
+        x, d, seen = s, 0, set()
+        while x not in rewards and x not in seen:
+            seen.add(x)
+            x, d = grid.step(x, policy[x]), d + 1
+        V[s] = rewards[x] * gamma ** d if x in rewards else 0.0
+    return V
+
+
+def improve_policy(policy, V, grid, gamma):
+    """Policy improvement: in each state switch to the arg max of Q(s, a) = gamma V(s'), but
+    only when it is strictly better than the current action, so ties never flip an arrow."""
+    def q(s, a):
+        return gamma * V[grid.step(s, a)]
+    new = {}
+    for s, a in policy.items():
+        best = max(TIE_ORDER, key=lambda b: (q(s, b), -TIE_ORDER.index(b)))
+        new[s] = best if q(s, best) > q(s, a) + 1e-9 else a
+    return new
+
+
+def policy_route(policy, start, grid, rewards=REWARDS_5X5):
+    """The states visited following the policy from start, until a reward or a repeat.
+    Returns (path, reward reached or None)."""
+    path, seen, s = [start], {start}, start
+    while s not in rewards:
+        s = grid.step(s, policy[s])
+        path.append(s)
+        if s in seen:
+            return path, None
+        seen.add(s)
+    return path, s
+
+
 def bellman_expectation():
     """Maths 06's end state in the right column: the label, the equation with its symbols
     coloured, and "where a = pi(s)". Returns (label, equation, where)."""
