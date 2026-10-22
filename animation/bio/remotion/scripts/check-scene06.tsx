@@ -7,7 +7,7 @@ import {Scene06Opening} from '../src/scene06-opening';
 import {getPlanningPose,ImaginedTrajectory} from '../src/planning-components';
 import {ENDING_CAMERA05} from '../src/Scene05_DopamineRewardPredictionErrors';
 import {BRAIN_PATHWAYS,BRAIN_REGIONS,anatomyToScreen} from '../src/BrainAnatomy';
-assert.deepEqual(SCENE06,{width:1920,height:1080,fps:30,durationInFrames:1680});
+assert.deepEqual(SCENE06,{width:1920,height:1080,fps:30,durationInFrames:1890});
 assert.equal(scene06ContentFrame(599),479);
 assert.equal(scene06ContentFrame(600),630,'At 20 seconds, cut to the former 25-second point');
 assert.equal(getScene06State(480).pfc,1,'PFC highlight completes within 19–20 seconds');
