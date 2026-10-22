@@ -34,8 +34,8 @@ viewer sees the *same* system being described first biologically, then computati
 - **Beat:** Each chapter node lights up in sequence.
 
 **1.3 Human vs computer — 31-second Remotion sequence**
-- **0–7 s:** Human draws in, considers uncertain branching routes, and shrugs while remaining at the starting point.
-- **7–14 s:** Split screen introduces conventional programmed computation. Incomplete instructions cause a warning; the computer stays in place.
+- **0–8 s:** Human draws in, considers uncertain branching routes, and shrugs while remaining at the starting point.
+- **8–14 s:** Split screen introduces conventional programmed computation. Incomplete instructions cause a warning; the computer stays in place.
 - **14–20 s:** A brain and processor draw in and exchange signals, showing how neuroscience can inspire computational models.
 - **20–31 s:** “HOW CAN WE UNDERSTAND THE HUMAN MIND?” and Action → Outcome → Learning form the final composition, held for one second.
 - **Attribution:** “Bellman, 1966” remains at the lower left after its first-second fade-in. No quotation or audio.
@@ -64,22 +64,22 @@ viewer sees the *same* system being described first biologically, then computati
 - **46–60 s:** Compare natural and drug-associated conceptual signals; transition to particles around a faint, forming neuron.
 - **Source:** Feltenstein et al., 2009 around 12–30 seconds. See `bio/docs/SCENE03.md` for timing and rendering.
 
-**Scene 03.5 — Dopamine and reward learning (70 seconds)**
+**Scene 03.5 — Dopamine and reward learning (65 seconds)**
 - **Presentation:** between Scene 03 and Scene 04; direct preview `bio/html/scene035.html`.
 - **0–12 s:** Continue the neuron handoff and introduce dopamine as a chemical messenger.
 - **12–27 s:** Everyday experiences focus into repeated cookie reinforcement.
-- **27–33 s:** Cocaine-associated powerful reinforcement can contribute to addiction.
-- **33–47 s:** Dopamine is more complex than simply a pleasure molecule (Volkow et al., 2011).
-- **47–59 s:** Learning and motivation: seek reward and avoid harm (Bromberg-Martin et al., 2010).
-- **59–70 s:** Expected versus actual cookies introduce reward prediction error; particles lead into a partial brain.
+- **27–36 s:** Storm-backed cocaine-associated powerful reinforcement can contribute to addiction.
+- **36–45 s:** Dopamine is more complex than simply a pleasure molecule (Volkow et al., 2011).
+- **45–52 s:** Learning and motivation: seek reward and avoid harm (Bromberg-Martin et al., 2010).
+- **52–65 s:** Expected versus actual cookies introduce reward prediction error; particles lead into a partial brain.
 - **Details:** `bio/docs/SCENE03_5.md`.
 
-**Scene 04 — Mesocorticolimbic introduction (30 seconds)**
+**Scene 04 — Mesocorticolimbic introduction (44 seconds)**
 - **Presentation:** immediately after Scene 03.5; direct preview `bio/html/scene04.html`.
 - **0–7 s:** Continue Scene 03.5’s partial-brain handoff into a right-facing head, reveal a medial brain cutaway, and zoom to the full brain.
 - **7–15 s:** Highlight VTA in the ventral midbrain, then draw simplified projections to NAc and anterior PFC. Introduce the mesocorticolimbic dopamine system.
-- **15–21 s:** Emphasize mesolimbic activity and reward-related learning/motivation while retaining the rest of the brain.
-- **21–30 s:** Natural-reward icons and the capsule send conceptual pulses toward shared circuitry. End with the full brain visible and a subtle VTA-centered zoom.
+- **15–29 s:** Emphasize mesolimbic activity and reward-related learning/motivation while retaining the rest of the brain.
+- **29–44 s:** Natural-reward icons and the capsule send conceptual pulses toward shared circuitry. End with the full brain visible and a subtle VTA-centered zoom.
 - **Sources:** Piantadosi et al., 2021 → Feltenstein et al., 2009 near 20 seconds.
 - **Reusable anatomy:** `bio/remotion/src/BrainAnatomy.tsx`; coordinate references and Scene 05 handoff in `bio/docs/SCENE04.md`.
 
@@ -167,14 +167,14 @@ viewer sees the *same* system being described first biologically, then computati
 - **Take-aways:** (1) Addiction exploits the reward-learning machinery. (2) Standard RL misses internal state. (3) HRL grounds reward in homeostasis. (4) Adding harm helps explain use despite consequences.
 - **References** panel.
 
-**Scene 06 — Mesocortical pathway, planning and action selection (60 seconds)**
+**Scene 06 — Mesocortical pathway, planning and action selection (56 seconds)**
 - **Presentation:** immediately after Scene 05; preview `bio/html/scene06.html`.
-- **0–9 s:** Continue learned-value artwork, then consider two possible actions.
-- **9–19 s:** VTA → PFC mesocortical projection; Cooper et al., 2017.
-- **19–29 s:** Planning, goal representation and sequential steps; Alkam et al., 2025.
-- **29–40 s:** Translucent imagined futures precede a solid chosen action; planning analogy.
-- **40–46 s:** Return to PFC and action selection.
-- **46–60 s:** Schematic rodent findings compare altered inputs onto NAc- and PFC-projecting VTA neurons; Cooper et al., 2017. Return to the central brain and hold the final second.
+- **0–13 s:** Doorbell → delivery bag → reward-learning puzzle piece → incomplete decision-making puzzle → missing action-selection piece → glowing line. No brain before 13 seconds.
+- **13–20 s:** VTA → PFC mesocortical projection; Cooper et al., 2017.
+- **20–28 s:** Planning, goal representation and sequential steps; Alkam et al., 2025.
+- **28–33 s:** Imagined outcomes and a completed choice; “PREDICT → EVALUATE → CHOOSE” appears at 29 seconds.
+- **33–53 s:** Rodent research → two VTA projection populations → cocaine-related NAc-projecting inputs → aversive-experience PFC-projecting inputs → matched comparison. Stable outgoing axons; Cooper et al., 2017 throughout.
+- **53–56 s:** Existing return to the brain and final hold.
 - **Details:** `bio/docs/SCENE06.md`.
 
 **Scene 07 — Prefrontal cortex, impulse control and addiction (60 seconds)**
@@ -186,3 +186,20 @@ viewer sees the *same* system being described first biologically, then computati
 - **43–51 s:** Distinct PFC roles; transition to rodent medial PFC and prelimbic cortex.
 - **51–60 s:** Schematic stimulation/inhibition comparison in cocaine-exposed rats; reduced versus increased drug seeking. Hold the final second; Volkow et al., 2019.
 - **Details:** `bio/docs/SCENE07.md`.
+
+
+**Scene 08 — Synaptic plasticity, dopamine and addiction (70 seconds)**
+- **Presentation:** after Scene 07; preview `bio/html/scene08.html`.
+- **0–8s:** Fixed neural network → connected pair → synaptic junction.
+- **8–15s:** Coordinated neuronal activity and a gradually strengthened illustrative connection.
+- **15–22s:** LTP comparison with equal test inputs and a larger receiving response.
+- **22–27s:** LTD comparison with equal test inputs and a smaller receiving response.
+- **27–30s:** Return to the same network; complete the learned pattern by frame 900.
+- **30–39s:** Dopamine enters only after the boundary; prediction error and selective modulation.
+- **39–45s:** Repeated cue/action/apple association.
+- **45–54s:** Neutral repeated drug exposure, accumulated adaptations and NAc/PFC insets.
+- **54–61s:** Drug-cue versus natural-reward response comparison.
+- **61–67s:** Persistent connections after stopping; cue-triggered craving and relapse vulnerability.
+- **67–70s:** Altered network remains; final message and stable hold.
+- **Citation:** Volkow et al., 2019 during addiction-related content.
+- **Details:** `bio/docs/SCENE08.md`.

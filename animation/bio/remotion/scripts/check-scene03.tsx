@@ -4,10 +4,14 @@ import {renderToStaticMarkup} from 'react-dom/server';
 import {DopamineHandoff, getAddictionPose, getNaturalLearningPose, getScene03Timing, SCENE03, T03} from '../src/Scene03_AddictionAndRewardLearning';
 import {getRiskScenePose} from '../src/Scene02_RiskAndAddiction';
 
-assert.equal(SCENE03.durationInFrames,1800);
-assert.equal(SCENE03.durationInFrames/SCENE03.fps,60);
+assert.equal(SCENE03.durationInFrames,2340);
+assert.equal(SCENE03.durationInFrames/SCENE03.fps,78);
 assert.equal(T03.rewardLearning,33*SCENE03.fps);
-assert.equal(SCENE03.durationInFrames-T03.rewardLearning,27*SCENE03.fps);
+assert.equal(SCENE03.durationInFrames-SCENE03.openingFrames-SCENE03.bridgeFrames-SCENE03.addictionHold-SCENE03.reinforcementHold-T03.rewardLearning,27*SCENE03.fps);
+assert.equal(SCENE03.openingFrames/SCENE03.fps,6);
+assert.equal(SCENE03.bridgeFrom/SCENE03.fps,35);
+assert.equal(SCENE03.bridgeFrames/SCENE03.fps,8);
+assert.deepEqual(getAddictionPose(96),getAddictionPose(0),'Opening choice returns to the original starting pose');
 const before=getRiskScenePose(689),after=getAddictionPose(0);
 assert.equal(before.x,after.x);
 assert.equal(before.footY,after.footY);
@@ -32,4 +36,4 @@ for(const [fn,start,end] of [[getAddictionPose,0,990],[getNaturalLearningPose,99
 const final=()=>renderToStaticMarkup(<svg><DopamineHandoff frame={1679}/></svg>);
 assert.equal(final(),final());
 assert.ok(!final().includes('<text'),'No large title in the final frame');
-console.log('PASS: 60 seconds; exact 33/27-second split; Scene 02 position continuity; critical title and citation timing; no teleports; deterministic scrubbing; text-free neuron handoff.');
+console.log('PASS: 78 seconds; two-second positive reinforcement hold; two-second addiction title hold; eight-second reward-learning bridge; six-second opening question; exact 33/27-second split; Scene 02 position continuity; critical title and citation timing; no teleports; deterministic scrubbing; text-free neuron handoff.');

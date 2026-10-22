@@ -27,7 +27,12 @@
     "check:scene06": "esbuild scripts/check-scene06.tsx --bundle --platform=node --packages=external --outfile=node_modules/.cache/check-scene06.cjs && node node_modules/.cache/check-scene06.cjs",
     "build:scene07": "esbuild src/player07.tsx --bundle --minify --outfile=../player/scene07-player.js",
     "render:scene07": "remotion render src/index.tsx Scene07-PrefrontalControlAndAddiction ../video/scene07-prefrontal-control-addiction.mp4 --codec=h264 --muted",
-    "check:scene07": "esbuild scripts/check-scene07.tsx --bundle --platform=node --packages=external --outfile=node_modules/.cache/check-scene07.cjs && node node_modules/.cache/check-scene07.cjs"
+    "check:scene07": "esbuild scripts/check-scene07.tsx --bundle --platform=node --packages=external --outfile=node_modules/.cache/check-scene07.cjs && node node_modules/.cache/check-scene07.cjs",
+    "build:scene08": "esbuild src/player08.tsx --bundle --minify --outfile=../player/scene08-player.js",
+    "render:scene08": "remotion render src/index.tsx Scene08-SynapticPlasticityAndAddiction ../video/scene08-synaptic-plasticity-and-addiction.mp4 --codec=h264 --muted",
+    "check:scene08": "esbuild scripts/check-scene08.tsx --bundle --platform=node --packages=external --outfile=node_modules/.cache/check-scene08.cjs && node node_modules/.cache/check-scene08.cjs",
+    "check:scene01": "esbuild scripts/check-scene01.tsx --bundle --platform=node --packages=external --outfile=node_modules/.cache/check-scene01.cjs && node node_modules/.cache/check-scene01.cjs",
+    "check:anatomy": "esbuild scripts/check-brain-anatomy.tsx --bundle --platform=node --packages=external --outfile=node_modules/.cache/check-brain-anatomy.cjs && node node_modules/.cache/check-brain-anatomy.cjs"
   },
   "dependencies": {
     "@remotion/cli": "4.0.484",
