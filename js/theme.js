@@ -4,6 +4,10 @@ const cache = new Map();
 
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => cache.clear());
 
+export function clearThemeCache() {
+  cache.clear();
+}
+
 export function cssVar(name) {
   if (!cache.has(name)) {
     cache.set(name, getComputedStyle(document.documentElement).getPropertyValue(name).trim());

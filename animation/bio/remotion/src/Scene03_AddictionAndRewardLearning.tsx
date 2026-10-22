@@ -5,7 +5,13 @@ import {curvePoint, draw, ease, fade, mix, pop, progress} from './motion';
 import {CapsuleSymbol, CROSSROADS, CrossroadsPaths, RewardSymbol, WarningSymbol} from './risk-components';
 import {BrokenHeart, CueSymbol, LearnedAssociation, RewardPulse, SimpleNeuron} from './reward-components';
 
-export const SCENE03={width:1920,height:1080,fps:30,durationInFrames:1800} as const;
+export const SCENE03={width:1920,height:1080,fps:30,durationInFrames:2340,openingFrames:180,bridgeFrom:1050,bridgeFrames:240,addictionHold:60,reinforcementHold:60} as const;
+export const scene03StoryFrame=(frame:number)=>{
+  // Hold the fully visible addiction title at scene second 12 for two extra seconds.
+  const reinforcementFrame=frame<540?frame:Math.max(540,frame-SCENE03.reinforcementHold);
+  const f=reinforcementFrame<180?reinforcementFrame:Math.max(180,reinforcementFrame-SCENE03.addictionHold);
+  return f<750?f:Math.max(750,f-SCENE03.bridgeFrames);
+};
 export const T03={
   addiction:0, initialReward:240, positiveReinforcement:420, repeatedLearning:480,
   diagramMorph:750, goneTooFar:810, climaxTitle:930, rewardLearning:990,
@@ -38,8 +44,11 @@ export const getAddictionPose=(frame:number)=>{
   return {x:mix(routeX,960-230*drawnToward,morph),footY:mix(routeY,780-65*drawnToward,morph),walking:walk*(1-morph)+Math.sin(drawnToward*Math.PI)*morph,t};
 };
 
-const AddictionStory: React.FC = () => {
-  const f=useCurrentFrame();
+const AddictionStory: React.FC<{intro?:boolean}> = ({intro=false}) => {
+  const frame=useCurrentFrame();
+  // Retrace a complete choice during the question, returning to the original starting pose.
+  const f=intro?frame*96/179:scene03StoryFrame(frame);
+  const circleFrame=intro?f:f+96;
   const pose=getAddictionPose(f);
   const diagram=ease(f,T03.diagramMorph,T03.goneTooFar);
   const strength=progress(f,T03.repeatedLearning,T03.goneTooFar);
@@ -59,7 +68,7 @@ const AddictionStory: React.FC = () => {
       <CapsuleSymbol x={1550} y={350}/>
       <WarningSymbol x={1670} y={237} opacity={warningsDim}/>
       <g opacity={fade(f,150,190,240)}><WarningSymbol x={1560} y={530} scale={.7} amount={progress(f,150,178)}/><WarningSymbol x={1305} y={600} scale={.6} amount={progress(f,175,205)}/><BrokenHeart x={1710} y={590} scale={.7} amount={progress(f,172,215)} opacity={.65}/></g>
-      <g opacity={fade(f,28,50,210)} stroke={C.yellow} strokeWidth={3} fill="none"><path d="M1058 418A45 45 0 1 1 1081 380M1080 363L1081 380 1064 379" {...draw(progress(f,28,65))}/></g>
+      <g opacity={fade(circleFrame,28,50,306)} stroke={C.yellow} strokeWidth={3} fill="none"><path d="M1058 418A45 45 0 1 1 1081 380M1080 363L1081 380 1064 379" {...draw(progress(circleFrame,28,65))}/></g>
       <g opacity={progress(f,360,405)}><LearnedAssociation d="M1550 305Q1635 240 1550 165" amount={progress(f,360,420)} strength={strength}/></g>
       {f>=480&&<RewardPulse x={1550} y={225} age={outcomeAge} opacity={outcomeAge>=0&&outcomeAge<=45?1:0} strength={1+.25*strength}/>}
     </g>
@@ -78,7 +87,6 @@ const AddictionStory: React.FC = () => {
       <RewardPulse x={pulseX} y={pulseY} scale={mix(reward,mix(.2,1,diagram),dot)} age={f-345} plus={dot<.9||diagram>.5} strength={1+.3*strength}/>
       <circle cx={pulseX} cy={pulseY} r={6} fill={C.yellow} opacity={dot*(1-diagram)}/>
     </g>
-    <g opacity={1-progress(f,0,60)}><text x={960} y={150} textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize={40} fill={C.white}>WHEN CONSEQUENCES NO LONGER <tspan fill={C.red}>GUIDE BEHAVIOUR</tspan></text></g>
     <g opacity={fade(f,155,180,240)}><Label x={960} y={135} size={44}>ADDICTION</Label><text x={960} y={192} textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize={29} fill={C.white}>CONTINUED USE DESPITE <tspan fill={C.red}>HARM</tspan></text></g>
     <g opacity={fade(f,420,445,480)}><Label x={960} y={140} size={38}>POSITIVE REINFORCEMENT</Label><Label x={960} y={195} size={28} color={C.yellow}>REWARD → MORE LIKELY TO REPEAT</Label></g>
     <g opacity={progress(f,T03.climaxTitle,960)} transform={`translate(0 ${16*(1-ease(f,930,960))})`}>
@@ -172,9 +180,38 @@ const RewardLearning: React.FC = () => {
   </g>;
 };
 
+const OpeningQuestion: React.FC = () => {
+  const frame=useCurrentFrame();
+  return <g opacity={progress(frame,0,12)*(1-progress(frame,160,180))}>
+    <Label x={960} y={95} size={28} color={C.yellow}>This raises an important question:</Label>
+    <Label x={960} y={155} size={42}>Why would someone continue making a choice,</Label>
+    <Label x={960} y={215} size={42}>even when they know it causes harm?</Label>
+  </g>;
+};
+
+const RewardLearningBridge: React.FC = () => {
+  const f=useCurrentFrame();
+  const signal=progress(f,55,170);
+  return <g>
+    <rect width={1920} height={1080} fill={C.bg}/>
+    <g opacity={progress(f,0,15)*(1-progress(f,220,240))}>
+      <Label x={960} y={250} size={34} color={C.yellow}>FROM REWARD TO ADDICTION</Label>
+      <RewardSymbol x={540} y={510} scale={1.2} amount={progress(f,10,40)}/>
+      <AnimatedArrow x={680} y={510} length={420} amount={progress(f,35,85)} color={C.yellow}/>
+      <circle cx={mix(690,1090,signal)} cy={510} r={9} fill={C.yellow} opacity={Math.sin(signal*Math.PI)}/>
+      <SimpleNeuron x={1330} y={510} scale={1.25} amount={progress(f,65,150)}/>
+      <Label x={540} y={750} size={32} color={C.green}>REWARDING EXPERIENCE</Label>
+      <Label x={1330} y={750} size={32} color={C.blue}>THE BRAIN LEARNS</Label>
+      <Label x={960} y={880} size={28} color={C.gray}>How do rewards shape future choices?</Label>
+    </g>
+  </g>;
+};
+
 export const Scene03_AddictionAndRewardLearning: React.FC = () => <AbsoluteFill style={{backgroundColor:C.bg}}>
   <svg viewBox="0 0 1920 1080" width="100%" height="100%" role="img" aria-label="Persistent drug-seeking despite harm, positive reinforcement, and learned cue–action–reward associations. A conceptual illustration of one contributing mechanism, ending with particles and a forming neuron.">
-    <Sequence from={0} durationInFrames={1050} layout="none"><AddictionStory/></Sequence>
-    <Sequence from={T03.rewardLearning} durationInFrames={SCENE03.durationInFrames-T03.rewardLearning} layout="none"><RewardLearning/></Sequence>
+    <Sequence from={0} durationInFrames={SCENE03.openingFrames} layout="none"><AddictionStory intro/><OpeningQuestion/></Sequence>
+    <Sequence from={SCENE03.openingFrames} durationInFrames={1050+SCENE03.bridgeFrames+SCENE03.addictionHold+SCENE03.reinforcementHold} layout="none"><AddictionStory/></Sequence>
+    <Sequence from={SCENE03.openingFrames+SCENE03.bridgeFrames+SCENE03.addictionHold+SCENE03.reinforcementHold+T03.rewardLearning} durationInFrames={SCENE03.durationInFrames-SCENE03.openingFrames-SCENE03.bridgeFrames-SCENE03.addictionHold-SCENE03.reinforcementHold-T03.rewardLearning} layout="none"><RewardLearning/></Sequence>
+    <Sequence from={SCENE03.bridgeFrom} durationInFrames={SCENE03.bridgeFrames} layout="none"><RewardLearningBridge/></Sequence>
   </svg>
 </AbsoluteFill>;
