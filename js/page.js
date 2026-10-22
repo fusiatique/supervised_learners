@@ -14,11 +14,11 @@ const Y_MIN_SPAN = 2; // the time plot's y-axis zooms in no further than this
 const X_MIN_SPAN = 20; // nor its time axis further than this many steps
 
 const SLIDERS = [
-  { key: 'c', label: 'Drug harm cost (c)', help: 'Reward points subtracted when the agent chooses the drug. Increase this to make drug use less attractive. It does not change the baseline drop caused by a dose.', min: 0, max: 20, step: 0.5 },
-  { key: 'R0', label: 'Drug pleasure (R0)', help: 'Extra reward points for choosing the drug, on top of any reward from moving the internal level H toward its target. Higher values make drug use more attractive; they do not make H rise more.', min: 0, max: 5, step: 0.5 },
-  { key: 'delta', label: 'Baseline drop per drug use (δ)', help: 'How much each drug dose lowers the baseline B, the level H drifts toward. Higher values make repeated use lower the baseline faster, potentially making the drug more useful for relieving a low internal state.', min: 0, max: 3, step: 0.1 },
-  { key: 'rho', label: 'Baseline healing rate (ρ)', help: 'How quickly baseline B recovers toward its original value of 40 each step. Higher values mean faster recovery. At 0, the baseline does not recover automatically. This is a fraction of the remaining gap, not a fixed increase.', min: 0, max: 0.01, step: 0.0005 },
-  { key: 'naturalGain', label: 'Natural reward gain', help: 'How much a natural action raises the internal level H. This is not a direct reward-point bonus: moving H closer to the target earns reward, while overshooting can lose reward. Higher values help natural rewards compensate for a lower baseline and lower the tipping point.', min: 0.5, max: 5, step: 0.5 },
+  { key: 'c', label: 'Drug harm cost (c)', help: 'A penalty the agent gets every time it takes the drug. It stands for the damage drug use does, for example to health, money or relationships.', min: 0, max: 20, step: 0.5 },
+  { key: 'R0', label: 'Drug pleasure (R0)', help: 'A bonus the agent gets every time it takes the drug. It stands for the “high”: the drug feels good, apart from what it does to H.', min: 0, max: 5, step: 0.5 },
+  { key: 'delta', label: 'Baseline drop per drug use (δ)', help: 'How much one dose lowers the baseline B. It stands for how strongly the brain adapts to the drug.', min: 0, max: 3, step: 0.1 },
+  { key: 'rho', label: 'Baseline healing rate (ρ)', help: 'How fast B recovers towards 40 when the agent stops using the drug. At the default, B gets halfway back in about 700 steps.', min: 0, max: 0.01, step: 0.0005 },
+  { key: 'naturalGain', label: 'Natural reward gain', help: 'How much H goes up each time the agent takes a natural reward.', min: 0.5, max: 5, step: 0.5 },
 ];
 
 const $ = (id) => document.getElementById(id);
@@ -213,11 +213,11 @@ function drawTrace() {
   cols.forEach((col, c) => {
     if (col?.drug) {
       ctx.fillStyle = cssVar('--act-drug');
-      ctx.fillRect(x(c) - 0.5, height - pad.bottom + 6, 1, 8);
+      ctx.fillRect(x(c) - 1, height - pad.bottom + 6, 2, 8);
     }
     if (col?.forced) {
       ctx.fillStyle = cssVar('--text-primary');
-      ctx.fillRect(x(c) - 1, height - pad.bottom + 4, 2, 14);
+      ctx.fillRect(x(c) - 1.5, height - pad.bottom + 4, 3, 14);
     }
   });
 
@@ -459,7 +459,7 @@ function renderReadouts() {
     hint = `It takes the drug on ${(drugShare * 100).toFixed(0)}% of steps. Each use keeps B down, and with B at ${B.toFixed(0)} natural rewards can only reach H = ${naturalCeiling(B, life.p).toFixed(0)}.`;
   } else if (B < tipping) {
     status = 'At risk';
-    kind = '';
+    kind = 'risk';
     hint = `B is below the tipping point: natural rewards can only reach H = ${naturalCeiling(B, life.p).toFixed(0)}, short of the setpoint.`;
   }
   if (!life.p.drugAvailable) hint += ' The drug is not available.';
@@ -470,6 +470,7 @@ function renderReadouts() {
   $('r-eps').textContent = `${(life.agent.epsilon * 100).toFixed(1)}%`;
   $('r-h').textContent = H.toFixed(1);
   $('r-b').textContent = B.toFixed(1);
+  $('r-ceiling').textContent = Math.min(life.p.hMax, naturalCeiling(B, life.p)).toFixed(1);
   $('tipping').textContent = tipping.toFixed(1);
 }
 
@@ -592,7 +593,9 @@ if (embed.has('panels')) {
   }
   // Lets the tutorial size its iframe to fit.
   new ResizeObserver(() => {
-    parent.postMessage({ type: 'simulation-height', height: document.documentElement.scrollHeight }, '*');
+    // The body's own height: documentElement.scrollHeight never drops below
+    // the frame's current height, so the frame could never shrink to fit.
+    parent.postMessage({ type: 'simulation-height', height: Math.ceil(document.body.getBoundingClientRect().height) }, '*');
   }).observe(document.body);
 }
 

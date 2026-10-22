@@ -13,15 +13,12 @@
   <link rel="stylesheet" href="css/style.css">
   <style>
     :root {
-      --unlearned: #f3f2ee;
     }
     @media (prefers-color-scheme: dark) {
       :root:not([data-theme="light"]) {
-        --unlearned: #232321;
       }
     }
 :root[data-theme="dark"] {
-        --unlearned: #232321;
       }
 
     .theme-picker { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 12px; color: var(--text-secondary); }
@@ -41,8 +38,8 @@
     #environment-intro.learning-visible { opacity: 0.6; }
     #environment { display: block; width: 100%; height: 248px; }
     .trace-help { position: relative; width: fit-content; margin-top: 10px; }
-    .trace-help button { padding: 0; border: 0; background: transparent; color: var(--text-secondary); font: inherit; font-size: 12px; cursor: help; }
-    #trace-navigation-help { display: none; position: absolute; bottom: calc(100% + 8px); left: 0; width: min(300px, 70vw); margin: 0; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); box-shadow: 0 4px 16px #0002; z-index: 10; }
+    .trace-help button { padding: 0; border: 0; border-bottom: 1px dotted currentColor; border-radius: 0; background: transparent; color: var(--text-secondary); font: inherit; font-size: 12px; font-weight: 700; cursor: help; }
+    #trace-navigation-help { display: none; position: absolute; bottom: calc(100% + 8px); left: 0; width: max-content; max-width: min(320px, 80vw); margin: 0; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); box-shadow: 0 4px 16px #0002; color: var(--text-secondary); font-size: 13px; z-index: 10; }
     .trace-help:hover #trace-navigation-help, .trace-help:focus-within #trace-navigation-help { display: block; }
     #trace { display: block; width: 100%; height: 280px; cursor: move; }
     #y-fit[aria-pressed="true"] { background: var(--text-primary); color: var(--surface); }
@@ -57,6 +54,7 @@
     .key span { display: inline-flex; align-items: center; gap: 6px; }
     .key i { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
     .key i.line { height: 3px; border-radius: 2px; }
+    .key i.tick { border-radius: 0; }
     .key i.dash { height: 0; border-top: 2px dashed var(--text-secondary); border-radius: 0; }
     .key i.dash.vertical { width: 0; height: 12px; border-top: 0; border-left: 2px dashed var(--text-secondary); }
     .readouts { display: flex; flex-wrap: wrap; gap: 12px 28px; margin: 0; padding: 12px 0; border-top: 1px solid var(--border); }
@@ -69,15 +67,17 @@
     .compact-now .readouts { padding: 0; }
     .state-strip { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; }
     .state-strip .readouts { border-top: 0; }
-    .state-strip .policy-help { margin: 0; }
-    .state-strip .policy-help button { padding: 0; border: 0; background: transparent; color: var(--text-secondary); font: inherit; font-size: 12px; cursor: help; }
-    .state-strip .policy-help p { display: none; position: absolute; bottom: calc(100% + 8px); left: 0; width: min(260px, 65vw); margin: 0; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); box-shadow: 0 4px 16px #0002; z-index: 10; }
-    .state-strip .policy-help:hover p, .state-strip .policy-help:focus-within p, .state-strip .policy-help[open] p { display: block; }
+    .state-strip .readouts { flex: 1; }
+    .readouts .readout-help { position: relative; margin-left: auto; }
+    .readout-help button { padding: 0; border: 0; border-bottom: 1px dotted currentColor; border-radius: 0; background: transparent; color: var(--text-secondary); font: inherit; font-size: 12px; font-weight: 700; cursor: help; }
+    #natural-ceiling-caption { display: none; position: absolute; bottom: calc(100% + 8px); right: 0; text-align: left; width: max-content; max-width: min(320px, 80vw); padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); box-shadow: 0 4px 16px #0002; color: var(--text-secondary); font-size: 13px; font-weight: 400; z-index: 10; }
+    .readout-help:hover #natural-ceiling-caption, .readout-help:focus-within #natural-ceiling-caption { display: block; }
     .readouts dt { font-size: 12px; color: var(--text-secondary); }
     .readouts dd { margin: 0; font-size: 18px; font-variant-numeric: tabular-nums; }
     .status { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
     .status.dependent { color: var(--act-drug); }
     .status.clean { color: var(--act-natural); }
+    .status.risk { color: var(--diagram-gold); }
     .decision-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
     .decision-table th, .decision-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
     .decision-table th { font-weight: 400; color: var(--text-secondary); }
@@ -138,6 +138,17 @@ r  = D(H) − D(H')
       </div>
     </aside>
 
+    <!-- Shown only in the tutorial (index.html?panels=...,chart-help). -->
+    <details class="panel reading chart-help" data-panel="chart-help" hidden>
+      <summary>Reading and navigating the chart</summary>
+      <ul>
+        <li>Show last <span class="ui-button ui-select">200 steps</span> picks how many steps are shown: 200, 500, 5,000 or 50,000. In wide windows the blue line is the average of H in each column, and the shading shows its range.</li>
+        <li>Y axis <span class="ui-button">−</span> and <span class="ui-button">+</span> zoom, <span class="ui-button">Fit</span> keeps the axis fitted to the data shown, <span class="ui-button">0–100</span> shows the full range.</li>
+        <li>Time <span class="ui-button">−</span> and <span class="ui-button">+</span> zoom in time, <span class="ui-button">Now</span> jumps back to the newest step and follows it.</li>
+        <li>Drag the chart to look back in time, and double-click it to reset the view. Hover over <span class="ui-hover-word">Explore the graph</span> under the chart to see the scroll gestures.</li>
+      </ul>
+    </details>
+
     <div class="minimal-content">
       <div class="minimal-row overview-row">
         <section class="panel" data-panel="environment">
@@ -182,11 +193,12 @@ r  = D(H) − D(H')
           <div><dt>Step</dt><dd id="r-step"></dd></div>
           <div><dt>Internal level H</dt><dd id="r-h"></dd></div>
           <div><dt>Baseline B</dt><dd id="r-b"></dd></div>
+          <div class="readout-help">
+            <dt><button type="button" aria-describedby="natural-ceiling-caption">Natural reward capacity</button>
+              <span id="natural-ceiling-caption" role="tooltip"></span></dt>
+            <dd id="r-ceiling"></dd>
+          </div>
         </dl>
-        <div class="policy-help">
-          <button type="button" aria-describedby="natural-ceiling-caption">ⓘ Natural reward capacity</button>
-          <p id="natural-ceiling-caption" class="hint" role="tooltip"></p>
-        </div>
         </div>
       </section>
       </div>
@@ -221,7 +233,7 @@ r  = D(H) − D(H')
         </div>
         <canvas id="trace" title="When zoomed vertically, scroll up/down to move the y-axis. Scroll left/right or drag right to browse history. At full y range, up/down scrolling browses time. Ctrl/⌘ + scroll zooms the y-axis; Alt/Option + scroll zooms time." aria-label="Internal level H and baseline B over elapsed simulation steps"></canvas>
         <div class="trace-help">
-          <button type="button" aria-describedby="trace-navigation-help">ⓘ Explore the graph</button>
+          <button type="button" aria-describedby="trace-navigation-help">Explore the graph</button>
           <p id="trace-navigation-help" class="hint" role="tooltip">When the y-axis is zoomed in, scroll down to see lower values and up to see higher values. Scroll left/right or drag right to look back in time. At the full 0–100 y range, up/down scrolling browses time. Use Now to follow live steps. The latest 50,000 steps are retained.</p>
         </div>
         <p id="trace-range" class="hint" aria-live="off"></p>
@@ -232,8 +244,8 @@ r  = D(H) − D(H')
         </div>
         <div class="state-panel-footer">
           <div class="key state-event-key">
-            <span><i style="background: var(--act-drug)"></i>Drug chosen</span>
-            <span><i style="background: var(--text-primary)"></i>Forced dose</span>
+            <span><i class="tick" style="background: var(--act-drug); width: 2px; height: 8px"></i>Drug chosen</span>
+            <span><i class="tick" style="background: var(--text-primary); width: 3px; height: 14px"></i>Forced dose</span>
           </div>
           <div class="state-help">
             <button id="state-info" class="state-info-button" type="button" aria-expanded="false" aria-controls="state-info-popup" aria-haspopup="dialog">States <span class="state-info-symbol" aria-hidden="true">i</span></button>
