@@ -33,11 +33,11 @@ viewer sees the *same* system being described first biologically, then computati
 - **Stage:** Chapter map: Biology → RL → HRL → Harm → Mapping → Limits.
 - **Beat:** Each chapter node lights up in sequence.
 
-**1.3 Human vs computer — 42-second Remotion sequence**
-- **0–9 s:** Human draws in, considers uncertain branching routes, shrugs, and makes a workable choice.
-- **9–21 s:** Split screen introduces conventional programmed computation. Incomplete instructions cause a warning; an explicit IF/ELSE resolves it.
-- **21–32 s:** A brain and processor draw in and exchange signals, showing how neuroscience can inspire computational models.
-- **32–42 s:** Both move upward; “HOW DO WE LEARN TO MAKE DECISIONS?” and Action → Outcome → Learning form the final composition, held for one second.
+**1.3 Human vs computer — 31-second Remotion sequence**
+- **0–7 s:** Human draws in, considers uncertain branching routes, and shrugs while remaining at the starting point.
+- **7–14 s:** Split screen introduces conventional programmed computation. Incomplete instructions cause a warning; the computer stays in place.
+- **14–20 s:** A brain and processor draw in and exchange signals, showing how neuroscience can inspire computational models.
+- **20–31 s:** “HOW CAN WE UNDERSTAND THE HUMAN MIND?” and Action → Outcome → Learning form the final composition, held for one second.
 - **Attribution:** “Bellman, 1966” remains at the lower left after its first-second fade-in. No quotation or audio.
 - **Implementation:** `bio/remotion/src/Scene01_HumanVsComputer.tsx`; embedded player in `bio/html/scene01.html`. See `bio/docs/SCENE01.md` for editing and MP4 export.
 
@@ -50,23 +50,33 @@ viewer sees the *same* system being described first biologically, then computati
 - **Page:** `bio/html/scene02.html`; Remotion composition: `Scene02-RiskAndAddiction`.
 - **0–7 s:** The closing learning loop from Scene 01 gives way to a persistent crossroads. An uncertain mystery-box choice reveals an undesirable outcome.
 - **7–15 s:** The character returns, remembers the warning, and chooses the safer apple.
-- **15–23 s:** The same box becomes a capsule. Despite the remembered warning, the character approaches it; no consumption is shown. End on “LEARNING CAN BECOME MALADAPTIVE.”
+- **15–23 s:** The same box becomes a capsule. Despite the remembered warning, the character approaches it; no consumption is shown. End on “WHEN CONSEQUENCES NO LONGER GUIDE BEHAVIOUR.”
 - **Sources:** Yates & Stone, 1992 → Piantadosi et al., 2021 around 15 seconds.
 - **Handoff:** The final second holds still. `RiskAndAddictionArtwork` at frame 660 is reusable for Scene 03. See `bio/docs/SCENE02.md`.
 
-**Scene 03 — Addiction and reward learning (56 seconds)**
+**Scene 03 — Addiction and reward learning (60 seconds)**
 - **Presentation:** immediately after Scene 02; direct preview `bio/html/scene03.html`.
 - **0–8 s:** Repeated drug-associated approaches despite visible harm, continuing the same crossroads.
 - **8–16 s:** An initially rewarding outcome and its association introduce positive reinforcement.
 - **16–27 s:** Repeated choices strengthen the conceptual association; the environment becomes a learning diagram.
 - **27–33 s:** Warnings remain as the association receives emphasis. Hold “REWARD LEARNING GONE TOO FAR” through the 33-second boundary.
 - **33–46 s:** Bell-cued apple trials show changing anticipation, then form Cue → Action → Reward.
-- **46–56 s:** Compare natural and drug-associated conceptual signals; transition to particles around a faint, forming neuron.
+- **46–60 s:** Compare natural and drug-associated conceptual signals; transition to particles around a faint, forming neuron.
 - **Source:** Feltenstein et al., 2009 around 12–30 seconds. See `bio/docs/SCENE03.md` for timing and rendering.
 
+**Scene 03.5 — Dopamine and reward learning (70 seconds)**
+- **Presentation:** between Scene 03 and Scene 04; direct preview `bio/html/scene035.html`.
+- **0–12 s:** Continue the neuron handoff and introduce dopamine as a chemical messenger.
+- **12–27 s:** Everyday experiences focus into repeated cookie reinforcement.
+- **27–33 s:** Cocaine-associated powerful reinforcement can contribute to addiction.
+- **33–47 s:** Dopamine is more complex than simply a pleasure molecule (Volkow et al., 2011).
+- **47–59 s:** Learning and motivation: seek reward and avoid harm (Bromberg-Martin et al., 2010).
+- **59–70 s:** Expected versus actual cookies introduce reward prediction error; particles lead into a partial brain.
+- **Details:** `bio/docs/SCENE03_5.md`.
+
 **Scene 04 — Mesocorticolimbic introduction (30 seconds)**
-- **Presentation:** immediately after Scene 03; direct preview `bio/html/scene04.html`.
-- **0–7 s:** Continue the particle/neuron handoff into a right-facing head, reveal a medial brain cutaway, and zoom to the full brain.
+- **Presentation:** immediately after Scene 03.5; direct preview `bio/html/scene04.html`.
+- **0–7 s:** Continue Scene 03.5’s partial-brain handoff into a right-facing head, reveal a medial brain cutaway, and zoom to the full brain.
 - **7–15 s:** Highlight VTA in the ventral midbrain, then draw simplified projections to NAc and anterior PFC. Introduce the mesocorticolimbic dopamine system.
 - **15–21 s:** Emphasize mesolimbic activity and reward-related learning/motivation while retaining the rest of the brain.
 - **21–30 s:** Natural-reward icons and the capsule send conceptual pulses toward shared circuitry. End with the full brain visible and a subtle VTA-centered zoom.
@@ -156,3 +166,23 @@ viewer sees the *same* system being described first biologically, then computati
 - **Stage:** The brain outline and the RL loop overlay into one image; the agent glyph returns to balance on the set-point gauge.
 - **Take-aways:** (1) Addiction exploits the reward-learning machinery. (2) Standard RL misses internal state. (3) HRL grounds reward in homeostasis. (4) Adding harm helps explain use despite consequences.
 - **References** panel.
+
+**Scene 06 — Mesocortical pathway, planning and action selection (60 seconds)**
+- **Presentation:** immediately after Scene 05; preview `bio/html/scene06.html`.
+- **0–9 s:** Continue learned-value artwork, then consider two possible actions.
+- **9–19 s:** VTA → PFC mesocortical projection; Cooper et al., 2017.
+- **19–29 s:** Planning, goal representation and sequential steps; Alkam et al., 2025.
+- **29–40 s:** Translucent imagined futures precede a solid chosen action; planning analogy.
+- **40–46 s:** Return to PFC and action selection.
+- **46–60 s:** Schematic rodent findings compare altered inputs onto NAc- and PFC-projecting VTA neurons; Cooper et al., 2017. Return to the central brain and hold the final second.
+- **Details:** `bio/docs/SCENE06.md`.
+
+**Scene 07 — Prefrontal cortex, impulse control and addiction (60 seconds)**
+- **Presentation:** immediately after Scene 06; preview `bio/html/scene07.html`.
+- **0–8 s:** Continue the same brain; impaired control, desire versus control.
+- **8–18 s:** Blue brake metaphor; the character stops, then moves further when control weakens.
+- **18–31 s:** Striatal D2 availability and its dotted association with lower PFC activity; Volkow et al., 2019; Uhl et al., 2019.
+- **31–43 s:** Chronic cocaine exposure, conceptual synaptic adaptation, possible changes in cue and natural-reward responses; Volkow et al., 2019.
+- **43–51 s:** Distinct PFC roles; transition to rodent medial PFC and prelimbic cortex.
+- **51–60 s:** Schematic stimulation/inhibition comparison in cocaine-exposed rats; reduced versus increased drug seeking. Hold the final second; Volkow et al., 2019.
+- **Details:** `bio/docs/SCENE07.md`.

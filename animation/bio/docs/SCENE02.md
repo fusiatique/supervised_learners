@@ -31,11 +31,11 @@ npm run render:scene02 -- --browser-executable="/Applications/Google Chrome.app/
 | 450–509 | It returns to the crossroads; the box crossfades into a neutral capsule. |
 | 510–569 | Looking and small movements toward both routes show hesitation. |
 | 570–629 | It approaches the capsule while remembering the warning; no consumption is shown. |
-| 630–659 | “LEARNING CAN BECOME MALADAPTIVE” appears; both paths dim. |
+| 630–659 | “WHEN CONSEQUENCES NO LONGER GUIDE BEHAVIOUR” appears; both paths dim. |
 | 660–689 | The entire final composition holds still. |
 
 The citation crossfades around frame 450 from `Yates & Stone, 1992` to `Piantadosi et al., 2021`, as supplied in the narration.
 
-`remotion/src/Scene02_RiskAndAddiction.tsx` owns the timeline. `remotion/src/risk-components.tsx` contains reusable apple, box, capsule, warning, thought bubble and crossroads artwork. Both walking positions and visible paths use the same cubic control points. The shared `HumanCharacter` now accepts optional expressions, gaze and natural arm movement, retaining its original defaults for Scene 01.
+`bio/remotion/src/Scene02_RiskAndAddiction.tsx` owns the timeline. `bio/remotion/src/risk-components.tsx` contains reusable apple, box, capsule, warning, thought bubble and crossroads artwork. Both walking positions and visible paths use the same cubic control points. The shared `HumanCharacter` now accepts optional expressions, gaze and natural arm movement, retaining its original defaults for Scene 01.
 
 To open Scene 03 on the exact same artwork, render `RiskAndAddictionArtwork` with `frame={660}` inside the same navy 1920 × 1080 SVG canvas. Reuse the scene's `SourceCitation` separately if needed. Scene 02 illustrates one possible pattern of persistent drug-seeking despite harm, rather than a universal behavior or an inability to learn.

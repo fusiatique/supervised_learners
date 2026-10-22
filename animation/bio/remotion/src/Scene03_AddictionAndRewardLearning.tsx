@@ -5,7 +5,7 @@ import {curvePoint, draw, ease, fade, mix, pop, progress} from './motion';
 import {CapsuleSymbol, CROSSROADS, CrossroadsPaths, RewardSymbol, WarningSymbol} from './risk-components';
 import {BrokenHeart, CueSymbol, LearnedAssociation, RewardPulse, SimpleNeuron} from './reward-components';
 
-export const SCENE03={width:1920,height:1080,fps:30,durationInFrames:1680} as const;
+export const SCENE03={width:1920,height:1080,fps:30,durationInFrames:1800} as const;
 export const T03={
   addiction:0, initialReward:240, positiveReinforcement:420, repeatedLearning:480,
   diagramMorph:750, goneTooFar:810, climaxTitle:930, rewardLearning:990,
@@ -78,7 +78,7 @@ const AddictionStory: React.FC = () => {
       <RewardPulse x={pulseX} y={pulseY} scale={mix(reward,mix(.2,1,diagram),dot)} age={f-345} plus={dot<.9||diagram>.5} strength={1+.3*strength}/>
       <circle cx={pulseX} cy={pulseY} r={6} fill={C.yellow} opacity={dot*(1-diagram)}/>
     </g>
-    <g opacity={1-progress(f,0,60)}><text x={960} y={150} textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize={40} fill={C.white}>LEARNING CAN BECOME <tspan fill={C.red}>MALADAPTIVE</tspan></text></g>
+    <g opacity={1-progress(f,0,60)}><text x={960} y={150} textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize={40} fill={C.white}>WHEN CONSEQUENCES NO LONGER <tspan fill={C.red}>GUIDE BEHAVIOUR</tspan></text></g>
     <g opacity={fade(f,155,180,240)}><Label x={960} y={135} size={44}>ADDICTION</Label><text x={960} y={192} textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize={29} fill={C.white}>CONTINUED USE DESPITE <tspan fill={C.red}>HARM</tspan></text></g>
     <g opacity={fade(f,420,445,480)}><Label x={960} y={140} size={38}>POSITIVE REINFORCEMENT</Label><Label x={960} y={195} size={28} color={C.yellow}>REWARD → MORE LIKELY TO REPEAT</Label></g>
     <g opacity={progress(f,T03.climaxTitle,960)} transform={`translate(0 ${16*(1-ease(f,930,960))})`}>
@@ -132,8 +132,11 @@ export const DopamineHandoff: React.FC<{frame:number;neuronOpacity?:number;parti
   </g>;
 };
 
+// Extend the two-character comparison by four seconds, preserving the neuron handoff.
+export const scene03TimelineFrame=(frame:number)=>frame<1470?frame:frame<1680?1470+(frame-1470)*(90/210):frame-120;
+
 const RewardLearning: React.FC = () => {
-  const f=useCurrentFrame()+T03.rewardLearning;
+  const f=scene03TimelineFrame(useCurrentFrame()+T03.rewardLearning);
   const pose=getNaturalLearningPose(f);
   const layout=ease(f,1320,1380);
   const compare=ease(f,1380,1470);

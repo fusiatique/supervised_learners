@@ -40,7 +40,7 @@ The on-screen citations follow the supplied narration: Piantadosi et al., 2021 d
 
 ## Reusable anatomy
 
-`remotion/src/BrainAnatomy.tsx` defines `BrainAnatomy`, `BrainRegionHighlight`, `DopaminePathway`, `DopamineParticle`, and `BrainRegionLabel`.
+`bio/remotion/src/BrainAnatomy.tsx` defines `BrainAnatomy`, `BrainRegionHighlight`, `DopaminePathway`, `DopamineParticle`, and `BrainRegionLabel`.
 
 The component accepts position/scale, drawing progress, cortical opacity, per-region highlights and opacity, optional labels, per-path drawing and visibility, and frame-based activity. `BRAIN_REGIONS`, `BRAIN_PATHWAYS`, `BRAIN_CENTER` and `BRAIN_BOUNDS` provide shared coordinates. Use `anatomyToScreen` for leader lines or camera targets.
 
