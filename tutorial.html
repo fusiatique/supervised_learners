@@ -22,6 +22,13 @@
 
   <main class="tutorial-content">
     <section class="panel">
+      <h2>Introduction</h2>
+      <p><strong>Goal.</strong> This simulation explores one possible explanation for drug dependence: how can an agent that simply learns from reward come to choose a drug again and again, even when every use costs it something? The agent is never told that the drug is good or bad. It only learns which actions keep it feeling right.</p>
+      <p><strong>Purpose.</strong> The simulation lets you watch dependence develop step by step, and test what causes it and what protects against it: forced doses, the drug’s cost, abstinence and relapse, and how quickly the baseline heals. It is a teaching tool for a computational hypothesis, not a model of real brains or a clinical tool. All numbers are illustrative.</p>
+      <p>By the end of this tutorial you will have made an agent dependent, seen why it keeps using the drug, and found out what protects it. Section 1 explains how the model works.</p>
+    </section>
+
+    <section class="panel">
       <h2>How to use this tutorial</h2>
       <p>The framed panels with Play buttons are the real simulation, not pictures. Each one runs its own agent, so you can experiment freely without affecting the others. If a panel gets into a state you don’t want, press <strong>Restart panel</strong> under it to get its starting agent back.</p>
       <p>Each section ends with a <strong>Try it</strong> box. Before opening <strong>What should happen?</strong>, make a guess: predicting first is the quickest way to find out whether the model works the way you think it does.</p>
@@ -36,7 +43,7 @@
         <li><strong>Internal level H</strong>: how the agent is doing right now. It wants H at a target called the <strong>setpoint</strong>, 50, and is rewarded for moving H towards it.</li>
         <li><strong>Baseline B</strong>: the level H drifts back to. Each step, H moves 10% of the way towards B. B starts at 40. Each drug use lowers it, and it slowly heals back.</li>
       </ul>
-      <p>Each step the agent chooses one of three actions: go to the <strong>natural reward</strong> (H + 2), take the <strong>drug</strong> (H + 25, B − 1), or do <strong>nothing</strong>. It is never told which is best; it learns from the rewards it receives.</p>
+      <p>Each step the agent chooses one of three actions: go to the <svg class="action-icon" viewBox="-13 -13 26 26" aria-hidden="true"><circle class="action-icon-natural" cx="0" cy="1" r="9" /><path class="action-icon-stem" d="M 0 -7 L 3 -12" /></svg><strong>natural reward</strong> (H + 2), take the <svg class="action-icon" viewBox="-13 -13 26 26" aria-hidden="true"><g transform="rotate(-36)"><rect class="action-icon-capsule" x="-12" y="-5" width="24" height="10" rx="5" /><path class="action-icon-drug" d="M 0 -5 H 7 A 5 5 0 0 1 7 5 H 0 Z" /></g></svg><strong>drug</strong> (H + 25, B − 1), or do <svg class="action-icon" viewBox="-13 -13 26 26" aria-hidden="true"><circle class="action-icon-nothing" cx="0" cy="0" r="9" /></svg><strong>nothing</strong>. It is never told which is best; it learns from the rewards it receives.</p>
       <figure class="tutorial-visual">
         <div class="tutorial-diagram-scroll" tabindex="0" aria-label="Diagram: how the dependence feedback loop works">
         <svg viewBox="0 0 720 208" role="img" aria-labelledby="mechanism-title mechanism-description">

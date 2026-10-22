@@ -19,6 +19,10 @@
   --diagram-risk: #f7e8dc;
   --diagram-grid: #deded8;
   --diagram-feedback: #76766f;
+
+  --act-nothing: #d9d7d0;
+  --act-natural: #1baf7a;
+  --act-drug: #e34948;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -42,6 +46,10 @@
     --diagram-risk: #633c2f;
     --diagram-grid: #454542;
     --diagram-feedback: #b8b7b0;
+
+    --act-nothing: #4a4945;
+    --act-natural: #2fc28c;
+    --act-drug: #ee6463;
   }
 }
 :root[data-theme="dark"] {
@@ -75,6 +83,10 @@
     --diagram-risk: #633c2f;
     --diagram-grid: #454542;
     --diagram-feedback: #b8b7b0;
+
+    --act-nothing: #4a4945;
+    --act-natural: #2fc28c;
+    --act-drug: #ee6463;
   }
 
 
@@ -312,6 +324,14 @@ h3 {
 .reward-bar.nothing { background: var(--text-muted); }
 .reward-bar.natural { background: var(--diagram-green); }
 .reward-bar.drug { background: var(--diagram-red); }
+
+/* Inline versions of the Environment panel's action icons. */
+.action-icon { width: 0.9em; height: 0.9em; margin: 0 0.15em 0 0.05em; vertical-align: -0.1em; }
+.action-icon-nothing { fill: none; stroke: var(--text-muted); stroke-width: 2; stroke-dasharray: 3 3; }
+.action-icon-natural { fill: var(--act-natural); }
+.action-icon-stem { fill: none; stroke: var(--text-secondary); stroke-width: 2; }
+.action-icon-capsule { fill: var(--surface); stroke: var(--act-drug); stroke-width: 2; }
+.action-icon-drug { fill: var(--act-drug); }
 
 .reward-value {
   text-align: right;
