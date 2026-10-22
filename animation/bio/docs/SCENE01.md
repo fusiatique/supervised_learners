@@ -46,3 +46,5 @@ The on-screen attribution `Bellman, 1966` follows the supplied script. Its exact
 Scene 06 follows Scene 05 with the mesocortical pathway and a planning analogy. Preview `animation/bio/html/scene06.html`; see [SCENE06.md](SCENE06.md) for its 60-second timeline, validation and export commands.
 
 Scene 07 follows Scene 06 with prefrontal impulse control and addiction. Preview `animation/bio/html/scene07.html`; see [SCENE07.md](SCENE07.md) for the 60-second timeline, scientific distinctions and export commands.
+
+Timing update: the human’s uncertainty and shrug are compressed into the first six seconds. The computer begins appearing at exactly 8 seconds and completes its drawing by about 8.7 seconds. Playback rejoins the previous choreography at 10 seconds; the 14-second brain transition and 31-second total remain unchanged.

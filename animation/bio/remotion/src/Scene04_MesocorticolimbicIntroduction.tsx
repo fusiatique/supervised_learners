@@ -6,9 +6,15 @@ import {DopamineCircuitBridge} from './dopamine-introduction-components';
 import {curvePoint, draw, ease, fade, mix, pop, progress} from './motion';
 import {CapsuleSymbol} from './risk-components';
 import {NaturalRewardIcons} from './natural-reward-icons';
+import {Scene04LivingSystem, usesLiving04} from './scene04-living-system';
 
-export const SCENE04={width:1920,height:1080,fps:30,durationInFrames:900} as const;
+export const SCENE04={width:1920,height:1080,fps:30,durationInFrames:1320} as const;
 export const T04={head:0,brain:60,zoom:120,system:210,projections:270,signals:360,mesolimbic:450,rewardSeeking:570,citationSwitch:600,rewards:630,drugs:690,naturalPulse:750,drugPulse:810,finalZoom:870,end:900} as const;
+
+// Keep the preceding pathway scene on screen for eight extra seconds,
+// then stretch the final reward sequence from nine to fifteen seconds.
+// Source-frame functions remain unchanged for Scene 05's existing handoff.
+export const scene04TimelineFrame=(frame:number)=>frame<630?frame:frame<870?629:Math.min(899,630+(frame-870)*.6);
 
 export const getScene04Camera=(frame:number):BrainCamera=>{
   const zoom=ease(frame,T04.zoom,T04.system),compare=ease(frame,T04.rewards,T04.drugs);
@@ -85,14 +91,22 @@ export const MesocorticolimbicArtwork:React.FC<{frame:number;showBrain?:boolean}
   </g>;
 };
 
+export const Scene04PlaybackArtwork:React.FC<{frame:number}>=({frame})=>{
+  const f=scene04TimelineFrame(frame);
+  if(usesLiving04(frame))return <Scene04LivingSystem frame={frame} opening={<MesocorticolimbicArtwork frame={240}/>} ending={<MesocorticolimbicArtwork frame={629}/>}/>;
+  return <>
+    <MesocorticolimbicArtwork frame={f}/>
+    <g opacity={1-progress(f,585,600)}><SourceCitation frame={f} source="Piantadosi et al., 2021"/></g>
+    <g opacity={progress(f,600,615)}><SourceCitation frame={f} source="Feltenstein et al., 2009"/></g>
+  </>;
+};
+
 export const Scene04_MesocorticolimbicIntroduction:React.FC=()=>{
-  const f=useCurrentFrame();
+  const frame=useCurrentFrame();
   return <AbsoluteFill style={{backgroundColor:C.bg}}>
     <svg viewBox="0 0 1920 1080" width="100%" height="100%" role="img" aria-label="Entering a right-facing medial brain cutaway. The ventral midbrain VTA projects to the ventral forebrain nucleus accumbens and anterior prefrontal cortex. Moving signals illustrate neuronal activity along these projections. Natural rewards and addictive drugs interact with overlapping reward-related circuitry.">
       <Sequence from={0} durationInFrames={210} layout="none"><EnteringBrain/></Sequence>
-      <MesocorticolimbicArtwork frame={f}/>
-      <g opacity={1-progress(f,585,600)}><SourceCitation frame={f} source="Piantadosi et al., 2021"/></g>
-      <g opacity={progress(f,600,615)}><SourceCitation frame={f} source="Feltenstein et al., 2009"/></g>
+      <Scene04PlaybackArtwork frame={frame}/>
     </svg>
   </AbsoluteFill>;
 };

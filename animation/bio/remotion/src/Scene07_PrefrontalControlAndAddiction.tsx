@@ -7,10 +7,16 @@ import {draw,ease,fade,mix,progress} from './motion';
 import {CocaineContainer} from './dopamine-introduction-components';
 import {CueSymbol} from './reward-components';
 import {RewardSymbol,WarningSymbol} from './risk-components';
-import {BehavioralBrake,D2ReceptorAvailability,getRatExperimentPose,RatBrain,RatIllustration,SynapticAdaptation} from './prefrontal-control-components';
+import {BehavioralBrake,D2ReceptorAvailability,getRatExperimentPose,RatBrain,RatIllustration} from './prefrontal-control-components';
 
-export const SCENE07={width:1920,height:1080,fps:30,durationInFrames:1800} as const;
+export const SCENE07={width:1920,height:1080,fps:30,durationInFrames:1920} as const;
 export const T07={bridge:0,options:60,conflict:150,brake:240,approach:330,stop:375,weaken:420,resist:480,receptors:540,receptorInset:630,association:720,functions:810,urges:870,adaptation:930,synapse:1020,cueResponse:1110,responseLabels:1200,subregions:1290,rodent:1380,prelimbic:1470,experiment:1530,stimulate:1590,inhibit:1680,summary:1740,hold:1770,end:1800} as const;
+// Give the entire removed pathway/adaptation section to the urges screen.
+export const scene07TimelineFrame=(frame:number)=>{
+ const extended=frame<1200?frame:frame<1380?1200+(frame-1200)*.5:frame-90;
+ const f=extended<1290?extended:extended<1410?1290+(extended-1290)*.75:extended-30;
+ return f<870?f:f<1110?870+(f-870)*(60/240):f;
+};
 const blend=(a:BrainCamera,b:BrainCamera,t:number):BrainCamera=>({x:mix(a.x,b.x,t),y:mix(a.y,b.y,t),scale:mix(a.scale,b.scale,t),anteriorRight:true});
 export const getScene07Camera=(frame:number)=>{
  const f=Math.min(frame,T07.hold);
@@ -90,19 +96,14 @@ export const ReceptorsAndControl:React.FC<{f:number}>=({f})=>{
 const Adaptations:React.FC<{f:number}>=({f})=>{
  const response=ease(f,1110,1170),opacity=progress(f,930,960)*(1-progress(f,1290,1320));
  return <g opacity={opacity}>
-  <Title f={f} from={930} until={1020} text="MESOCORTICAL PATHWAY" color={C.yellow}/>
-  <g opacity={1-progress(f,1110,1155)}>
-    {[0,1,2].map(i=><CocaineContainer key={i} x={1100+i*160} y={810} scale={.43} amount={progress(f,940+i*22,970+i*22)} opacity={progress(f,940+i*22,960+i*22)}/>)}
-    <SynapticAdaptation x={1330} y={440} amount={progress(f,1020,1055)} adaptation={progress(f,1030,1110)} frame={f}/>
-    <g opacity={progress(f,1020,1050)}><Label x={1330} y={700} size={28} color={C.yellow}>SYNAPTIC ADAPTATION</Label></g>
-  </g>
   <g opacity={progress(f,1110,1150)}>
     <CueSymbol x={1090} y={580} scale={.7}/><CocaineContainer x={970} y={580} scale={.35}/><RewardSymbol x={1570} y={580} scale={.8}/>
     <HumanCharacter x={mix(1320,1200,response)} y={875} scale={.75} frame={f} naturalMotion walking={Math.sin(response*Math.PI)} expression="recognition" look={-5}/>
     <path d="M1230 730Q1160 670 1110 650" stroke={C.yellow} strokeWidth={5} fill="none" {...draw(response)}/>
     <path d="M1390 730Q1490 670 1550 650" stroke={C.yellow} strokeWidth={2} opacity={.25} fill="none" {...draw(response)}/>
     <circle cx={1090} cy={580} r={90} fill="none" stroke={C.yellow} strokeWidth={3} opacity={.4*response}/><circle cx={1570} cy={580} r={78} fill="none" stroke={C.yellow} strokeWidth={2} opacity={.12*response}/>
-    <g opacity={progress(f,1200,1225)}><Label x={960} y={135} size={29} color={C.red}>STRONGER DRUG-CUE REACTIVITY</Label><Label x={960} y={190} size={29} color={C.green}>WEAKER NATURAL-REWARD RESPONSE</Label></g>
+    <g opacity={progress(f,1200,1225)}><Label x={960} y={135} size={29} color={C.red}>STRONGER DRUG-CUE REACTIVITY</Label></g>
+    <g opacity={progress(f,1200,1225)}><Label x={960} y={190} size={29} color={C.green}>WEAKER NATURAL-REWARD RESPONSE</Label></g>
     <Label x={1390} y={975} size={20} color={C.gray}>Possible changes following chronic exposure</Label>
   </g>
  </g>;
@@ -137,14 +138,14 @@ export const PrelimbicExperimentArtwork:React.FC<{frame:number}>=({frame})=>{
  </g>;
 };
 export const Scene07_PrefrontalControlAndAddiction:React.FC=()=>{
- const f=Math.min(useCurrentFrame(),T07.hold),s=getScene07State(f);
+ const f=Math.min(scene07TimelineFrame(useCurrentFrame()),T07.hold),s=getScene07State(f);
  return <AbsoluteFill style={{backgroundColor:C.bg}}><svg viewBox="0 0 1920 1080" width="100%" height="100%" role="img" aria-label="Prefrontal impulse control, a schematic association between striatal D2 receptor availability and PFC activity, chronic-cocaine adaptations, and opposite effects of stimulating or inhibiting rat prelimbic cortex on drug seeking.">
   <HumanAnatomy f={f}/>
   <Sequence from={0} durationInFrames={580} layout="none"><ControlMetaphor f={f}/></Sequence>
-  <Sequence from={540} durationInFrames={420} layout="none"><ReceptorsAndControl f={f}/></Sequence>
-  <Sequence from={930} durationInFrames={390} layout="none"><Adaptations f={f}/></Sequence>
-  <Sequence from={1290} durationInFrames={300} layout="none"><RodentTransition f={f}/></Sequence>
-  <Sequence from={1530} durationInFrames={270} layout="none"><PrelimbicExperimentArtwork frame={f}/></Sequence>
+  <Sequence from={540} durationInFrames={600} layout="none"><ReceptorsAndControl f={f}/></Sequence>
+  <Sequence from={1110} durationInFrames={310} layout="none"><Adaptations f={f}/></Sequence>
+  <Sequence from={1380} durationInFrames={330} layout="none"><RodentTransition f={f}/></Sequence>
+  <Sequence from={1650} durationInFrames={270} layout="none"><PrelimbicExperimentArtwork frame={f}/></Sequence>
   {s.citation&&<g opacity={f<930?fade(f,450,480,900):progress(f,930,960)}><SourceCitation frame={f} source={s.citation}/></g>}
  </svg></AbsoluteFill>;
 };

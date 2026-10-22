@@ -118,9 +118,9 @@ export const RodentExperimentIllustration:React.FC<{frame:number}>=({frame})=>{
 };
 
 export const NAc_INPUTS={
-  PFC:[[205,275],[240,355],[330,375],[398,418]],
-  vHPC:[[565,430],[520,390],[460,390],[398,418]],
-  BLA:[[454,442],[440,428],[420,425],[398,418]],
+  PFC:[BRAIN_REGIONS.PFC.center,[240,355],[330,375],BRAIN_REGIONS.NAc.center],
+  vHPC:[BRAIN_REGIONS.vHPC.center,[520,390],[460,390],BRAIN_REGIONS.NAc.center],
+  BLA:[BRAIN_REGIONS.BLA.center,[440,428],[420,425],BRAIN_REGIONS.NAc.center],
 } as const;
 export type InputRegion=keyof typeof NAc_INPUTS;
 export const NeuralInputPathway:React.FC<{region:InputRegion;camera:BrainCamera;amount:number;frame:number;activity?:number}>=({region,camera,amount,frame,activity=1})=>{

@@ -12,6 +12,8 @@ import {SCENE06,Scene06_MesocorticalPathwayAndPlanning} from './Scene06_Mesocort
 
 import {SCENE07,Scene07_PrefrontalControlAndAddiction} from './Scene07_PrefrontalControlAndAddiction';
 
+import {SCENE08,Scene08_SynapticPlasticityAndAddiction} from './Scene08_SynapticPlasticityAndAddiction';
+
 const Root: React.FC = () => <>
   <Composition id="Scene01-HumanVsComputer" component={Scene01_HumanVsComputer} width={SCENE01.width} height={SCENE01.height} fps={SCENE01.fps} durationInFrames={SCENE01.durationInFrames}/>
   <Composition id="Scene02-RiskAndAddiction" component={Scene02_RiskAndAddiction} width={SCENE02.width} height={SCENE02.height} fps={SCENE02.fps} durationInFrames={SCENE02.durationInFrames}/>
@@ -21,5 +23,6 @@ const Root: React.FC = () => <>
   <Composition id="Scene05-DopamineRewardPredictionErrors" component={Scene05_DopamineRewardPredictionErrors} width={SCENE05.width} height={SCENE05.height} fps={SCENE05.fps} durationInFrames={SCENE05.durationInFrames}/>
   <Composition id="Scene06-MesocorticalPathwayAndPlanning" component={Scene06_MesocorticalPathwayAndPlanning} width={SCENE06.width} height={SCENE06.height} fps={SCENE06.fps} durationInFrames={SCENE06.durationInFrames}/>
   <Composition id="Scene07-PrefrontalControlAndAddiction" component={Scene07_PrefrontalControlAndAddiction} width={SCENE07.width} height={SCENE07.height} fps={SCENE07.fps} durationInFrames={SCENE07.durationInFrames}/>
+  <Composition id="Scene08-SynapticPlasticityAndAddiction" component={Scene08_SynapticPlasticityAndAddiction} width={SCENE08.width} height={SCENE08.height} fps={SCENE08.fps} durationInFrames={SCENE08.durationInFrames}/>
 </>;
 registerRoot(Root);

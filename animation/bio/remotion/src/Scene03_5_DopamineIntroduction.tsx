@@ -7,12 +7,17 @@ import {RewardPulse, SimpleNeuron} from './reward-components';
 import {DopamineHandoff} from './Scene03_AddictionAndRewardLearning';
 import {CocaineContainer, Cookie, CookiePlate, DopamineCircuitBridge, DopamineMessenger, Pair, ShoppingBag, Smile} from './dopamine-introduction-components';
 
-export const SCENE03_5={width:1920,height:1080,fps:30,durationInFrames:2100} as const;
-export const T035={bridge:0,messenger:150,everyday:360,cookie:630,cocaine:810,beyondPleasure:990,notQuite:1080,complex:1170,motivation:1410,seek:1500,avoid:1590,combine:1680,prediction:1770,actual:1860,error:1890,formula:1950,handoff:2010,brain:2070,end:2100} as const;
+export const SCENE03_5={width:1920,height:1080,fps:30,durationInFrames:1950} as const;
+// Hold at 32 seconds for three extra seconds; cut the original 42–47s tail
+// (45–50s after the hold), jumping directly into learning and motivation.
+// At 52 seconds, skip another five seconds to the expected/actual reward scene.
+// Hold the completed comparison for two extra seconds before the neuron handoff.
+export const cocaineTimelineFrame=(frame:number)=>frame<960?frame:frame<1050?960:frame<1350?frame-90:frame<1560?frame+60:frame<1800?frame+210:frame<1860?2010:frame+150;
+export const T035={bridge:0,messenger:150,everyday:360,cookie:630,cocaine:810,hold:960,resume:1050,beyondPleasure:1080,notQuite:1170,complex:1260,motivation:1350,seek:1440,avoid:1530,prediction:1560,actual:1650,error:1680,formula:1740,handoff:1890,brain:1920,end:1950} as const;
 export const getDopamineIntroductionState=(frame:number)=>({
   pleasureVisible:frame>=T035.beyondPleasure&&frame<T035.motivation,
   predictionVisible:frame>=T035.prediction&&frame<T035.handoff+30,
-  citation:frame>=990&&frame<1410?'Volkow et al., 2011':frame>=1410&&frame<1770?'Bromberg-Martin et al., 2010':null,
+  citation:frame>=T035.beyondPleasure&&frame<T035.motivation?'Volkow et al., 2011':frame>=T035.motivation&&frame<T035.prediction?'Bromberg-Martin et al., 2010':null,
 });
 const stage=(f:number,start:number,end:number)=> (start===0?1:progress(f,start,start+20))*(1-progress(f,end,end+20));
 const Title:React.FC<{f:number;start:number;text:string;y?:number;color?:string}>=({f,start,text,y=170,color=C.white})=><g opacity={progress(f,start,start+24)} transform={`translate(0 ${15*(1-ease(f,start,start+24))})`}><Label x={960} y={y} size={38} color={color}>{text}</Label></g>;
@@ -76,6 +81,34 @@ export const CookieReinforcementExample:React.FC<{f:number}>=({f:frame})=>{
   </g>;
 };
 
+/** Sparse lightning accents and drifting clouds, behind the cocaine illustration. */
+export const CocaineStorm:React.FC<{f:number}>=({f})=>{
+  const amount=progress(f,810,835)*(1-progress(f,1080,1100));
+  const strikes=[{at:826,path:'M310 0L270 100 325 92 252 225 277 141 225 150 260 0'}, {at:900,path:'M1660 0L1610 125 1670 110 1580 285 1615 171 1565 185 1605 0'}, {at:955,path:'M310 0L270 100 325 92 252 225 277 141 225 150 260 0'}, {at:1010,path:'M1660 0L1610 125 1670 110 1580 285 1615 171 1565 185 1605 0'}, {at:1062,path:'M310 0L270 100 325 92 252 225 277 141 225 150 260 0'}];
+  return <g opacity={amount} aria-label="Dark storm clouds and lightning">
+    <defs><radialGradient id="cocaine-storm-vignette"><stop offset="0%" stopColor="#101827" stopOpacity=".1"/><stop offset="100%" stopColor="#02040b" stopOpacity=".95"/></radialGradient></defs>
+    <rect width="1920" height="1080" fill="#050811" opacity=".75"/>
+    <rect width="1920" height="1080" fill="url(#cocaine-storm-vignette)"/>
+    {[180,570,980,1390,1770].map((x,i)=><ellipse key={i} cx={x+12*Math.sin(f*.008+i)} cy={30+i%2*30} rx={290} ry={115} fill="#20293d" opacity=".38"/>)}
+    {strikes.map(({at,path})=>{
+      const flash=progress(f,at,at+3)*(1-progress(f,at+6,at+18));
+      return <g key={at} opacity={flash}>
+        <ellipse cx={960} cy={80} rx={1050} ry={380} fill="#a8badf" opacity=".06"/>
+        <path d={path} fill="#7295cf" stroke="#7295cf" strokeWidth={14} opacity=".12"/>
+        <path d={path} fill="#d6e5ff" opacity=".85"/>
+      </g>;
+    })}
+  </g>;
+};
+
+// The strike is already fully visible at frame 840 (exactly 28 seconds).
+export const largeLightningOpacity=(frame:number)=>frame<840?0:1-progress(frame,840,858);
+export const ScreenLightning:React.FC<{f:number}>=({f})=><g opacity={largeLightningOpacity(f)} aria-label="Large lightning strike at 28 seconds" pointerEvents="none">
+  <rect width="1920" height="1080" fill="#d6e5ff" opacity=".14"/>
+  <path d="M160 0L650 235 565 310 1130 545 980 635 1700 1080M1130 545L1450 465 1370 575 1870 710M650 235L340 420 405 505 75 690" fill="none" stroke="#7295cf" strokeWidth={44} opacity=".25"/>
+  <path d="M160 0L650 235 565 310 1130 545 980 635 1700 1080M1130 545L1450 465 1370 575 1870 710M650 235L340 420 405 505 75 690" fill="none" stroke="#e9f3ff" strokeWidth={9} strokeLinejoin="miter"/>
+</g>;
+
 export const CocaineReinforcementExample:React.FC<{f:number}>=({f})=>{
   const shift=ease(f,810,870),association=progress(f,870,950);
   return <g opacity={stage(f,810,990)}>
@@ -86,7 +119,7 @@ export const CocaineReinforcementExample:React.FC<{f:number}>=({f})=>{
     <path d="M1000 770Q1280 850 1450 660" fill="none" stroke={C.yellow} strokeWidth={5} {...draw(association)}/><path d="M1000 770Q1280 850 1450 660" fill="none" stroke={C.yellow} strokeWidth={18} opacity={.08*association} {...draw(association)}/>
     <RewardPulse x={1440} y={510} age={f-880} strength={1.5}/><WarningSymbol x={1640} y={520} scale={.7} amount={progress(f,890,920)} opacity={progress(f,890,910)}/>
     <Title f={f} start={930} text="POWERFUL REINFORCEMENT" color={C.yellow}/>
-    <g opacity={progress(f,960,989)}><Label x={960} y={240} size={32}>CAN CONTRIBUTE TO <tspan fill={C.red}>ADDICTION</tspan></Label></g>
+    <g opacity={progress(f,930,960)}><Label x={960} y={240} size={32}>CAN CONTRIBUTE TO <tspan fill={C.red}>ADDICTION</tspan></Label></g>
   </g>;
 };
 
@@ -127,7 +160,7 @@ export const RewardAvoidanceExample:React.FC<{f:number}>=({f})=>{
 };
 
 export const RewardPredictionErrorIntroduction:React.FC<{f:number}>=({f})=>{
-  const actual=progress(f,1860,1910),amount=progress(f,1770,1810),out=1-progress(f,2010,2070);
+  const actual=progress(f,1860,1910),amount=progress(f,1770,1810),out=1-progress(f,2040,2070);
   return <g>
     <g opacity={amount*out}>
       <HumanCharacter x={420} y={650} scale={.78} frame={f} expression={f<1860?'curious':'satisfied'} look={5}/>
@@ -141,15 +174,27 @@ export const RewardPredictionErrorIntroduction:React.FC<{f:number}>=({f})=>{
       <Title f={f} start={1950} text="ACTUAL OUTCOME − EXPECTED OUTCOME" y={905} color={C.gray}/>
       <RewardPulse x={1215} y={775} age={f-1950}/>
     </g>
-    <g opacity={progress(f,2010,2040)}><DopamineCircuitBridge frame={Math.max(0,f-2070)}/></g>
+    <g opacity={progress(f,2040,2070)}><DopamineCircuitBridge frame={Math.max(0,f-2070)}/></g>
   </g>;
 };
 
-const sections=[{start:0,end:150,component:Bridge},{start:150,end:360,component:NeurotransmitterIllustration},{start:360,end:T035.cookie,component:EverydayRewardExamples},{start:T035.cookie,end:810,component:CookieReinforcementExample},{start:810,end:990,component:CocaineReinforcementExample},{start:990,end:1410,component:DopamineBeyondPleasure},{start:1410,end:1770,component:RewardAvoidanceExample},{start:1770,end:2100,component:RewardPredictionErrorIntroduction}];
+// Playback ranges include short crossfades, except at the two requested cuts.
+const sections=[
+  {from:0,to:170,component:Bridge},
+  {from:150,to:380,component:NeurotransmitterIllustration},
+  {from:360,to:650,component:EverydayRewardExamples},
+  {from:630,to:830,component:CookieReinforcementExample},
+  {from:810,to:1100,component:CocaineReinforcementExample},
+  {from:1080,to:1350,component:DopamineBeyondPleasure},
+  {from:1350,to:1560,component:RewardAvoidanceExample},
+  {from:1560,to:1950,component:RewardPredictionErrorIntroduction},
+];
 export const Scene03_5_DopamineIntroduction:React.FC=()=>{
-  const f=useCurrentFrame();const state=getDopamineIntroductionState(f);
+  const frame=useCurrentFrame();const f=cocaineTimelineFrame(frame);const state=getDopamineIntroductionState(frame);
   return <AbsoluteFill style={{backgroundColor:C.bg}}><svg viewBox="0 0 1920 1080" width="100%" height="100%" role="img" aria-label="Dopamine as a chemical messenger in reinforcement, learning and motivation; expected versus actual reward introduces reward prediction errors.">
-    {sections.map(({start,end,component:Part})=><Sequence key={start} from={start} durationInFrames={Math.min(end+20,2100)-start} layout="none"><Part f={f}/></Sequence>)}
+    <CocaineStorm f={frame}/>
+    {sections.map(({from,to,component:Part})=><Sequence key={from} from={from} durationInFrames={to-from} layout="none"><Part f={f}/></Sequence>)}
+    <ScreenLightning f={frame}/>
     {state.citation&&<g opacity={state.citation.startsWith('Volkow')?fade(f,990,1020,1380):fade(f,1410,1440,1740)}><SourceCitation frame={f} source={state.citation}/></g>}
   </svg></AbsoluteFill>;
 };

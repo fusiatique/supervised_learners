@@ -3,9 +3,10 @@ import {AbsoluteFill, Sequence, useCurrentFrame} from 'remotion';
 import {AnimatedArrow, BrainIllustration, C, ComputerCharacter, DecisionPath, HumanCharacter, Label, LearningLoop, ProcessorIllustration, SourceCitation} from './components';
 import {curvePoint, draw, ease, fade, mix, pop, progress} from './motion';
 
-export const SCENE01={width:1920,height:1080,fps:30,durationInFrames:930,computerFrom:210,brainFrom:420} as const;
-// Remove the old 7–9 second interval while retaining later choreography.
-export const scene01TimelineFrame=(frame:number)=>frame<SCENE01.computerFrom?frame:frame+60;
+export const SCENE01={width:1920,height:1080,fps:30,durationInFrames:930,computerFrom:240,brainFrom:420} as const;
+// Finish the human's uncertainty/gesture by 6s, then introduce the computer
+// at exactly 8s. Rejoin the existing choreography at 10s.
+export const scene01TimelineFrame=(frame:number)=>frame<180?frame*1.25:frame<SCENE01.computerFrom?225:frame<300?270+(frame-SCENE01.computerFrom)*1.5:frame+60;
 
 const Decisions: React.FC = () => {
   const frame=useCurrentFrame();
@@ -21,9 +22,9 @@ const Decisions: React.FC = () => {
       {[0,1].map(i=><g key={i} opacity={fade(f,120+i*14,135+i*14,183)} transform={`translate(${445+i*160} ${390+i*70}) scale(${pop(f,120+i*14)})`}><Label x={0} y={0} size={40} color={C.red}>?</Label></g>)}
     </g>
     <path d="M960 150V880" stroke={C.white} opacity={.18} strokeWidth={3} fill="none" {...draw(progress(f,270,330))}/>
-    <g opacity={progress(f,270,300)} transform="translate(1000 80) scale(.88)">
+    <g opacity={progress(f,270,285)} transform="translate(1000 80) scale(.88)">
       <DecisionPath amount={progress(f,330,390)} color={C.blue} frame={Math.max(0,f-270)}/>
-      <ComputerCharacter x={340+attempt} y={600} scale={.85} amount={progress(f,270,330)} frame={f} confused={confusion}/>
+      <ComputerCharacter x={340+attempt} y={600} scale={.85} amount={progress(f,270,300)} frame={f} confused={confusion}/>
       <g opacity={progress(f,420,438)}>
         <Label x={510} y={835} size={30} color={C.blue} anchor="start">{f<510?'IF condition → action':'IF condition → action A'}</Label>
         <g opacity={f<510?.5+.5*Math.sin(f*.35)**2:1}><Label x={510} y={884} size={30} color={f<510?C.red:C.green} anchor="start">{f<510?'ELSE → ?':'ELSE → action B'}</Label></g>
@@ -31,7 +32,7 @@ const Decisions: React.FC = () => {
       {confusion&&<g transform={`translate(365 350) scale(${pop(f,420)})`} stroke={C.red} strokeWidth={4} fill={C.bg} strokeLinejoin="round"><path d="M0 -33L31 22H-31Z"/><path d="M0 -14V3M0 12V13" strokeLinecap="round"/></g>}
       <g opacity={fade(f,510,522)} transform={`translate(375 355) scale(${pop(f,510)})`}><path d="M-18 0L-3 15 25 -19" stroke={C.green} fill="none" strokeWidth={5} strokeLinecap="round"/></g>
     </g>
-    <g opacity={fade(f,330,350)}><Label x={1450} y={180} size={25} color={C.gray}>Conventional programmed computation</Label></g>
+    <g opacity={fade(f,300,320)}><Label x={1450} y={180} size={25} color={C.gray}>Conventional programmed computation</Label></g>
   </g>;
 };
 

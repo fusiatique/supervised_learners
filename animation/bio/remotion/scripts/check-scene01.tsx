@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {SCENE01,scene01TimelineFrame} from '../src/Scene01_HumanVsComputer';
+assert.equal(SCENE01.computerFrom,8*30);
+assert.equal(SCENE01.durationInFrames,930);
+assert.equal(SCENE01.brainFrom,420);
+assert.equal(scene01TimelineFrame(180),225,'Human gesture and uncertainty finish by six seconds');
+assert.equal(scene01TimelineFrame(239),225,'Computer remains hidden through the end of second seven');
+assert.equal(scene01TimelineFrame(240),270,'Computer drawing starts at exactly eight seconds');
+assert.equal(scene01TimelineFrame(260),300,'Computer completes its drawing within the first second of its entrance');
+for(let f=300;f<420;f++)assert.equal(scene01TimelineFrame(f),f+60,'Existing choreography from ten seconds onward is preserved');
+const frames=Array.from({length:420},(_,f)=>scene01TimelineFrame(f));
+for(let f=419;f>=0;f--)assert.equal(scene01TimelineFrame(f),frames[f]);
+console.log('PASS: human gesture compressed, computer entrance at 8s, existing choreography restored at 10s, unchanged 31s duration and 14s brain transition.');
