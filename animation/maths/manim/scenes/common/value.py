@@ -2,6 +2,9 @@
 (which starts on them): the gamma-driven value field, the right-column equations, the
 gamma slider with its weight bars, and dashed path trails."""
 
+from collections import deque
+from functools import lru_cache
+
 from manim import (
     DOWN,
     LEFT,
@@ -27,18 +30,38 @@ WORLD_SHIFT = 1.4 * LEFT  # the 5x5 grid is wider than the 3x3, so it moves left
 COL_X = 3.3  # centre of the right column once the grid has moved
 
 
+@lru_cache(maxsize=None)
+def _steps_to(goal, rows, cols, blocked):
+    """Shortest number of steps from every cell to goal, never passing through a blocked cell
+    (another reward: reaching one ends the episode). Unreachable cells are left out."""
+    def neighbours(x):
+        r, c = divmod(x - 1, cols)
+        for dr, dc in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+            if 0 <= r + dr < rows and 0 <= c + dc < cols:
+                yield (r + dr) * cols + (c + dc) + 1
+
+    dist, frontier = {goal: 0}, deque([goal])
+    while frontier:
+        x = frontier.popleft()
+        for y in neighbours(x):
+            if y not in dist and y not in blocked:
+                dist[y] = dist[x] + 1
+                frontier.append(y)
+    return dist
+
+
 def discounted_value(s, gamma, grid, rewards=REWARDS_5X5):
     """The best discounted reward reachable from s, matching the Bellman convention used from
     Maths 06 on: a reward r that is d steps away is worth gamma^d * r, so a reward's own cell is
     worth r, its neighbours gamma * r, and so on. Reaching a reward ends the episode, so a reward
-    cell is worth exactly its own reward."""
+    cell is worth exactly its own reward, and a path to one reward cannot pass through another."""
     if s in rewards:
         return float(rewards[s])
-    r0, c0 = divmod(s - 1, grid.cols)
     best = 0.0
     for goal, r in rewards.items():
-        r1, c1 = divmod(goal - 1, grid.cols)
-        best = max(best, r * gamma ** (abs(r1 - r0) + abs(c1 - c0)))
+        dist = _steps_to(goal, grid.rows, grid.cols, frozenset(rewards) - {goal})
+        if s in dist:
+            best = max(best, r * gamma ** dist[s])
     return best
 
 

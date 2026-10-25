@@ -11,15 +11,14 @@ then improvement) on "We improved our policy using the state values", iteration 
 
 import random
 
+import numpy as np
 from manim import (
     DOWN,
     LEFT,
     PI,
     RIGHT,
     UP,
-    ArcBetweenPoints,
     Circumscribe,
-    CurvedArrow,
     Dot,
     FadeIn,
     FadeOut,
@@ -28,11 +27,16 @@ from manim import (
     MathTex,
     MovingCameraScene,
     MoveAlongPath,
+    ParametricFunction,
+    Rectangle,
     RoundedRectangle,
     Text,
     Transform,
+    Triangle,
     VGroup,
     Write,
+    angle_of_vector,
+    there_and_back,
 )
 
 from common import (
@@ -46,8 +50,12 @@ EXAMPLE = 8  # where Maths 07 leaves the agent
 ARGMAX_TEX = r"\pi(s) = \arg\max_a Q^\pi(s, a)"
 OLD_S8 = "up"  # Maths 07 never drew s8's old (random) arrow: the agent stood on it
 LOOP_Y = 0.85  # centre line of the evaluation / improvement loop in the right column
-ROW_Y = -0.55  # first row of the iteration history, under the loop
-ROW_GAP = 0.32
+# The loop is one ellipse with the two boxes sitting on it, left and right. The amber dot goes
+# round it continuously, disappearing into each box as that step happens.
+LOOP_A, LOOP_B = 2.0, 1.0  # the ellipse's half-width and half-height
+BOX_W, BOX_H = 2.35, 1.15
+ROW_Y = -0.72  # first row of the iteration history, under the loop and its bottom label
+ROW_GAP = 0.27
 ROW_COLUMNS = (COL_X - 2.75, COL_X - 1.05, COL_X + 1.4)  # left edges: iteration, route, states changed
 
 # Narration cues (seconds from the start), at about 165 words per minute.
@@ -77,13 +85,38 @@ def value_label(v, grid, s):
 
 
 def loop_box(title, tex, x):
-    """One stage of the policy-iteration loop: a rounded box with a title and a formula."""
-    frame = RoundedRectangle(corner_radius=0.15, width=2.85, height=1.15, stroke_color=MODEL, stroke_width=2,
-                             fill_color=BG, fill_opacity=0.9)
-    label = Text(title, font_size=20, color=INK)
-    formula = MathTex(tex, font_size=28, color=MUTED)
+    """One stage of the policy-iteration loop: a rounded box with a title and a formula. It is
+    opaque and layered above the dot, so the dot disappears into it while that step happens."""
+    frame = RoundedRectangle(corner_radius=0.15, width=BOX_W, height=BOX_H, stroke_color=MODEL, stroke_width=2,
+                             fill_color=BG, fill_opacity=1).set_z_index(21)
+    label = Text(title, font_size=20, color=INK).set_z_index(22)
+    formula = MathTex(tex, font_size=28, color=MUTED).set_z_index(22)
     VGroup(label, formula).arrange(DOWN, buff=0.14).move_to(frame)
     return VGroup(frame, label, formula).move_to([x, LOOP_Y, 0])
+
+
+def pulse(box):
+    """A box's outline flares amber and swells slightly, then settles; its text stays readable."""
+    return box[0].animate(rate_func=there_and_back).scale(1.06).set_stroke(DOPAMINE, width=4)
+
+
+def loop_point(t):
+    """The point at angle t on the loop's ellipse: t = pi is the evaluation box, t = 0 improvement."""
+    return np.array([COL_X + LOOP_A * np.cos(t), LOOP_Y + LOOP_B * np.sin(t), 0])
+
+
+def loop_arrow(t0, t1):
+    """One half of the loop: the ellipse from angle t0 to t1, with an arrowhead at t1."""
+    arc = ParametricFunction(lambda u: loop_point(t0 + (t1 - t0) * u), t_range=[0, 1]).set_stroke(MUTED, width=3)
+    heading = loop_point(t1) - loop_point(t1 - 0.02 * np.sign(t1 - t0))
+    tip = Triangle(stroke_width=0, fill_color=MUTED, fill_opacity=1).scale(0.1)
+    tip.rotate(angle_of_vector(heading) - np.pi / 2).move_to(loop_point(t1))
+    return VGroup(arc, tip)
+
+
+def loop_path(t0, t1):
+    """The dot's route from angle t0 to t1 (through the boxes, which hide it)."""
+    return ParametricFunction(lambda u: loop_point(t0 + (t1 - t0) * u), t_range=[0, 1])
 
 
 def history_row(k, reached, changed):
@@ -155,30 +188,50 @@ class Scene08PolicyIteration(MovingCameraScene):
                  q_title, q_eq, argmax, meaning, improvement, box, *policy_arrows.values(), no_reward)
         body = stage.agent
 
-        # The loop, history and route caption, shared by the iterations below.
-        eval_box = loop_box("1. Policy evaluation", r"V^\pi(s)", COL_X - 1.5)
-        improve_box = loop_box("2. Policy improvement", r"\pi \leftarrow \arg\max_a Q^\pi", COL_X + 1.5)
-        top_path = ArcBetweenPoints(eval_box.get_top() + 0.08 * UP, improve_box.get_top() + 0.08 * UP, angle=-PI / 2)
-        bottom_path = ArcBetweenPoints(improve_box.get_bottom() + 0.08 * DOWN, eval_box.get_bottom() + 0.08 * DOWN,
-                                       angle=-PI / 2)
-        top_arrow = CurvedArrow(top_path.get_start(), top_path.get_end(), angle=-PI / 2, color=MUTED, stroke_width=3)
-        bottom_arrow = CurvedArrow(bottom_path.get_start(), bottom_path.get_end(), angle=-PI / 2, color=MUTED,
-                                   stroke_width=3)
-        dot = Dot(top_path.get_start(), radius=0.08, color=DOPAMINE).set_z_index(20)
+        # The loop, history and route caption, shared by the iterations below. Each half of the loop
+        # says what crossing it means, and a counter in the middle counts the laps.
+        eval_box = loop_box("1. Policy evaluation", r"V^\pi(s)", COL_X - LOOP_A)
+        improve_box = loop_box("2. Policy improvement", r"\pi \leftarrow \arg\max_a Q^\pi", COL_X + LOOP_A)
+        edge = np.arcsin((BOX_H / 2) / LOOP_B) + 0.06  # where the ellipse leaves a box's top or bottom edge
+        top_arrow = loop_arrow(PI - edge, edge)
+        bottom_arrow = loop_arrow(-edge, -(PI - edge))
+        top_path, bottom_path = loop_path(PI, 0), loop_path(0, -PI)
+        top_note = Text("use the values to choose better actions", font_size=18, color=MUTED).move_to(
+            [COL_X, LOOP_Y + LOOP_B + 0.24, 0])
+        bottom_note = Text("re-evaluate the new policy", font_size=18, color=MUTED).move_to(
+            [COL_X, LOOP_Y - LOOP_B - 0.24, 0])
+        counter_word = Text("iteration", font_size=18, color=MUTED)
+        counter_num = MathTex("2", font_size=44, color=MODEL)
+        counter = VGroup(counter_word, counter_num).arrange(DOWN, buff=0.08).move_to([COL_X, LOOP_Y, 0])
+        dot = Dot(loop_point(PI), radius=0.08, color=DOPAMINE).set_z_index(20)
+        # Flashed over the grid whenever the values are thrown away and recalculated.
+        reset_flash = Rectangle(width=grid.width, height=grid.height, stroke_width=0, fill_color=INK,
+                                fill_opacity=0).move_to(grid).set_z_index(7)
+        self.add(reset_flash)
         caption = Text("starting again from a random policy", font_size=24, color=MUTED).move_to(
             [grid.get_x(), -3.45, 0])
         policy, rows, trail, reached = dict(old_policy), [], None, None
 
-        def evaluate(round_loop=True, run_time=0.8):
+        def evaluate(round_loop=True, flash=True):
             """Step one: V^pi of the current policy into every cell, and the route from the start.
-            round_loop moves the dot back round the loop to evaluation."""
+            round_loop first carries the dot round the bottom of the loop into evaluation and ticks
+            the counter; flash marks the old values being thrown away before the new ones fill in."""
             nonlocal trail, reached
             V = evaluate_policy(policy, grid, GAMMA)
+            if round_loop:
+                number = MathTex(str(len(rows) + 1), font_size=44, color=MODEL).move_to(counter_num)
+                self.play(MoveAlongPath(dot, bottom_path), Transform(counter_num, number), run_time=0.45)
+            if flash:
+                # The old values are thrown away: the grid flashes, the glow goes out, the numbers fade.
+                self.play(reset_flash.animate.set_fill(opacity=0.22),
+                          *[glows[s].animate.set_fill(opacity=0) for s in cells],
+                          *[values[s].animate.set_opacity(0.12) for s in cells],
+                          *([pulse(eval_box)] if round_loop else []),
+                          run_time=0.25)
             anims = [Transform(values[s], value_label(V[s], grid, s)) for s in cells]
             anims += [glows[s].animate.set_fill(opacity=field_opacity(V[s])) for s in cells]
-            if round_loop:
-                anims += [MoveAlongPath(dot, bottom_path), Indicate(eval_box, color=MODEL, scale_factor=1.06)]
-            self.play(*anims, run_time=run_time)
+            anims.append(reset_flash.animate.set_fill(opacity=0))
+            self.play(*anims, run_time=0.6 if flash else 0.8)
             path, reached = policy_route(policy, START, grid)
             new_trail = dashed_trail([grid.center_of(s) for s in path], DOPAMINE if reached else MUTED)
             if reached:
@@ -193,19 +246,22 @@ class Scene08PolicyIteration(MovingCameraScene):
 
         def improve(V, round_loop=True, run_time=0.8):
             """Step two: swing every arrow whose state has a strictly better action; log the iteration.
-            round_loop moves the dot along the loop to improvement."""
+            round_loop first carries the dot round the top of the loop into improvement."""
             nonlocal policy
             new = improve_policy(policy, V, grid, GAMMA)
             changed = [s for s in cells if new[s] != policy[s]]
             policy = new
             row = history_row(len(rows) + 1, reached, len(changed))
             rows.append(row)
+            if round_loop:
+                self.play(MoveAlongPath(dot, top_path), run_time=0.35)
+                run_time = 0.5
             anims = [FadeIn(row, shift=0.1 * UP)]
             if changed:
                 anims.append(LaggedStart(*[Transform(policy_arrows[s], policy_arrow(grid, s, policy[s]))
                                            for s in changed], lag_ratio=0.06))
             if round_loop:
-                anims += [MoveAlongPath(dot, top_path), Indicate(improve_box, color=MODEL, scale_factor=1.06)]
+                anims.append(pulse(improve_box))
             self.play(*anims, run_time=run_time)
 
         # "Now, there is one final step."  The right column clears and the grid goes back to
@@ -217,7 +273,7 @@ class Scene08PolicyIteration(MovingCameraScene):
         stage.arrows = VGroup()
         self.play(*[Transform(policy_arrows[s], policy_arrow(grid, s, old_policy[s], color=MUTED)) for s in others],
                   FadeIn(policy_arrows[EXAMPLE]), FadeIn(caption, shift=0.1 * UP), run_time=0.9)
-        V = evaluate(round_loop=False)
+        V = evaluate(round_loop=False, flash=False)
 
         # "We improved our policy using the state values,
         self.next_section("iteration 1")
@@ -242,13 +298,14 @@ class Scene08PolicyIteration(MovingCameraScene):
         # "So we recalculate the values with the new policy,
         self.next_section("iteration 2")
         self.at(T_RECALC)
-        self.play(FadeIn(eval_box, scale=0.9), FadeIn(dot, scale=0.5), run_time=0.5)
+        self.play(FadeIn(eval_box, scale=0.9), FadeIn(dot), run_time=0.5)
         V = evaluate(round_loop=False)
         # ...and improve the policy again."
         self.at(T_AGAIN_POLICY)
-        self.play(FadeIn(improve_box, scale=0.9), FadeIn(top_arrow), run_time=0.5)
+        self.play(FadeIn(improve_box, scale=0.9), FadeIn(top_arrow, top_note), run_time=0.5)
         improve(V)
-        self.play(FadeIn(bottom_arrow), run_time=0.4)
+        # The way back closes the loop, and the counter shows this was the second lap.
+        self.play(FadeIn(bottom_arrow, bottom_note, counter), run_time=0.4)
 
         # "And again."
         self.next_section("iteration 3")
@@ -262,7 +319,7 @@ class Scene08PolicyIteration(MovingCameraScene):
         # "This is policy iteration."
         self.next_section("policy iteration")
         self.at(T_PI)
-        title = Text("policy iteration", font_size=30, color=MODEL).move_to([COL_X, 2.35, 0])
+        title = Text("policy iteration", font_size=30, color=MODEL).move_to([COL_X, 2.55, 0])
         self.play(FadeIn(title, shift=0.1 * DOWN), run_time=0.6)
 
         # "We then repeat this until we reach an optimal policy."
@@ -317,9 +374,11 @@ class Scene08PolicyIteration(MovingCameraScene):
         frame = self.camera.frame
         self.play(frame.animate.scale(0.5).move_to(agent.get_center() + 0.6 * DOWN + 0.5 * LEFT),
                   LaggedStart(*[absorb(m, agent) for m in (opt_eq, opt_label, bellman_eq,
-                                                          VGroup(eval_box, improve_box, top_arrow, bottom_arrow), title)],
+                                                          VGroup(eval_box, improve_box, top_arrow, bottom_arrow,
+                                                                 top_note, bottom_note, counter), title)],
                               lag_ratio=0.15),
                   run_time=2.4)
-        self.remove(opt_eq, opt_label, bellman_eq, eval_box, improve_box, top_arrow, bottom_arrow, title)
+        self.remove(opt_eq, opt_label, bellman_eq, eval_box, improve_box, top_arrow, bottom_arrow, top_note,
+                    bottom_note, counter, title)
         self.play(agent.blink())
         self.at(T_END)
