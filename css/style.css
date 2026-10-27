@@ -163,6 +163,149 @@ h3 {
   margin-bottom: 8px;
 }
 
+/* The tutorial's section menu: a sidebar on the left, kept in view while
+   scrolling; a bar across the top on narrow screens. */
+.tutorial-layout {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 900px);
+  justify-content: center;
+  gap: 24px;
+  padding: 0 20px;
+}
+
+.tutorial-layout > .tutorial-content { margin: 16px 0 24px; padding: 0; }
+
+.tutorial-nav {
+  position: sticky;
+  top: 16px;
+  z-index: 30;
+  align-self: start;
+  margin-top: 16px;
+  padding: 10px 6px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.tutorial-nav-links {
+  display: grid;
+  gap: 2px;
+}
+
+.tutorial-progress { margin: 0 6px 10px; border-radius: 999px; overflow: hidden; }
+
+@media (max-width: 900px) {
+  .tutorial-layout { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .tutorial-nav {
+    top: 0;
+    margin: 0 -20px;
+    padding: 0;
+    border-width: 0 0 1px;
+    border-radius: 0;
+  }
+  .tutorial-nav-links { display: flex; gap: 4px; padding: 8px 20px; overflow-x: auto; scrollbar-width: thin; }
+  .tutorial-progress { margin: 0; border-radius: 0; order: 1; }
+  .tutorial-nav { display: flex; flex-direction: column; }
+}
+
+.tutorial-nav-links a {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.tutorial-nav-links a:hover { background: var(--page); color: var(--text-primary); }
+
+.tutorial-nav-links a[aria-current="page"] {
+  background: var(--agent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.nav-number {
+  display: inline-grid;
+  place-items: center;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--page);
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.tutorial-nav-links a[aria-current="page"] .nav-number { background: #ffffff40; color: inherit; }
+
+.tutorial-progress { height: 3px; background: var(--grid); }
+.tutorial-progress span { display: block; width: 0; height: 100%; background: var(--agent); transition: width 300ms ease; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .tutorial-nav-links a[aria-current="page"] { color: #0b0b0b; }
+}
+:root[data-theme="dark"] .tutorial-nav-links a[aria-current="page"] { color: #0b0b0b; }
+
+/* One section at a time, sliding in. */
+.tutorial-content > section:not([hidden]) { animation: slide-in 280ms ease; }
+
+@keyframes slide-in {
+  from { opacity: 0; transform: translateY(10px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tutorial-content > section:not([hidden]) { animation: none; }
+  .tutorial-progress span { transition: none; }
+}
+
+.slide-pager {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.pager-link {
+  display: inline-grid;
+  justify-self: start;
+  gap: 1px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.pager-link:hover { border-color: var(--axis); }
+
+.slide-pager > :last-child { justify-self: end; text-align: right; }
+
+.pager-link.next {
+  background: var(--agent);
+  border-color: var(--agent);
+  color: #fff;
+}
+
+.pager-title { font-size: 12px; font-weight: 400; opacity: 0.8; }
+.pager-count { color: var(--text-muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .pager-link.next { color: #0b0b0b; }
+}
+:root[data-theme="dark"] .pager-link.next { color: #0b0b0b; }
+
+@media (max-width: 640px) {
+  .pager-title { display: none; }
+}
+
 .tutorial-content {
   display: grid;
   gap: 16px;
@@ -742,6 +885,7 @@ summary {
 }
 
 /* Inline help stays inside the scrolling parameter sidebar instead of clipping. */
+.params-default { margin: 4px 0 6px; padding: 4px 10px; font-size: 12px; }
 .minimal-param { align-items: center; grid-template-columns: minmax(0, 1fr) auto; }
 .minimal-param .parameter-value {
   display: flex;
@@ -759,11 +903,11 @@ summary {
   margin: 6px 0 4px;
   padding: 10px 12px;
   border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--grid);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 4px 16px #0002;
   color: var(--text-secondary);
-  font-size: 12px;
-  line-height: 1.6;
+  font-size: 13px;
 }
 
 .state-panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
@@ -771,7 +915,7 @@ summary {
 .state-panel-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
 .state-panel-footer .state-event-key { margin-top: 0; }
 .state-help { position: relative; flex-shrink: 0; margin-left: auto; }
-.state-info-button { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; }
+.state-info-button { padding: 0; border: 0; border-bottom: 1px dotted currentColor; border-radius: 0; background: transparent; color: var(--text-secondary); font-size: 12px; font-weight: 700; cursor: help; }
 .state-info-symbol { display: inline-grid; place-items: center; width: 17px; height: 17px; border: 1px solid currentColor; border-radius: 50%; font-family: Georgia, serif; font-style: italic; font-weight: 700; }
 .state-info-popup {
   position: absolute;
@@ -859,11 +1003,13 @@ summary {
   background: var(--page);
 }
 
-.tutorial-content .try h3 {
-  margin: 0 0 6px;
+.tutorial-content .try > summary {
   font-size: 13px;
+  font-weight: 700;
   color: var(--text-primary);
 }
+
+.tutorial-content .try[open] > summary { margin-bottom: 6px; }
 
 .try + .try { margin-top: 12px; }
 .try + p { margin-top: 14px; }
@@ -883,6 +1029,7 @@ summary {
 .reveal[open] summary,
 .reading[open] summary { margin-bottom: 6px; }
 .reveal p + p { margin-top: 8px; }
+.reveal .reveal-note { font-size: 12px; font-style: italic; color: var(--text-muted); }
 /* Section 8: the parameters as soft tiles, one under the other. */
 .tutorial-content .param-list {
   display: grid;
@@ -1042,14 +1189,17 @@ summary {
 .ui-reveal::before { content: "▸ "; }
 
 .ui-try {
-  padding: 1px 8px;
+  padding: 0 5px;
   border-left: 3px solid var(--diagram-blue);
-  border-radius: 0 6px 6px 0;
+  border-radius: 0 5px 5px 0;
   background: var(--page);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
 }
+
+/* The closed toggle's arrow, as on a real Try it box. */
+.ui-try::before { content: "▸ "; }
 
 .embed-restart {
   float: right;

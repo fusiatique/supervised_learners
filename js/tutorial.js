@@ -223,15 +223,17 @@ window.addEventListener('message', (event) => {
   }
 });
 
-// Reloading an embed brings back its starting agent, which Reset cannot:
-// Reset gives an agent that has learned nothing.
+// Restarting an embed brings back its starting agent and default settings,
+// which Reset cannot: Reset gives an agent that has learned nothing.
 for (const figure of document.querySelectorAll('.simulation-embed')) {
   const frame = figure.querySelector('iframe');
   const restart = document.createElement('button');
   restart.type = 'button';
   restart.className = 'embed-restart';
   restart.textContent = 'Restart panel';
-  restart.addEventListener('click', () => frame.contentWindow.location.reload());
+  // Loading the page afresh rather than reloading it: on a reload, browsers
+  // restore controls such as the speed slider to where the reader left them.
+  restart.addEventListener('click', () => { frame.src = frame.getAttribute('src'); });
   figure.querySelector('figcaption').prepend(restart);
 }
 
@@ -252,5 +254,60 @@ for (const word of document.querySelectorAll('.hover-info')) {
   word.addEventListener('focusin', place);
 }
 
+// --- Slides: one section at a time ------------------------------------------
+
+// Shows one section at a time. The menu, the progress bar and each section's
+// Previous/Next buttons are built from the sections' ids and data-nav labels.
+function slides() {
+  const sections = [...document.querySelectorAll('.tutorial-content > section[id]')];
+  const nav = $('tutorial-nav-links');
+  if (!sections.length || !nav) return;
+
+  const links = sections.map((section, i) => {
+    const link = document.createElement('a');
+    link.href = `#${section.id}`;
+    link.innerHTML = `${i ? `<span class="nav-number">${i}</span>` : ''}${section.dataset.nav}`;
+    nav.append(link);
+    return link;
+  });
+
+  sections.forEach((section, i) => {
+    const pager = document.createElement('div');
+    pager.className = 'slide-pager';
+    const prev = sections[i - 1];
+    const next = sections[i + 1];
+    pager.innerHTML = `
+      ${prev ? `<a class="pager-link" href="#${prev.id}">← Previous<span class="pager-title">${prev.dataset.nav}</span></a>` : '<span></span>'}
+      <span class="pager-count">${i + 1} of ${sections.length}</span>
+      ${next ? `<a class="pager-link next" href="#${next.id}">Next →<span class="pager-title">${next.dataset.nav}</span></a>` : '<a class="pager-link" href="index.html">Open the full simulation →</a>'}`;
+    section.append(pager);
+  });
+
+  function show(id, scroll = true) {
+    const index = Math.max(0, sections.findIndex((section) => section.id === id));
+    sections.forEach((section, i) => { section.hidden = i !== index; });
+    links.forEach((link, i) => {
+      if (i === index) link.setAttribute('aria-current', 'page');
+      else link.removeAttribute('aria-current');
+    });
+    $('tutorial-progress').style.width = `${((index + 1) / sections.length) * 100}%`;
+    links[index].scrollIntoView({ block: 'nearest', inline: 'center' });
+    if (scroll) window.scrollTo({ top: 0 });
+  }
+
+  const current = () => sections.findIndex((section) => !section.hidden);
+  window.addEventListener('hashchange', () => show(location.hash.slice(1)));
+  // Arrow keys move between sections, except while a slider or field has focus.
+  document.addEventListener('keydown', (event) => {
+    if (event.altKey || event.ctrlKey || event.metaKey) return;
+    if (event.target.closest('input, select, textarea, [contenteditable]')) return;
+    const step = { ArrowRight: 1, ArrowLeft: -1 }[event.key];
+    const target = sections[current() + (step ?? 0)];
+    if (step && target) location.hash = target.id;
+  });
+  show(location.hash.slice(1), false);
+}
+
+slides();
 ceilingExplorer();
 rewardExplorer();
