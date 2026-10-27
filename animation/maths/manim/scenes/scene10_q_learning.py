@@ -60,6 +60,14 @@ def action_pills(grid, s, texts):
             for a, d in ACTIONS.items()}
 
 
+def takeaway_list():
+    """The three takeaways Maths 10 ends on, ticked, in the right column."""
+    return VGroup(*[
+        VGroup(MathTex(r"\checkmark", font_size=34, color=DOPAMINE), Text(t, font_size=24, color=INK)).arrange(RIGHT, buff=0.2)
+        for t in ("choose actions based on expected rewards", "evaluate possible futures", "keep improving")
+    ]).arrange(DOWN, aligned_edge=LEFT, buff=0.35).move_to([COL_X, 1.4, 0])
+
+
 def fmt(v):
     return f"{v:.0f}" if abs(v - round(v)) < 1e-9 else f"{v:.1f}"
 
@@ -212,10 +220,7 @@ class Scene10QLearning(PacedScene, Scene):
         self.play(LaggedStart(*[FadeOut(f, scale=1.05) for f in fog.values()], lag_ratio=0.03),
                   LaggedStart(*[FadeIn(g) for g in learned.values()], lag_ratio=0.03),
                   FadeIn(*[a for s, a in cell_arrows.items() if s != stage.state], extra), run_time=1.6)
-        takeaways = VGroup(*[
-            VGroup(MathTex(r"\checkmark", font_size=34, color=DOPAMINE), Text(t, font_size=24, color=INK)).arrange(RIGHT, buff=0.2)
-            for t in ("choose actions based on expected rewards", "evaluate possible futures", "keep improving")
-        ]).arrange(DOWN, aligned_edge=LEFT, buff=0.35).move_to([COL_X, 1.4, 0])
+        takeaways = takeaway_list()
         self.wait(1)
         # "...choose actions based on expected rewards..."
         self.play(FadeIn(takeaways[0], shift=0.15 * RIGHT), run_time=0.5)

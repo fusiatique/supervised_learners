@@ -42,6 +42,7 @@ for (const [sceneId, playerId, prefix] of [
   ['maths-policy-iteration', 'maths08Player', 'maths08'],
   ['maths-exploration', 'maths09Player', 'maths09'],
   ['maths-q-learning', 'maths10Player', 'maths10'],
+  ['maths-internal-state', 'maths11Player', 'maths11'],
 ]) {
   const send = (action) => document.getElementById(playerId)?.contentWindow?.postMessage({type: `${prefix}:${action}`}, location.origin);
   sceneHooks[sceneId] = {enter() { send('play'); }, leave() { send('pause'); }};

@@ -18,3 +18,5 @@ from .value import (
     style_g_equation, sv_title, v_equation, value_field,
 )
 from .pacing import PacedScene
+from .gauge import Gauge
+from .icons import WATER, water_glass

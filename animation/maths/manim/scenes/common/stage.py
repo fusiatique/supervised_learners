@@ -100,7 +100,7 @@ class GridStage:
         s, self.state = self.state, s2
         body = VGroup(self.agent, self.arrows, self.riders)
         return AnimationGroup(
-            body.animate.shift(self.grid.center_of(s2) - self.agent.get_center()),
+            body.animate.shift(self.grid.center_of(s2) - self.agent.head.get_center()),
             self.grid[s].animate.set_fill(CELL),
             self.grid[s2].animate.set_fill(HIGHLIGHT),
             run_time=run_time,
@@ -115,7 +115,8 @@ class GridStage:
             return body.animate(rate_func=there_and_back, run_time=run_time).shift(0.25 * ACTIONS[action])
         self.state = s2
         anims = [
-            body.animate.shift(self.grid.center_of(s2) - self.agent.get_center()),
+            # Positioned by the head, so marks around it (sweat, arms) never pull the agent off-centre.
+            body.animate.shift(self.grid.center_of(s2) - self.agent.head.get_center()),
             self.grid[s].animate.set_fill(CELL),
             self.grid[s2].animate.set_fill(HIGHLIGHT),
         ]
