@@ -1,6 +1,7 @@
 // Interactive figures for tutorial.html. The explainers run the real model
 // from model.js; the live panels are the simulation itself, embedded.
 import { NOTHING, NATURAL, DRUG, ACTIONS, config, step, naturalCeiling, tippingPoint } from './model.js';
+import { faceShape, FACE_UNIT, actionIconSvg } from './environmentView.js';
 
 const $ = (id) => document.getElementById(id);
 const fmt = (value, digits = 1) => Number(value.toFixed(digits)).toString();
@@ -95,11 +96,6 @@ function rewardExplorer() {
   // Same left-to-right order, symbols and colours as the Environment panel.
   const ORDER = [NATURAL, NOTHING, DRUG];
   const classes = { [NOTHING]: 'nothing', [NATURAL]: 'natural', [DRUG]: 'drug' };
-  const icons = {
-    [NATURAL]: '<circle class="action-icon-natural" cx="0" cy="1" r="9" /><path class="action-icon-stem" d="M 0 -7 L 3 -12" />',
-    [NOTHING]: '<circle class="action-icon-nothing" cx="0" cy="0" r="9" />',
-    [DRUG]: '<g transform="rotate(-36)"><rect class="action-icon-capsule" x="-12" y="-5" width="24" height="10" rx="5" /><path class="action-icon-drug" d="M 0 -5 H 7 A 5 5 0 0 1 7 5 H 0 Z" /></g>',
-  };
   const signed = (v) => `${v >= 0 ? '+' : '−'}${fmt(Math.abs(v), 2)}`;
 
   // The agent's face as the Environment panel draws it (environmentView.js
@@ -112,18 +108,17 @@ function rewardExplorer() {
       return `rgb(${[0, 1, 2].map((i) => Math.round(channel(a, i) + (channel(b, i) - channel(a, i)) * t)).join(', ')})`;
     };
     const fill = mood < 0 ? mix(css('--face-neutral'), css('--face-sad'), -mood) : mix(css('--face-neutral'), css('--face-happy'), mood);
-    const worry = Math.max(0, -mood) * 2.5;
-    const arch = Math.max(0, mood) * 1.5;
-    const brows = [-1, 1].map((side) => {
-      const outer = side * 7.5;
-      const inner = side * 2;
-      return `M ${outer} ${-7 + worry} Q ${(outer + inner) / 2} ${-8.5 - arch} ${inner} ${-8 - worry}`;
-    }).join(' ');
-    const mouthY = 5 - Math.max(0, -mood) * 2;
+    // The same face as environmentView.js drawFace.
+    const r = 13;
+    const k = r / FACE_UNIT;
+    const { half, y, control, brows } = faceShape(mood);
+    const eyes = [-1, 1].map((side) => `M ${side * 12 * k} ${-6 * k} V ${-2 * k}`).join(' ');
+    const mouth = `M ${-half * k} ${y * k} Q 0 ${control * k} ${half * k} ${y * k}`;
+    const browPath = `M ${-19 * k} ${-12 * k} L ${-7 * k} ${-15 * k} M ${7 * k} ${-15 * k} L ${19 * k} ${-12 * k}`;
     return `<svg class="agent-face" viewBox="-15 -15 30 30" role="img" aria-label="The agent">
-      <circle r="13" fill="${fill}" />
-      <path d="${brows} M -6 ${mouthY} Q 0 ${mouthY + 7 * mood} 6 ${mouthY}" />
-      <circle class="face-eye" cx="-4.5" cy="-2.5" r="1.7" /><circle class="face-eye" cx="4.5" cy="-2.5" r="1.7" />
+      <circle r="${r}" fill="${fill}" />
+      <path d="${eyes} ${mouth}" />
+      ${brows > 0 ? `<path d="${browPath}" opacity="${brows}" />` : ''}
     </svg>`;
   }
 
@@ -174,7 +169,7 @@ function rewardExplorer() {
         ? `H change ${signed(driveReduction)} · pleasure − harm ${signed(drugTerm)}`
         : '';
       return `<div class="option-box ${classes[action]}${isBest ? ' best' : ''}">
-        <div class="option-name"><svg class="action-icon" viewBox="-13 -13 26 26" aria-hidden="true">${icons[action]}</svg>${ACTIONS[action].name}</div>
+        <div class="option-name">${actionIconSvg(action)}${ACTIONS[action].name}</div>
         <div class="option-move">H ${H} → ${fmt(nextH)}</div>
         <div class="option-track" aria-hidden="true"><span class="option-bar ${classes[action]}" style="left:${left}%;width:${width}%"></span></div>
         <div class="option-reward">Reward <strong>${signed(reward)}</strong></div>

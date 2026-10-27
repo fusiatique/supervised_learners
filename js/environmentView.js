@@ -1,4 +1,4 @@
-import { ACTIONS, NOTHING, NATURAL, naturalCeiling } from './model.js';
+import { ACTIONS, NOTHING, NATURAL, DRUG, naturalCeiling } from './model.js';
 import { cssVar, prepareCanvas, CANVAS_FONT } from './theme.js';
 
 // The environment panel: three stations the agent walks between, one per
@@ -25,42 +25,75 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.roundRect(x, y, w, h, r);
 }
 
-// A small picture for each action: an empty ring, an apple, a capsule.
+// The bio videos' apple and capsule (animation/bio/remotion/src/
+// risk-components.tsx RewardSymbol and CapsuleSymbol), in their own units: both
+// fit a 160 by 160 box around 0, 0. Doing nothing is a dashed ring.
+const APPLE = {
+  body: 'M0 -30C-31 -57 -67 -26 -56 11C-46 48 -23 62 0 47C23 62 46 48 56 11C67 -26 31 -57 0 -30Z',
+  stem: 'M0 -29Q-7 -50 7 -65',
+  leaf: 'M6 -52Q21 -77 43 -65Q35 -43 6 -52Z',
+  shine: 'M-40 -9Q-46 4 -37 17',
+};
+const CAPSULE = {
+  left: 'M0 -31H-43A31 31 0 0 0 -43 31H0Z',
+  right: 'M0 -31H43A31 31 0 0 1 43 31H0Z',
+  outline: 'M-43 -31H43A31 31 0 0 1 43 31H-43A31 31 0 0 1 -43 -31Z M0 -31V31',
+};
+
+// The same icons as SVG markup, for the tutorial; style.css colours them.
+export function actionIconSvg(action) {
+  const inner = action === NATURAL
+    ? `<g transform="translate(0 7)"><path class="icon-apple" d="${APPLE.body}" /><path class="icon-line" d="${APPLE.stem}" /><path class="icon-leaf" d="${APPLE.leaf}" /><path class="icon-shine" d="${APPLE.shine}" /></g>`
+    : action === DRUG
+      ? `<g transform="rotate(-25)"><path class="icon-pill-red" d="${CAPSULE.left}" /><path class="icon-pill-white" d="${CAPSULE.right}" /><path class="icon-line" d="${CAPSULE.outline}" /></g>`
+      : '<circle class="icon-nothing" r="58" />';
+  return `<svg class="action-icon" viewBox="-80 -80 160 160" aria-hidden="true">${inner}</svg>`;
+}
+
+// Draws an action's icon centred on (x, y), about 22 pixels across. Outlines are
+// in the text colour, so they are white in the dark theme, as in the videos.
 function drawIcon(ctx, action, x, y) {
-  const color = cssVar(ACTION_COLORS[action]);
-  ctx.lineWidth = 2;
+  const size = 22 / 160;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(size, size);
+  ctx.lineWidth = 1.1 / size;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  const ink = cssVar('--text-primary');
   if (action === NOTHING) {
     ctx.strokeStyle = cssVar('--text-muted');
-    ctx.setLineDash([3, 3]);
+    ctx.setLineDash([3 / size, 3 / size]);
     ctx.beginPath();
-    ctx.arc(x, y, 9, 0, 2 * Math.PI);
+    ctx.arc(0, 0, 58, 0, 2 * Math.PI);
     ctx.stroke();
     ctx.setLineDash([]);
   } else if (action === NATURAL) {
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.arc(x, y + 1, 9, 0, 2 * Math.PI);
-    ctx.fill();
-    ctx.strokeStyle = cssVar('--text-secondary');
-    ctx.beginPath();
-    ctx.moveTo(x, y - 7);
-    ctx.lineTo(x + 3, y - 12);
-    ctx.stroke();
+    const green = cssVar('--act-natural');
+    ctx.translate(0, 7);
+    const body = new Path2D(APPLE.body);
+    ctx.fillStyle = green;
+    ctx.globalAlpha = 0.25;
+    ctx.fill(body);
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = ink;
+    ctx.stroke(body);
+    ctx.stroke(new Path2D(APPLE.stem));
+    ctx.strokeStyle = green;
+    ctx.stroke(new Path2D(APPLE.leaf));
+    ctx.globalAlpha = 0.6;
+    ctx.stroke(new Path2D(APPLE.shine));
+    ctx.globalAlpha = 1;
   } else {
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.rotate(-Math.PI / 5);
-    roundRect(ctx, -12, -5, 24, 10, 5);
-    ctx.fillStyle = cssVar('--surface');
-    ctx.fill();
-    ctx.strokeStyle = color;
-    ctx.stroke();
-    roundRect(ctx, 0, -5, 12, 10, [0, 5, 5, 0]);
-    ctx.fillStyle = color;
-    ctx.fill();
-    ctx.restore();
+    ctx.rotate((-25 * Math.PI) / 180);
+    ctx.fillStyle = cssVar('--act-drug');
+    ctx.fill(new Path2D(CAPSULE.left));
+    ctx.fillStyle = '#ffffff';
+    ctx.fill(new Path2D(CAPSULE.right));
+    ctx.strokeStyle = ink;
+    ctx.stroke(new Path2D(CAPSULE.outline));
   }
-  ctx.lineWidth = 1;
+  ctx.restore();
 }
 
 function drawStations(ctx, life, view, shares, { cardW, centers }, advanced) {
@@ -141,43 +174,53 @@ const faceColor = (mood) => mood < 0
   ? mix(cssVar('--face-neutral'), cssVar('--face-sad'), -mood)
   : mix(cssVar('--face-neutral'), cssVar('--face-happy'), mood);
 
-// The agent as a face whose mouth curves from a smile (mood 1) to a frown (-1),
-// with brows that arch when content and pull up in the middle when distressed.
+// The bio videos' character's face (animation/bio/remotion/src/components.tsx
+// HumanCharacter), in units of its head radius of 37: short upright eyes, a
+// mouth (half width, height, curve control) that blends from 'satisfied'
+// (mood 1) through 'neutral' (0) to 'disappointed' (-1), and the disappointed
+// brows, faded in as the mood falls.
+const FACE_UNIT = 37;
+const MOUTHS = { satisfied: [13, 11, 26], neutral: [10, 13, 20], disappointed: [10, 18, 10] };
+function faceShape(mood) {
+  const [a, b, t] = mood >= 0 ? [MOUTHS.neutral, MOUTHS.satisfied, mood] : [MOUTHS.neutral, MOUTHS.disappointed, -mood];
+  const [half, y, control] = a.map((v, i) => v + (b[i] - v) * t);
+  return { half, y, control, brows: Math.max(0, -mood) };
+}
+
+// Draws the face at (x, y) with a head radius of 13, in the page's colours.
 function drawFace(ctx, x, y, mood) {
+  const r = 13;
+  const k = r / FACE_UNIT;
   const ink = cssVar('--agent-ink');
   ctx.fillStyle = faceColor(mood);
   ctx.strokeStyle = ink;
   ctx.lineWidth = 1.5;
   ctx.beginPath();
-  ctx.arc(x, y, 13, 0, 2 * Math.PI);
+  ctx.arc(x, y, r, 0, 2 * Math.PI);
   ctx.fill();
   ctx.stroke();
 
-  const worry = Math.max(0, -mood) * 2.5;
-  const arch = Math.max(0, mood) * 1.5;
+  const { half, y: mouthY, control, brows } = faceShape(mood);
   ctx.lineCap = 'round';
-  for (const side of [-1, 1]) {
-    const outer = x + side * 7.5;
-    const inner = x + side * 2;
-    ctx.beginPath();
-    ctx.moveTo(outer, y - 7 + worry);
-    ctx.quadraticCurveTo((outer + inner) / 2, y - 8.5 - arch, inner, y - 8 - worry);
-    ctx.stroke();
-  }
-
-  ctx.fillStyle = ink;
-  for (const dx of [-4.5, 4.5]) {
-    ctx.beginPath();
-    ctx.arc(x + dx, y - 2.5, 1.7, 0, 2 * Math.PI);
-    ctx.fill();
-  }
-  // A frown sits a little higher so it stays inside the face.
-  const mouthY = y + 5 - Math.max(0, -mood) * 2;
-  ctx.lineWidth = 1.8;
+  ctx.lineWidth = 1.6;
   ctx.beginPath();
-  ctx.moveTo(x - 6, mouthY);
-  ctx.quadraticCurveTo(x, mouthY + 7 * mood, x + 6, mouthY);
+  for (const side of [-1, 1]) {
+    ctx.moveTo(x + side * 12 * k, y - 6 * k);
+    ctx.lineTo(x + side * 12 * k, y - 2 * k);
+  }
+  ctx.moveTo(x - half * k, y + mouthY * k);
+  ctx.quadraticCurveTo(x, y + control * k, x + half * k, y + mouthY * k);
   ctx.stroke();
+  if (brows > 0) {
+    ctx.globalAlpha = brows;
+    ctx.beginPath();
+    ctx.moveTo(x - 19 * k, y - 12 * k);
+    ctx.lineTo(x - 7 * k, y - 15 * k);
+    ctx.moveTo(x + 7 * k, y - 15 * k);
+    ctx.lineTo(x + 19 * k, y - 12 * k);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
   ctx.lineCap = 'butt';
   ctx.lineWidth = 1;
 }
@@ -284,3 +327,5 @@ export function drawEnvironment(canvas, life, view, shares, now, advanced = fals
   drawMeter(ctx, life, width, height - 52);
   return moving;
 }
+
+export { faceShape, FACE_UNIT };
