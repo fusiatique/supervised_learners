@@ -36,7 +36,7 @@ from manim import (
 
 from common import (
     DOPAMINE, HARM, HOMEO, INK, MODEL, MUTED, WORLD_SHIFT, Agent, Gauge, PacedScene, PolicyBox, Reward, big_world,
-    glow_square, policy_arrow, value_tex, water_glass,
+    brain_light, glow_square, policy_arrow, value_tex, water_glass,
 )
 from scene09_exploration import EGREEDY_TEX, GOAL, HIDDEN, after_discovery, glow_opacity, maths08_policy
 from scene10_q_learning import takeaway_list
@@ -220,9 +220,7 @@ class Scene11InternalState(PacedScene, MovingCameraScene):
         others = VGroup(*[trios[k] for k in ("thirsty", "overfull")], *trios["satisfied"][1:])
         self.play(FadeOut(others, world), one.animate.scale(1.8).move_to(AGENT_POS), run_time=0.9)
         self.play(Transform(one.mouth, one.make_mouth("blank")), run_time=0.3)
-        brain = Circle(radius=0.36 * one.radius, stroke_width=0, fill_color=HOMEO, fill_opacity=0.35).move_to(
-            one.brain_point()).set_z_index(one.z_index + 1)
-        h_in_brain = MathTex("H", font_size=34, color=HOMEO).move_to(brain).set_z_index(one.z_index + 2)
+        brain, h_in_brain = brain_light(one)
         # "...an internal state..."
         self.play(FadeIn(brain, scale=0.5), FadeIn(h_in_brain, scale=1.6), run_time=0.7)
         gauge = Gauge(value=0.0, radius=1.5).move_to(GAUGE_POS)

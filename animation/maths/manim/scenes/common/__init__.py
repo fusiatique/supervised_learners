@@ -1,6 +1,6 @@
 """Shared building blocks for the maths scenes."""
 
-from .agent import Agent, absorb
+from .agent import Agent, absorb, brain_light
 from .grid import ACTIONS, GridWorld, Maze
 from .theme import BG, CELL, DOPAMINE, HARM, HOMEO, INK, MODEL, MUTED, WALL
 from .stage import AGENT_RATIO, CELL_3X3, GRID_SHIFT, HIGHLIGHT, PANEL_POS, RIGHT_X, GridStage, state_panel
@@ -19,4 +19,4 @@ from .value import (
 )
 from .pacing import PacedScene
 from .gauge import Gauge
-from .icons import WATER, water_glass
+from .icons import PILL, WATER, apple, capsule, moon, sun, water_glass

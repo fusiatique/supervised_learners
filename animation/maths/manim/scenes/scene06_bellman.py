@@ -1,7 +1,7 @@
 """Maths 06 — The Bellman equation.
 
 Narration: from "Now every state can have a value. But how do we calculate it? The Bellman Equation."
-to "...the rewards, and the values of those next states."
+to "This is called the Bellman expectation equation."
 Starts on Maths 05's last frame.
 """
 
@@ -163,17 +163,14 @@ class Scene06Bellman(MovingCameraScene):
         self.play(FadeIn(calc[7], scale=1.8), run_time=0.4)
         self.wait(0.3)
 
-        # "So even without a reward, this state is valuable because it leads towards one."
+        # "So value propagates backwards from the reward."  The 9 settles on its state, then back along the
+        # agent's path each state is worth 0.9 of the next; the camera pulls out.
+        self.next_section("propagate")
         nine = value_tex(9, grid, EXAMPLE)
         goal_value = value_tex(10, grid, GOAL)
         self.play(FadeTransform(calc[7].copy(), nine), FadeTransform(v_goal, goal_value),
                   FadeIn(glow_square(grid, EXAMPLE, 9), glow_square(grid, GOAL, 10)), FadeOut(r_label), run_time=0.9)
         self.add(nine, goal_value)
-        self.wait(3.9)
-
-        # "This way, the value of a reward propagates backwards through the environment."
-        # Back along the agent's path, each state is worth 0.9 of the next; the camera pulls out.
-        self.next_section("propagate")
         self.play(stage.unlight(), FadeOut(calc, calc_panel), frame.animate(run_time=2.6).set(width=config.frame_width).move_to(ORIGIN),
                   run_time=0.5)
         path_values = VGroup()
@@ -184,8 +181,8 @@ class Scene06Bellman(MovingCameraScene):
             label, glow, mark = value_tex(value, grid, s), glow_square(grid, s, value), policy_arrow(grid, s, action)
             path_values.add(label)
             policy_marks.add(mark)
-            self.play(FadeIn(glow), FadeIn(label, shift=0.15 * LEFT), FadeIn(mark), run_time=0.4)
-        self.wait(1.9)
+            self.play(FadeIn(glow), FadeIn(label, shift=0.15 * LEFT), FadeIn(mark), run_time=0.3)
+        self.wait(0.3)
 
         # "For a deterministic environment following a fixed policy, the Bellman equation is:"
         self.next_section("equation")
@@ -208,21 +205,16 @@ class Scene06Bellman(MovingCameraScene):
         self.play(bellman_eq[5].animate.set_color(MODEL), Circumscribe(bellman_eq[5], color=MODEL), run_time=0.8)
         self.wait(0.9)
 
-        # "This is called the Bellman expectation equation."
+        # "This is called the Bellman expectation equation."  As it is named, it is applied everywhere:
+        # every state gets its value, filling outward from the rewards.
         self.next_section("expectation")
         label = Text("Bellman expectation equation:", font_size=28, color=MUTED).next_to(bellman_eq, UP, buff=0.4)
-        self.play(FadeIn(label, shift=0.1 * DOWN), FadeOut(heading), run_time=0.6)
-        self.wait(2.3)
-
-        # "A state's value depends on the policy's actions, the next states, the rewards, and the values
-        # of those next states."  The equation is applied everywhere: every state gets its value.
-        self.next_section("everywhere")
         others = [s for s in range(1, 26) if s not in (EXAMPLE, GOAL) and s not in [b for b, _ in BACKWARDS]]
         others.sort(key=lambda s: -discounted_value(s, GAMMA, grid))  # fill outward from the rewards
         fills = []
         for s in others:
             v = discounted_value(s, GAMMA, grid)
             fills.append(VGroup(glow_square(grid, s, v), value_tex(v, grid, s)))
-        self.play(Indicate(bellman_eq, color=DOPAMINE, scale_factor=1.05), run_time=0.8)
-        self.play(FadeOut(policy_marks), LaggedStart(*[FadeIn(f) for f in fills], lag_ratio=0.12), run_time=4.5)
-        self.wait(1.5)
+        self.play(FadeIn(label, shift=0.1 * DOWN), FadeOut(heading), run_time=0.6)
+        self.play(FadeOut(policy_marks), LaggedStart(*[FadeIn(f) for f in fills], lag_ratio=0.12), run_time=2.4)
+        self.wait(0.6)

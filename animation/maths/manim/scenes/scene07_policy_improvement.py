@@ -1,6 +1,6 @@
 """Maths 07 — The action-value function and policy improvement.
 
-Narration: from "Now we can evaluate how good a state is under a policy."
+Narration: from "Now let's use these values to choose better actions."
 to "...This is precisely why the state-value function matters."
 Starts on Maths 06's last frame.
 """
@@ -28,17 +28,13 @@ from manim import (
 )
 
 from common import (
-    ACTIONS, BG, CELL, COL_X, DOPAMINE, GREEDY_TEX, HIGHLIGHT, INK, MODEL, MUTED, REWARDS_5X5, START, WORLD_SHIFT,
+    ACTIONS, BG, COL_X, DOPAMINE, GREEDY_TEX, INK, MODEL, MUTED, REWARDS_5X5, WORLD_SHIFT,
     PolicyBox, bellman_expectation, big_world, discounted_value, glow_square, policy_arrow, value_tex,
 )
 
 GAMMA = 0.9
 EXAMPLE = 8  # the state before the 10, where the agent ends Maths 06
 ARGMAX_TEX = r"\pi(s) = \arg\max_a Q^\pi(s, a)"
-# The current (reward-greedy) policy, followed for a few steps: from s8 the 10 is next door;
-# after the reset it wanders (every neighbour is 0) until the 5 is next door.
-GREEDY_RUN_1 = ["right"]  # s8 -> s9 (10)
-GREEDY_RUN_2 = ["up", "right", "right"]  # s21 -> s16 -> s17 -> s18 (5)
 TIE_ORDER = ["up", "right", "left", "down"]  # how ties are broken when choosing the arg max
 
 
@@ -65,13 +61,6 @@ def action_pills(grid, s, texts):
 
 
 class Scene07PolicyImprovement(Scene):
-    def walk(self, stage, actions, stars):
-        for action in actions:
-            lands = stage.grid.step(stage.state, action) in REWARDS_5X5
-            self.play(stage.light(action, color=DOPAMINE if lands else MODEL), run_time=0.15)
-            self.play(stage.move(action, run_time=0.35))
-        self.play(stage.unlight(), stars[stage.state].collect(), run_time=0.5)
-
     def construct(self):
         # Maths 06's last frame.
         stage, r_values, stars, start_tag = big_world(s=EXAMPLE)
@@ -89,23 +78,11 @@ class Scene07PolicyImprovement(Scene):
             """Q(s, a) = r(s, a, s') + gamma V(s'): no reward for leaving an ordinary state."""
             return GAMMA * V[grid.step(s, a)]
 
-        # "Now we can evaluate how good a state is under a policy."
-        self.next_section("evaluate")
+        # "Now let's use these values to choose better actions."  The values, then the policy that will use them.
+        self.next_section("use the values")
         self.play(Indicate(bellman_eq, color=MODEL, scale_factor=1.05), run_time=0.9)
-        self.wait(3.1)
-
-        # "But remember, our ultimate goal is to make our agent behave intelligently. So we need to
-        # utilise these values."  The current policy flashes; the agent follows it, ignoring the values.
-        self.next_section("current policy")
         self.play(Indicate(box, color=MODEL, scale_factor=1.06), run_time=0.8)
-        self.walk(stage, GREEDY_RUN_1, stars)
-        body = VGroup(stage.agent, arrows)
-        self.play(FadeOut(body, scale=0.6), grid[stage.state].animate.set_fill(CELL), run_time=0.35)
-        body.shift(grid.center_of(START) - stage.agent.get_center())
-        stage.state = START
-        self.play(FadeIn(body, scale=0.6), grid[START].animate.set_fill(HIGHLIGHT), run_time=0.35)
-        self.walk(stage, GREEDY_RUN_2, stars)
-        self.wait(1.5)
+        self.wait(1.4)
 
         # "Suppose we've calculated the value of every state in the maze."
         self.next_section("suppose")
@@ -147,7 +124,7 @@ class Scene07PolicyImprovement(Scene):
         self.wait(0.6)
 
         # "This is the action-value function. It tells us how good a particular action is in a particular
-        # state, assuming we follow our current policy. It works like the state-value function, but for an action."
+        # state, assuming we follow our current policy."
         self.next_section("action-value")
         q_title = Text("action-value function", font_size=28, color=MODEL).next_to(q_eq, UP, buff=0.3)
         self.play(FadeIn(q_title, shift=0.1 * DOWN), run_time=0.6)
@@ -159,9 +136,6 @@ class Scene07PolicyImprovement(Scene):
         self.wait(0.8)
         self.play(*[FadeTransform(rewards_r[a], q_labels[a]) for a in ACTIONS], run_time=0.9)
         self.wait(4.6)
-        # "It works like the state-value function, but for an action."
-        self.play(Indicate(bellman_eq, color=MODEL, scale_factor=1.08), Indicate(q_eq[0], color=MODEL), run_time=1)
-        self.wait(3.3)
 
         # "In this example, right has the highest value. So we update our policy to choose right whenever
         # the agent finds itself in this state."

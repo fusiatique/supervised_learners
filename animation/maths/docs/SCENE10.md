@@ -2,7 +2,7 @@
 
 Open `animation/index.html` in Live Server. Maths 10 follows Maths 09 in chapter 3; its direct link is `#maths-q-learning`. `animation/maths/html/scene10.html` also provides standalone playback.
 
-40 seconds · 1920 × 1080 · 60 FPS · silent (narration is read over it).
+27 seconds · 1920 × 1080 · 60 FPS · silent (narration is read over it).
 
 From `animation/maths/manim`:
 
@@ -21,8 +21,7 @@ Start reading at 0:00, and start each line at its time: the animations are unhur
 | 0:06 | "Each time it acts, it nudges its estimate towards what actually happened…" | The agent steps down into the grey: the cell clears and it finds the 20 (r = 20). A number line from 0 to 20 marks its estimate (0, violet) and what actually happened (20, amber); the estimate is nudged halfway, to 10 (α = 0.5), and that action's pill becomes Q = 10. |
 | 0:11 | "…the reward plus the discounted value of where it landed." | Another try, from s14 (which clears): the agent steps down to s19. No reward, but where it landed is now worth up to 10 ("max Q = 10"), so what actually happened is 0 + 0.9 × 10 = 9; the target moves to 9, and the estimate is nudged halfway, to 4.5. |
 | 0:17 | "This is called Q-learning, and it's what our simulation uses." | The number line makes way for Q(s,a) ← Q(s,a) + α[r + γ max Q(s′,a′) − Q(s,a)] under the title "Q-learning": the old Q(s,a) is braced "estimate", the bracket "what actually happened", and α is "how big a nudge". "used in our simulation" appears under the title. |
-| 0:20.5 | "For the rest of this explanation, we'll focus on how the agent evaluates rewards. But keep in mind that exploration can be an important part of learning." | The labels go and the equation moves up. On "how the agent evaluates rewards" (0:23) the 20 and the target in the equation pulse. On "exploration" (0:26.5) the ε-greedy policy box and every still-grey cell pulse their outlines. |
-| 0:29 | "Of course, this is a simplified model. But we've established something important. An agent can learn to choose actions based on expected rewards, evaluate possible futures, and keep improving." | The Q pills and the equation clear. With enough experience the grey lifts (0:32) on everything the agent has learned: values, glow and arrows (now including s25, worth 0.9 × 20 = 18). Three ticks appear as they are said: "choose actions based on expected rewards" (the agent steps onto the 20 and smiles), "evaluate possible futures", "keep improving". |
+| 0:20.5 | "So our agent can now learn from experience, evaluate possible futures, and keep improving." | The Q pills and the equation clear and, with enough experience, the grey lifts on everything the agent has learned: values, glow and arrows (now including s25, worth 0.9 × 20 = 18). Three ticks appear as they are said: "learn from experience" (the agent steps onto the 20 and smiles), "evaluate possible futures", "keep improving". |
 
 Each gap is a `self.wait(...)` under a comment quoting its narration line in `scene10_q_learning.py`.
 

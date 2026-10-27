@@ -2,7 +2,7 @@
 
 Open `animation/index.html` in Live Server. Maths 07 follows Maths 06 in chapter 3; its direct link is `#maths-policy-improvement`. `animation/maths/html/scene07.html` also provides standalone playback.
 
-73 seconds · 1920 × 1080 · 60 FPS · silent (narration is read over it).
+61 seconds · 1920 × 1080 · 60 FPS · silent (narration is read over it).
 
 From `animation/maths/manim`:
 
@@ -17,19 +17,18 @@ Start reading at 0:00. Timings assume about 165 words per minute.
 
 | Time | Say | On screen |
 | --- | --- | --- |
-| 0:00 | "Now we can evaluate how good a state is under a policy." | Opens on Maths 06's last frame; the Bellman expectation equation pulses. |
-| 0:04 | "But remember, our ultimate goal is to make our agent behave intelligently. So we need to utilise these values." | The current policy box flashes, and the agent follows that policy, ignoring the values: it steps onto the 10, resets to the start, wanders (every neighbour is 0) and stumbles onto the 5. |
-| 0:10.5 | "Suppose we've calculated the value of every state in the maze." | The agent glides back to s8 as every state's value pulses in a wave. |
-| 0:14 | "For every action, we ask two questions." | The Bellman equation shrinks to the top. |
-| 0:16.5 | "First, what immediate reward does it give?" | "1. What immediate reward does it give?" appears; each action gets an "r = 0" pill in the cell it leads to. |
-| 0:19 | "Second, how valuable is the state it takes us to?" | "2. How valuable is the state it takes us to?" appears; the values of the four neighbouring states are circled in turn. |
-| 0:22 | "For our deterministic environment, combining these gives us:" | Q^π(s, a) = r(s, a, s′) + γV^π(s′) writes in. |
-| 0:25 | "This is the action-value function. It tells us how good a particular action is in a particular state, assuming we follow our current policy. It works like the state-value function, but for an action." | "action-value function" appears over it. On "how good a particular action is" (0:28) each "r = 0" becomes that action's Q: up 7.3, down 7.3, left 7.3, right 9. On "works like the state-value function" (0:34) V^π and Q^π pulse together. |
-| 0:38 | "In this example, right has the highest value. So we update our policy to choose right whenever the agent finds itself in this state." | Right and its Q = 9 light amber (0:39); on "update our policy" (0:42.5) s8 is circled. |
-| 0:47 | "More generally: π_new(s) = arg max_a Q^π(s, a)." | The arg max rule writes in. |
-| 0:49.5 | "Arg max simply means: choose the action with the highest value." | "arg max" pulses and "choose the action with the highest Q" appears under it; then (0:52.5) the policy box swaps to π(s) = arg max_a Q^π(s, a). |
-| 0:54.5 | "Doing this for every state gives a new policy that is at least as good as the old one. This process is called policy improvement." | Every other state gets a grey arrow, the old (random) policy (0:55); then, starting next to the rewards, each one swings to its arg max, turning violet (0:56.5–0:59.5). On "policy improvement" (0:60.5) the label appears. |
-| 1:02.5 | "Notice that the agent can now choose an action with no immediate reward if it leads to a more valuable state. This is precisely why the state-value function matters." | s7 is circled and its arrow pulses, with an "r = 0" pill: no reward for the step (1:04), but it leads to s8, whose 9 is circled (1:06). On "why the state-value function matters" (1:09.5) the Bellman equation and every value pulse. |
+| 0:00 | "Now let's use these values to choose better actions." | Opens on Maths 06's last frame; the Bellman expectation equation pulses, then the current policy box. |
+| 0:03 | "Suppose we've calculated the value of every state in the maze." | The agent glides back to s8 as every state's value pulses in a wave. |
+| 0:06.5 | "For every action, we ask two questions." | The Bellman equation shrinks to the top. |
+| 0:09 | "First, what immediate reward does it give?" | "1. What immediate reward does it give?" appears; each action gets an "r = 0" pill in the cell it leads to. |
+| 0:11.5 | "Second, how valuable is the state it takes us to?" | "2. How valuable is the state it takes us to?" appears; the values of the four neighbouring states are circled in turn. |
+| 0:14.5 | "For our deterministic environment, combining these gives us:" | Q^π(s, a) = r(s, a, s′) + γV^π(s′) writes in. |
+| 0:17.5 | "This is the action-value function. It tells us how good a particular action is in a particular state, assuming we follow our current policy." | "action-value function" appears over it. On "how good a particular action is" (0:20.5) each "r = 0" becomes that action's Q: up 7.3, down 7.3, left 7.3, right 9. |
+| 0:26.5 | "In this example, right has the highest value. So we update our policy to choose right whenever the agent finds itself in this state." | Right and its Q = 9 light amber (0:27.5); on "update our policy" (0:31) s8 is circled. |
+| 0:35.5 | "More generally: π_new(s) = arg max_a Q^π(s, a)." | The arg max rule writes in. |
+| 0:38 | "Arg max simply means: choose the action with the highest value." | "arg max" pulses and "choose the action with the highest Q" appears under it; then (0:41) the policy box swaps to π(s) = arg max_a Q^π(s, a). |
+| 0:43 | "Doing this for every state gives a new policy that is at least as good as the old one. This process is called policy improvement." | Every other state gets a grey arrow, the old (random) policy (0:43.5); then, starting next to the rewards, each one swings to its arg max, turning violet (0:45–0:48). On "policy improvement" (0:49) the label appears. |
+| 0:51 | "Notice that the agent can now choose an action with no immediate reward if it leads to a more valuable state. This is precisely why the state-value function matters." | s7 is circled and its arrow pulses, with an "r = 0" pill: no reward for the step (0:52.5), but it leads to s8, whose 9 is circled (0:54.5). On "why the state-value function matters" (0:58) the Bellman equation and every value pulse. |
 
 Each gap is a `self.wait(...)` under a comment quoting its narration line in `scene07_policy_improvement.py`.
 

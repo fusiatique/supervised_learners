@@ -2,7 +2,7 @@
 
 Open `animation/index.html` in Live Server. Maths 09 follows Maths 08 in chapter 3; its direct link is `#maths-exploration`. `animation/maths/html/scene09.html` also provides standalone playback.
 
-52 seconds · 1920 × 1080 · 60 FPS · silent (narration is read over it).
+50 seconds · 1920 × 1080 · 60 FPS · silent (narration is read over it).
 
 From `animation/maths/manim`:
 
@@ -23,12 +23,12 @@ Start reading at 0:00. Timings assume about 165 words per minute; the animations
 | 0:02 | "Once the agent finds a rewarding path, should it always follow it? Or should it sometimes try something new, in case there's a better reward elsewhere?" | The agent steps down to s14, a junction, and its arrows appear. On "always follow it?" (0:04.5) the up arrow lights amber towards the known 10. On "try something new" (0:07.5) fog rolls over the bottom-right corner (unexplored, a "?" in each cell) and the down arrow into it lights violet. |
 | 0:11.5 | "This is the exploration-exploitation dilemma." | "Exploitation" (amber) and "Exploration" (violet) slide in from opposite sides of the right column. |
 | 0:13 | "Exploration means trying actions to discover new outcomes. Exploitation means using what the agent already knows to get the best known reward." | Exploration's definition appears with a violet ghost path down into the fog, ending at a dashed "?" star (0:14); exploitation's with an amber ghost path up to the 10 (0:18). |
-| 0:21.5 | "A smart agent needs both. If it only explores, it never uses what it learns. If it only exploits, it might never find something better." | Both words pulse; "only exploring: never uses what it learns" (0:23.5); "only exploiting: might never find something better" (0:26.5). |
-| 0:30 | "So how do we balance the two?" | The two words sit on a seesaw that tips one way, then the other, then levels. |
-| 0:33.5 | "One common approach is epsilon-greedy exploration." | "ε-greedy" and π(a ∣ s) = random action with probability ε, best-known action with probability 1 − ε. |
-| 0:37 | "Epsilon controls how often the agent explores." | An ε slider and a bar split into "explore" (violet, ε) and "exploit" (amber, 1 − ε) appear; the policy box becomes π = ε-greedy on Q^π. |
-| 0:38.5 | "At zero, it always exploits. At one, it always explores. In between, it usually picks its best-known action but sometimes tries something else." | ε slides to 0 (all exploit), then to 1 (all explore) at 0:40, then to 0.1 on "In between" (0:42.5). On "usually picks its best-known action" (0:44) the amber part of the bar pulses and the agent takes the known path to the 10, then resets to the junction. On "sometimes tries something else" (0:46) the violet part pulses, "random!", and the agent steps into the fog: the cells next to it clear, revealing a 20. |
-| 0:48.5 | "That best-known action can change as it learns." | Every value is recalculated with the 20 and the glow is rescaled; the arrows that now have a better action swing (s14's flips from up to down); the new route from the junction draws in, down to the 20. |
+| 0:21 | "If it only explores, it never uses what it learns; if it only exploits, it might never find something better." | "only exploring: never uses what it learns" (0:21.5); "only exploiting: might never find something better" (0:24.5). |
+| 0:27.5 | "So how do we balance the two?" | The two words sit on a seesaw that tips one way, then the other, then levels. |
+| 0:31 | "One common approach is epsilon-greedy exploration." | "ε-greedy" and π(a ∣ s) = random action with probability ε, best-known action with probability 1 − ε. |
+| 0:34.5 | "Epsilon controls how often the agent explores." | An ε slider and a bar split into "explore" (violet, ε) and "exploit" (amber, 1 − ε) appear; the policy box becomes π = ε-greedy on Q^π. |
+| 0:36 | "At zero, it always exploits. At one, it always explores. In between, it usually picks its best-known action but sometimes tries something else." | ε slides to 0 (all exploit), then to 1 (all explore) at 0:37.5, then to 0.1 on "In between" (0:40). On "usually picks its best-known action" (0:41.5) the amber part of the bar pulses and the agent takes the known path to the 10, then resets to the junction. On "sometimes tries something else" (0:43.5) the violet part pulses, "random!", and the agent steps into the fog: the cells next to it clear, revealing a 20. |
+| 0:46 | "That best-known action can change as it learns." | Every value is recalculated with the 20 and the glow is rescaled; the arrows that now have a better action swing (s14's flips from up to down); the new route from the junction draws in, down to the 20. |
 
 Each gap is a `self.wait(...)` under a comment quoting its narration line in `scene09_exploration.py`.
 

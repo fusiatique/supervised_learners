@@ -44,6 +44,9 @@ for (const [sceneId, playerId, prefix] of [
   ['maths-q-learning', 'maths10Player', 'maths10'],
   ['maths-internal-state', 'maths11Player', 'maths11'],
   ['maths-setpoint', 'maths12Player', 'maths12'],
+  ['maths-homeostatic-reward', 'maths13Player', 'maths13'],
+  ['maths-drugs', 'maths14Player', 'maths14'],
+  ['maths-harm', 'maths15Player', 'maths15'],
 ]) {
   const send = (action) => document.getElementById(playerId)?.contentWindow?.postMessage({type: `${prefix}:${action}`}, location.origin);
   sceneHooks[sceneId] = {enter() { send('play'); }, leave() { send('pause'); }};

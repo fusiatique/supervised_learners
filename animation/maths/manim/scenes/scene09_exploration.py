@@ -239,11 +239,9 @@ class Scene09Exploration(PacedScene, MovingCameraScene):
                   Indicate(stars[GOAL], color=DOPAMINE), run_time=0.9)
         self.wait(2.4)
 
-        # "A smart agent needs both. If it only explores, it never uses what it learns. If it only
-        # exploits, it might never find something better."
+        # "If it only explores, it never uses what it learns; if it only exploits, it might never find
+        # something better."
         self.next_section("needs both")
-        self.play(Indicate(exploit, color=DOPAMINE), Indicate(explore, color=MODEL), run_time=0.8)
-        self.wait(1.4)
         only_explore = Text("only exploring:\nnever uses what it learns", font_size=18, color=MODEL,
                             line_spacing=0.8).next_to(explore_def, DOWN, buff=0.45)
         only_exploit = Text("only exploiting: might\nnever find something better", font_size=18, color=DOPAMINE,

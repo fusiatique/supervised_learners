@@ -78,20 +78,17 @@ class Scene05StateValue(Scene):
         self.play(LaggedStart(*[FadeIn(z, scale=1.3) for z in zeros.values()], lag_ratio=0.1), FadeOut(gap), run_time=0.8)
         self.wait(1.9)
 
-        # "Remember when I introduced the 'reward function' earlier?"
+        # "We can give non-reward states a value too, using the state-value function."
         self.next_section("state-value function")
-        self.play(Indicate(block, color=DOPAMINE, scale_factor=1.1), run_time=1)
-        self.wait(2.3)
-        # "What we can do is we can give a 'value' to the non-reward states too."
         self.play(FadeOut(zero_group), run_time=0.4)
         stage.riders.remove(zero_group)
-        self.wait(4.7)
-        # "And this is done through the state-value function."
+        self.wait(0.9)
+        # "...using the state-value function."
         title = sv_title(colored=False)
         self.play(FadeOut(block, shift=0.2 * UP), FadeIn(title, shift=0.2 * UP), run_time=0.7)
         self.play(title[:5].animate.set_color(MODEL), run_time=0.4)  # "state"
         self.play(title[6:11].animate.set_color(DOPAMINE), run_time=0.4)  # "value"
-        self.wait(1.8)
+        self.wait(1.6)
 
         # "Intuitively, we know that some states are better than others, even without a reward on them."
         # The squares on the way to the 10 glow, from the reward back towards the agent.

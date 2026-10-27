@@ -2,7 +2,7 @@
 
 Open `animation/index.html` in Live Server. Maths 08 follows Maths 07 in chapter 3; its direct link is `#maths-policy-iteration`. `animation/maths/html/scene08.html` also provides standalone playback.
 
-53 seconds · 1920 × 1080 · 60 FPS · silent (narration is read over it).
+47 seconds · 1920 × 1080 · 60 FPS · silent (narration is read over it).
 
 From `animation/maths/manim`:
 
@@ -28,8 +28,8 @@ Start reading at 0:00. Timings assume about 165 words per minute. The iterations
 | 0:25.2 | "This is policy iteration." | "policy iteration" titles the loop. |
 | 0:27.3 | "We then repeat this until we reach an optimal policy." | The four history rows pulse in turn. On "an optimal policy" (0:29.4) every arrow turns violet, the last row is circled and "optimal policy" appears. |
 | 0:31.6 | "Mathematically, an optimal policy satisfies:" | The history clears; π*(s) = arg max_a [r(s, a, s′) + γV*(s′)] writes in. |
-| 0:34.4 | "This is the Bellman optimality equation expressed as a policy choice. It tells us to pick the action that maximises immediate reward plus discounted future value." | "Bellman optimality equation:" appears above it. "arg max" pulses on "maximises" (0:41.3), r(s, a, s′) is circled on "immediate reward" (0:41.8), and γV*(s′) on "discounted future value" (0:42.8). |
-| 0:44.8 | "And just like that, we have gone from a random agent to one that systematically improves its behaviour." | The trail clears; the agent reappears at the start, takes the optimal route to the 10, and smiles. From 0:48.4 the camera pushes in on it while the equations and the loop shrink into its brain, leaving the final policy around it. |
+| 0:34.4 | "This is the Bellman optimality equation expressed as a policy choice." | "Bellman optimality equation:" appears above it. |
+| 0:39 | "And just like that, we have gone from a random agent to one that systematically improves its behaviour." | The trail clears; the agent reappears at the start, takes the optimal route to the 10, and smiles. From 0:42.5 the camera pushes in on it while the equations and the loop shrink into its brain, leaving the final policy around it. |
 
 Each beat waits for its cue with `self.at(T_...)`; the cue times are constants at the top of `scene08_policy_iteration.py`. Change them if the narrator is faster or slower. Each iteration (one lap: dot to evaluation, flash, new values, dot to improvement, arrows) takes about 2.8 seconds, so "And again." needs about 3 seconds between repeats.
 

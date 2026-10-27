@@ -2,7 +2,7 @@
 
 Open `animation/index.html` in Live Server. Maths 01 opens chapter 3 and pauses when you leave its page. Its direct link is `#maths-agent-environment`. `animation/maths/html/scene01.html` also provides standalone playback.
 
-44 seconds · 1920 × 1080 · 60 FPS · silent (narration is read over it).
+39 seconds · 1920 × 1080 · 60 FPS · silent (narration is read over it).
 
 From `animation/maths/manim`:
 
@@ -25,9 +25,8 @@ Start reading at 0:00. The pauses are kept tight: the opening line needs about 1
 | 0:23 | "Next, you need an environment." | A large square draws around the agent as it shrinks into the centre; labelled "environment". |
 | 0:25.5 | "This can be anything the agent interacts with, for example, a maze." | The maze walls draw in inside the square (0:25.5–0:28); faint grid lines then mark the positions. |
 | 0:29.5 | "For our case, we'll use a simple environment with just a few distinct states." | The walls fade, the square closes down to one cell, and eight cells grow around it. |
-| 0:34 | "These states are, for example, positions the agent can be in." | Large, faint s1–s9 watermarks fade in, centred in each cell. |
-| 0:37.5 | "The agent position is now represented by these states." | The grid slides left and "agent state: s5" appears; the agent walks s5 → s2 → s3 → s6 → s9 → s8 → s5 (0:40–0:43), with the readout following. |
-| 0:43 | *(hold)* | Agent at s5, ready for Maths 02. |
+| 0:34 | "These states are, for example, positions the agent can be in." | Large, faint s1–s9 watermarks fade in, centred in each cell. Then the grid slides left, "agent state: s5" appears and s5 lights up, and the agent steps up to s2 and back (the readout follows). |
+| 0:38.5 | *(hold)* | Agent at s5, ready for Maths 02. |
 
 Each gap is a `self.wait(...)` under a comment quoting its narration line in `scene01_agent_environment.py`; change it if the narrator is faster or slower.
 

@@ -14,6 +14,7 @@ from manim import (
     Ellipse,
     Flash,
     Line,
+    MathTex,
     Rectangle,
     Succession,
     VGroup,
@@ -22,7 +23,7 @@ from manim import (
     there_and_back,
 )
 
-from .theme import INK, MODEL
+from .theme import HOMEO, INK, MODEL
 
 EXPRESSIONS = ("blank", "happy", "sad", "open", "wavy")
 MOODS = ("tired", "thirsty", "satisfied", "overfull")
@@ -121,3 +122,11 @@ def absorb(mob, agent, run_time=1.2):
         mob.animate(rate_func=rush_into, run_time=run_time).scale(0.05).move_to(target).set_opacity(0),
         Flash(target, color=MODEL, line_length=0.25 * agent.radius, flash_radius=0.3 * agent.radius, run_time=0.5),
     )
+
+
+def brain_light(agent):
+    """The teal disc and H in the agent's brain (its internal state), sized to sit clear of the eyes."""
+    glow = Circle(radius=0.26 * agent.radius, stroke_width=0, fill_color=HOMEO, fill_opacity=0.35).move_to(
+        agent.brain_point()).set_z_index(agent.z_index + 1)
+    h = MathTex("H", font_size=27 * agent.radius / 1.08, color=HOMEO).move_to(glow).set_z_index(agent.z_index + 2)
+    return VGroup(glow, h)

@@ -1,6 +1,6 @@
 """Maths 03 — A random policy, and why it cannot learn.
 
-Narration: from "So now, we have a state s, and set of actions A, and transition functions."
+Narration: from "But how does the agent actually move?"
 to "So how can we give it a better policy?"
 Starts on Maths 02's last frame.
 """
@@ -61,37 +61,9 @@ class Scene03RandomPolicy(Scene):
         dots = stream_dots()
         self.add(stage.group, arrows, heading, rule, rows, dots)
 
-        # "So now, we have a state s, and set of actions A, and transition functions."
-        self.next_section("recap")
-        recap_labels = VGroup(*[Text(t, font_size=26, color=MUTED) for t in ("state", "actions", "transitions")])
-        state_tex = MathTex("s", font_size=56, color=MODEL)
-        actions_tex = MathTex(r"A = \{\uparrow, \downarrow, \leftarrow, \rightarrow\}", font_size=44, color=INK)
-        rule_target = general_rule().scale(0.7)
-        formulas = VGroup(state_tex, actions_tex, rule_target)
-        # Two columns, labels right-aligned against formulas left-aligned, centred as a block.
-        gap = 0.35
-        label_w, formula_w = max(l.width for l in recap_labels), max(f.width for f in formulas)
-        split = RIGHT_X - (label_w + gap + formula_w) / 2 + label_w
-        for label, formula, y in zip(recap_labels, formulas, (2.3, 1.2, 0.1)):
-            label.move_to([split, y, 0], aligned_edge=RIGHT)
-            formula.move_to([split + gap, y, 0], aligned_edge=LEFT)
-        self.play(FadeOut(rows, dots, heading, rule), run_time=0.6)
-        self.wait(0.9)
-        # "...a state s..."
-        self.play(FadeIn(recap_labels[0], state_tex, shift=0.15 * DOWN), stage.agent.animate(
-            rate_func=rate_functions.there_and_back, run_time=0.5).scale(1.12), run_time=0.5)
-        self.wait(0.6)
-        # "...and set of actions A..."
-        self.play(FadeIn(recap_labels[1], actions_tex, shift=0.15 * DOWN), run_time=0.5)
-        self.wait(0.6)
-        # "...and transition functions."
-        self.play(FadeIn(recap_labels[2], rule_target, shift=0.15 * DOWN), run_time=0.6)
-        self.wait(0.5)
-
         # "But how does the agent actually move?"
         self.next_section("how")
-        recap = VGroup(recap_labels, formulas)
-        self.play(FadeOut(recap, shift=0.3 * UP), run_time=0.6)
+        self.play(FadeOut(rows, dots, heading, rule), run_time=0.6)
         # The arrows step aside; the agent shrugs, with a question mark beside its head.
         agent = stage.agent
         hands = agent.make_hands()

@@ -64,7 +64,7 @@ def takeaway_list():
     """The three takeaways Maths 10 ends on, ticked, in the right column."""
     return VGroup(*[
         VGroup(MathTex(r"\checkmark", font_size=34, color=DOPAMINE), Text(t, font_size=24, color=INK)).arrange(RIGHT, buff=0.2)
-        for t in ("choose actions based on expected rewards", "evaluate possible futures", "keep improving")
+        for t in ("learn from experience", "evaluate possible futures", "keep improving")
     ]).arrange(DOWN, aligned_edge=LEFT, buff=0.35).move_to([COL_X, 1.4, 0])
 
 
@@ -188,26 +188,7 @@ class Scene10QLearning(PacedScene, Scene):
         self.play(FadeIn(sim_tag, shift=0.1 * DOWN), run_time=0.5)
         self.wait(1)
 
-        # "For the rest of this explanation, we'll focus on how the agent evaluates rewards. But keep in
-        # mind that exploration can be an important part of learning."
-        self.next_section("focus")
-        self.play(FadeOut(estimate_brace, estimate_note, target_brace, target_note, alpha_note, sim_tag),
-                  update.animate.scale(0.8).move_to([COL_X, 2.25, 0]), stage.unlight(), run_time=0.8)
-        self.wait(1.3)
-        # "...how the agent evaluates rewards."
-        self.play(Indicate(twenty, color=DOPAMINE, scale_factor=1.4), Indicate(update[6], color=DOPAMINE),
-                  run_time=1)
-        self.wait(2.3)
-        # "...exploration can be an important part of learning."
-        # fog holds only the cells still unexplored: lifted ones were popped as the agent entered them.
-        self.play(box.frame.animate(rate_func=there_and_back).scale(1.05).set_stroke(MODEL, width=5),
-                  LaggedStart(*[f[0].animate(rate_func=there_and_back).set_stroke(MODEL, width=4) for f in fog.values()],
-                              lag_ratio=0.02),
-                  run_time=1.2)
-        self.wait(1.6)
-
-        # "Of course, this is a simplified model. But we've established something important. An agent can
-        # learn to choose actions based on expected rewards, evaluate possible futures, and keep improving."
+        # "So our agent can now learn from experience, evaluate possible futures, and keep improving."
         # Enough experience fills in what it knows: the grey lifts on the learned values and policy,
         # the agent takes its route to the 20, and the three takeaways tick in.
         self.next_section("wrap up")
@@ -215,14 +196,13 @@ class Scene10QLearning(PacedScene, Scene):
         # s25 was never explored in Maths 09; once learned it is worth 0.9 x 20 and points to the 20.
         extra = VGroup(glow_square(grid, 25, V[25]).set_fill(opacity=glow_opacity(V[25])), value_tex(V[25], grid, 25),
                        policy_arrow(grid, 25, "left"))
-        self.play(FadeOut(*pills.values(), *second.values(), update, title), run_time=0.6)
-        self.wait(2.2)
-        self.play(LaggedStart(*[FadeOut(f, scale=1.05) for f in fog.values()], lag_ratio=0.03),
+        self.play(FadeOut(estimate_brace, estimate_note, target_brace, target_note, alpha_note, sim_tag,
+                          *pills.values(), *second.values(), update, title), stage.unlight(),
+                  LaggedStart(*[FadeOut(f, scale=1.05) for f in fog.values()], lag_ratio=0.03),
                   LaggedStart(*[FadeIn(g) for g in learned.values()], lag_ratio=0.03),
-                  FadeIn(*[a for s, a in cell_arrows.items() if s != stage.state], extra), run_time=1.6)
+                  FadeIn(*[a for s, a in cell_arrows.items() if s != stage.state], extra), run_time=1.4)
         takeaways = takeaway_list()
-        self.wait(1)
-        # "...choose actions based on expected rewards..."
+        # "...learn from experience..."
         self.play(FadeIn(takeaways[0], shift=0.15 * RIGHT), run_time=0.5)
         self.play(stage.light("down", color=DOPAMINE), run_time=0.3)
         self.play(stage.move("down", run_time=0.4))

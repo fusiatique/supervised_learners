@@ -2,7 +2,7 @@
 
 Open `animation/index.html` in Live Server. Maths 12 follows Maths 11 in the HRL chapter; its direct link is `#maths-setpoint`. `animation/maths/html/scene12.html` also provides standalone playback.
 
-67 seconds · 1920 × 1080 · 60 FPS · silent (narration is read over it).
+55 seconds · 1920 × 1080 · 60 FPS · silent (narration is read over it).
 
 From `animation/maths/manim`:
 
@@ -22,13 +22,12 @@ Start reading at 0:00, and start each line at its time (there are small gaps bet
 | 0:00 | "This brings us to an idea called homeostatic reinforcement learning." | Opens on Maths 11's last frame. The agent and its gauge slide left and the title "Homeostatic reinforcement learning" comes in. |
 | 0:03.5 | "The central idea, developed by Keramati and colleagues, is that reward learning and regulating our internal state are not separate problems." | "Keramati & Gutkin, 2014" under the title. "reward learning" (amber) and "regulating an internal state" (teal) slide in (0:06) and, on "not separate problems" (0:08.5), slide together into one box. |
 | 0:11 | "An outcome can be rewarding because it corrects an internal imbalance." | Two copies of the agent, each with a small gauge whose target is marked: one "close to its target", one "far from its target", the same glass of water in front of each. The glass's reward is a small bar for the first and a tall bar for the second. |
-| 0:15 | "HRL turns this into a principle: the value of an outcome depends on how much it reduces the agent's deviation from a desired internal state." | The principle writes in above them: "value of an outcome = how much it reduces the deviation from a desired internal state". |
-| 0:23.5 | "Let's call the agent's internal state H. Imagine it as a simplified, dopamine-like signal. This is only an analogy, because a single number can't capture dopamine's full biology." | The two copies go and the agent and gauge return. The H on the gauge and in the agent's brain pulse; the needle drifts. "≈ a dopamine-like signal" appears (0:27), then the caveat "an analogy: one number can't capture dopamine's biology" (0:29.5). |
-| 0:33.5 | "The target is the homeostatic setpoint, H*. It is the level the agent is trying to maintain." | A fixed mark at the top of the dial, "H* setpoint"; the needle wobbles around it and settles on it. |
-| 0:39.5 | "Importantly, the agent shouldn't simply maximise H. Being above the target isn't automatically better. What matters is the distance from the setpoint." | The needle runs up to full: "more H ≠ better" and a red cross at the top of the dial. Then (0:44.5) the needle drops below the setpoint and a red arc shows the distance; it swings above the setpoint, and the arc follows. |
-| 0:48 | "We call this homeostatic deviation." | "homeostatic deviation" (red) beside the arc. |
-| 0:49.5 | "For simplicity, we could measure the absolute distance from the setpoint. But for our model, we'll use a scaled squared deviation:" | ∣H* − H∣ appears ("absolute distance", 0:51.5), then becomes D(H) = (H* − H)² / H* ("scaled squared deviation", 0:54). |
-| 0:56.5 | "At the setpoint, deviation is zero. The further H moves away in either direction, the greater the deviation." | A plot of D(H) for H from 0 to 100: a U with its floor at H* = 50. A dot rides the curve with the needle: it settles at the bottom, "0", then the needle sweeps to near empty and near full and the dot climbs each side. |
+| 0:15 | "Let's call the agent's internal state H. Imagine it as a simplified, dopamine-like signal. This is only an analogy, because a single number can't capture dopamine's full biology." | The two copies go and the agent and gauge return. The H on the gauge and in the agent's brain pulse; the needle drifts. "≈ a dopamine-like signal" appears (0:18.5), then the caveat "an analogy: one number can't capture dopamine's biology" (0:21). |
+| 0:25 | "The target is the homeostatic setpoint, H*. It is the level the agent is trying to maintain." | A fixed mark at the top of the dial, "H* setpoint"; the needle wobbles around it and settles on it. |
+| 0:31 | "Importantly, the agent shouldn't simply maximise H. Being above the target isn't automatically better. What matters is the distance from the setpoint." | The needle runs up to full: "more H ≠ better" and a red cross at the top of the dial. Then (0:36) the needle drops below the setpoint and a red arc shows the distance; it swings above the setpoint, and the arc follows. |
+| 0:39.5 | "We call this homeostatic deviation." | "homeostatic deviation" (red) beside the arc. |
+| 0:41 | "In our model, we measure it as a scaled squared deviation:" | D(H) = (H* − H)² / H* writes in under "homeostatic deviation", labelled "scaled squared deviation". |
+| 0:45 | "At the setpoint, deviation is zero. The further H moves away in either direction, the greater the deviation." | A plot of D(H) for H from 0 to 100: a U with its floor at H* = 50. A dot rides the curve with the needle: it settles at the bottom, "0", then the needle sweeps to near empty and near full and the dot climbs each side. |
 
 Each gap is a `self.wait(...)` under a comment quoting its narration line in `scene12_setpoint.py`.
 

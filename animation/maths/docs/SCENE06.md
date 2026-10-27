@@ -2,7 +2,7 @@
 
 Open `animation/index.html` in Live Server. Maths 06 follows Maths 05 in chapter 3; its direct link is `#maths-bellman`. `animation/maths/html/scene06.html` also provides standalone playback.
 
-62 seconds · 1920 × 1080 · 60 FPS · silent (narration is read over it).
+50 seconds · 1920 × 1080 · 60 FPS · silent (narration is read over it).
 
 From `animation/maths/manim`:
 
@@ -23,12 +23,10 @@ Start reading at 0:00. Timings assume about 165 words per minute.
 | 0:09 | "The central idea behind the Bellman equation is defining the value of a state is equal to the reward we receive from leaving that state, plus the discounted value of the state we end up in." | The title settles into a heading at the top right. The idea builds as it is said: value(s) = (on "the value of a state", 0:12) … reward for leaving s (on "the reward we receive…", 0:15) … + γ · value(next state) (on "plus the discounted value…", 0:18). |
 | 0:21 | "Say moving from our state gives no immediate reward, but leads to a state with a value of 10. With a discount factor of 0.9, our current state's value would be…" | The field fades and the camera closes in on the row before the 10 as the agent steps back to s8. "r = 0" appears and the right arrow lights amber on "no immediate reward" (0:22); "V = 10" under the star on "a value of 10" (0:24.5); then V(s8) = 0 + 0.9 (10) = builds on a dark panel above the row (0:26.5–0:29). |
 | 0:31 | "Nine." | = 9 pops in. |
-| 0:31.5 | "So even without a reward, this state is valuable because it leads towards one." | The 9 drops into s8's corner and the 10 into s9's; both cells glow. |
-| 0:36.5 | "This way, the value of a reward propagates backwards through the environment." | The camera pulls back out while the value flows back along the γ = 0.9 agent's path: 8.1, 7.3, 6.6, 5.9, 5.3, each cell glowing a little less, with a small violet arrow showing the action taken there. |
-| 0:40.5 | "For a deterministic environment following a fixed policy, the Bellman equation is:" | The worded idea turns into V^π(s) = r(s, a, s′) + γV^π(s′), with "where a = π(s)" under it (0:43). |
-| 0:45 | "Vπ(s) is the value of state s under policy π, r is the immediate reward, and s' is the next state." | Each symbol is circled as it is named: V^π(s) (violet), with the policy box and the path arrows pulsing; r(s, a, s′) (amber, 0:48.5); V^π(s′) (violet, 0:50.5). |
-| 0:52 | "This is called the Bellman expectation equation." | "Bellman expectation equation:" appears above the equation. |
-| 0:55 | "A state's value depends on the policy's actions, the next states, the rewards, and the values of those next states." | The equation pulses and is applied everywhere: every remaining cell glows and gets its value, filling outwards from the rewards. |
+| 0:31.5 | "So value propagates backwards from the reward." | The 9 drops into s8's corner and the 10 into s9's; both cells glow. The camera pulls back out while the value flows back along the γ = 0.9 agent's path: 8.1, 7.3, 6.6, 5.9, 5.3, each cell glowing a little less, with a small violet arrow showing the action taken there. |
+| 0:35 | "For a deterministic environment following a fixed policy, the Bellman equation is:" | The worded idea turns into V^π(s) = r(s, a, s′) + γV^π(s′), with "where a = π(s)" under it (0:37.5). |
+| 0:39.5 | "Vπ(s) is the value of state s under policy π, r is the immediate reward, and s' is the next state." | Each symbol is circled as it is named: V^π(s) (violet), with the policy box and the path arrows pulsing; r(s, a, s′) (amber, 0:43); V^π(s′) (violet, 0:45). |
+| 0:46.5 | "This is called the Bellman expectation equation." | "Bellman expectation equation:" appears above the equation, and it is applied everywhere: every remaining cell glows and gets its value, filling outwards from the rewards. |
 
 Each gap is a `self.wait(...)` under a comment quoting its narration line in `scene06_bellman.py`.
 

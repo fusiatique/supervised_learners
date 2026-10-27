@@ -70,13 +70,10 @@ T_PI = 25.2  # "This is policy iteration."
 T_REPEAT = 27.3  # "We then repeat this
 T_OPTIMAL = 29.4  # ...until we reach an optimal policy."
 T_MATH = 31.6  # "Mathematically, an optimal policy satisfies:"
-T_OPTIMALITY = 34.4  # "This is the Bellman optimality equation expressed as a policy choice.
-T_MAXIMISES = 41.3  # ...It tells us to pick the action that maximises
-T_IMMEDIATE = 41.8  # ...immediate reward
-T_DISCOUNTED = 42.8  # ...plus discounted future value."
-T_JUST = 44.8  # "And just like that, we have gone from a random agent to one that systematically
-T_ABSORB = 48.4  # ...improves its behaviour."
-T_END = 52.5
+T_OPTIMALITY = 34.4  # "This is the Bellman optimality equation expressed as a policy choice."
+T_JUST = 39.0  # "And just like that, we have gone from a random agent to one that systematically
+T_ABSORB = 42.6  # ...improves its behaviour."
+T_END = 46.7
 
 
 def value_label(v, grid, s):
@@ -337,23 +334,16 @@ class Scene08PolicyIteration(MovingCameraScene):
         self.next_section("optimality")
         self.at(T_MATH)
         opt_eq = MathTex(r"\pi^*(s)", "=", r"\arg\max_a", r"\big[", "r(s, a, s')", "+", r"\gamma", r"V^*(s')", r"\big]",
-                         font_size=40, color=INK).move_to([COL_X, -1.4, 0])
+                         font_size=40, color=INK).move_to([COL_X, -1.62, 0])
         opt_eq[0].set_color(MODEL)
         opt_eq[4].set_color(DOPAMINE)
         opt_eq[7].set_color(MODEL)
         self.play(FadeOut(*rows, optimal, shift=0.1 * UP), run_time=0.5)
         self.play(Write(opt_eq), run_time=1.4)
-        # "This is the Bellman optimality equation expressed as a policy choice.
+        # "This is the Bellman optimality equation expressed as a policy choice."
         self.at(T_OPTIMALITY)
-        opt_label = Text("Bellman optimality equation:", font_size=24, color=MUTED).next_to(opt_eq, UP, buff=0.3)
+        opt_label = Text("Bellman optimality equation:", font_size=24, color=MUTED).next_to(opt_eq, UP, buff=0.2)
         self.play(FadeIn(opt_label, shift=0.1 * DOWN), run_time=0.6)
-        # ...It tells us to pick the action that maximises immediate reward plus discounted future value."
-        self.at(T_MAXIMISES)
-        self.play(Indicate(opt_eq[2], color=DOPAMINE, scale_factor=1.15), run_time=0.5)
-        self.at(T_IMMEDIATE)
-        self.play(Circumscribe(opt_eq[4], color=DOPAMINE, buff=0.06), run_time=0.9)
-        self.at(T_DISCOUNTED)
-        self.play(Circumscribe(VGroup(opt_eq[6], opt_eq[7]), color=MODEL, buff=0.06), run_time=0.9)
 
         # "And just like that, we have gone from a random agent to one that systematically improves
         # its behaviour."  The agent takes the optimal route; the camera pushes in and the

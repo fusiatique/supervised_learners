@@ -1,7 +1,7 @@
 """Maths 01 — The agent and its environment.
 
 Narration: from "Addiction as an exploitation of the reward learning system..."
-to "The agent position is now represented by these states."
+to "These states are, for example, positions the agent can be in."
 """
 
 from manim import (
@@ -34,7 +34,7 @@ from common import AGENT_RATIO, CELL, CELL_3X3, GRID_SHIFT, HIGHLIGHT, INK, MODE
 CELL_MAZE = 0.9
 
 # s5 -> s2 -> s3 -> s6 -> s9 -> s8 -> s5
-WANDER = ["up", "right", "down", "down", "left", "up"]
+WANDER = ["up", "down"]  # s5 -> s2 -> s5
 
 
 class Scene01AgentEnvironment(Scene):
@@ -121,19 +121,15 @@ class Scene01AgentEnvironment(Scene):
         self.add(grid)
         self.wait(1)
 
-        # "These states are, for example, positions the agent can be in."
+        # "These states are, for example, positions the agent can be in."  The labels fade in; the grid
+        # slides left as "agent state" appears, and the agent steps to a neighbouring state and back.
         self.next_section("states")
         labels = grid.make_labels()
-        self.play(LaggedStart(*[FadeIn(l, scale=1.2) for l in labels], lag_ratio=0.15, run_time=2))
-        self.wait(1.5)
-
-        # "The agent position is now represented by these states."
+        self.play(LaggedStart(*[FadeIn(l, scale=1.2) for l in labels], lag_ratio=0.15, run_time=1.6))
         world = VGroup(grid, labels, agent)
-        self.play(world.animate.shift(GRID_SHIFT))
         panel, readout = state_panel(5)
-        self.play(FadeIn(panel, shift=0.2 * LEFT), grid[5].animate.set_fill(HIGHLIGHT))
-        self.wait(0.5)
-
+        self.play(world.animate.shift(GRID_SHIFT), FadeIn(panel, shift=0.2 * LEFT), run_time=0.8)
+        self.play(grid[5].animate.set_fill(HIGHLIGHT), run_time=0.25)  # (not with the shift: both would move grid[5])
         s = 5
         for action in WANDER:
             s2 = grid.step(s, action)
@@ -145,8 +141,7 @@ class Scene01AgentEnvironment(Scene):
                 Transform(readout, new_readout),
                 run_time=0.45,
             )
-            self.wait(0.1)
             s = s2
 
         # Hold for the hand-off to Maths 02.
-        self.wait(0.5)
+        self.wait(0.4)
