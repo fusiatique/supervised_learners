@@ -4,7 +4,7 @@ the current level and a needle. Its value is a ValueTracker from 0 (empty) to 1 
 import numpy as np
 from manim import DOWN, PI, Arc, Dot, Line, MathTex, ValueTracker, VGroup, always_redraw
 
-from .theme import HOMEO, INK, MUTED
+from .theme import HARM, HOMEO, INK, MUTED
 
 
 class Gauge(VGroup):
@@ -21,9 +21,11 @@ class Gauge(VGroup):
                                               arc_center=self.center()).set_stroke(HOMEO, width=14))
         self.needle = always_redraw(lambda: Line(self.center(), self._point(self.value.get_value(), 0.72))
                                     .set_stroke(INK, width=4))
-        self.hub = Dot(self.center(), radius=0.08, color=INK)
-        self.label = MathTex(label, font_size=40, color=HOMEO).next_to(self.hub, DOWN, buff=0.2)
-        self.add(self.track, self.ticks, self.fill, self.needle, self.hub, self.label)
+        self.hub = Dot(self.center(), radius=0.08 * min(1.0, radius / 1.5), color=INK)
+        self.add(self.track, self.ticks, self.fill, self.needle, self.hub)
+        if label:
+            self.label = MathTex(label, font_size=40 * min(1.0, radius / 1.5), color=HOMEO).next_to(self.hub, DOWN, buff=0.2)
+            self.add(self.label)
 
     def center(self):
         return self.track.get_arc_center()
@@ -31,6 +33,21 @@ class Gauge(VGroup):
     def angle(self, v):
         """The dial angle for a level v in [0, 1]: empty on the left, full on the right."""
         return PI * (1 - v)
+
+    def mark(self, v, label=None, color=INK):
+        """A fixed tick across the track at level v, optionally labelled (the setpoint H*).
+        Create it once the gauge is in place; add it to the scene (it does not follow later moves)."""
+        mark = VGroup(Line(self._point(v, 0.74), self._point(v, 1.2)).set_stroke(color, width=4))
+        if label:
+            mark.add(MathTex(label, font_size=36 * min(1.0, self.radius / 1.5), color=color).move_to(self._point(v, 1.45)))
+        return mark
+
+    def gap(self, target, color=HARM):
+        """A live arc just outside the track from level `target` to the needle: the deviation."""
+        return always_redraw(lambda: Arc(
+            radius=1.14 * self.radius, start_angle=self.angle(target),
+            angle=self.angle(self.value.get_value()) - self.angle(target) or 1e-3, arc_center=self.center(),
+        ).set_stroke(color, width=7))
 
     def _point(self, v, fraction):
         a = self.angle(v)

@@ -10,3 +10,4 @@ animation/bio/remotion/build/
 animation/maths/manim/build/
 animation/maths/manim/.venv/
 __pycache__/
+animation/maths/manim/media/
