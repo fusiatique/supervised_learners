@@ -232,16 +232,15 @@ class Scene15Harm(PacedScene, Scene):
         before, after = WITHDRAWAL
         relief = drive(before) - drive(after)
         total = relief + R0 - COST
-        sick = Agent(radius=0.6).move_to([-5.4, 0.35, 0])
-        sick_mouth, sick_marks = sick.mood("tired")
-        sick.mouth.become(sick_mouth)
+        sick = Agent(radius=0.6).move_to([-5.4, 0.35, 0]).show_mood("tired")
         sick_brain = brain_light(sick)
         who2 = Text("in withdrawal", font_size=24, color=INK).next_to(sick, UP, buff=0.2)
         new_line = sum_line(relief, total).move_to(line)
         relief_weight = block(relief, HOMEO, f"+{relief:.1f}")
-        self.play(FadeOut(agent, brain, who, walks, line, overshoot), FadeIn(sick, sick_marks, sick_brain, who2),
+        self.play(FadeOut(agent, brain, who, walks, line, overshoot), FadeIn(sick, sick_brain, who2),
                   gauge.value.animate.set_value(before / 100), pill.animate.set_opacity(1),
                   scale.tilt.animate.set_value(tilt_for(R0 - COST)), run_time=0.8)
+        sick.idle()  # nodding off, sweating
         # "...gets huge relief."
         self.play(gauge.value.animate.set_value(after / 100), run_time=0.8)
         self.play(FadeIn(new_line[0], shift=0.1 * UP), FadeIn(relief_weight.move_to(new_line[0]), scale=0.6), run_time=0.5)
@@ -252,11 +251,10 @@ class Scene15Harm(PacedScene, Scene):
                   rate_func=rate_functions.ease_out_back)
         self.wait(0.4)
         # "It takes the drug."
-        happy_mouth, _ = sick.mood("satisfied")
         self.play(pill.animate.scale(0.3).move_to(sick.mouth.get_center()).set_opacity(0), run_time=0.6,
                   rate_func=rate_functions.ease_in_sine)
         self.remove(pill)
-        self.play(Transform(sick.mouth, happy_mouth), FadeOut(sick_marks), run_time=0.5)
+        self.play(sick.set_mood("satisfied"), run_time=0.5)
         self.wait(0.4)
 
         # "The harm hasn't disappeared. It's just been outweighed."  The red block is still on the scale.

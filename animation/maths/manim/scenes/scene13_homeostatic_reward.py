@@ -27,7 +27,6 @@ from manim import (
     GrowArrow,
     Indicate,
     LaggedStart,
-    ManimColor,
     MathTex,
     Rectangle,
     Scene,
@@ -38,13 +37,10 @@ from manim import (
     Write,
     always_redraw,
     rate_functions,
-    UpdateFromAlphaFunc,
-    interpolate_color,
-    smooth,
 )
 
 from common import (
-    DOPAMINE, HARM, HOMEO, INK, MUTED, Agent, Gauge, PacedScene, apple, brain_light, moon, sun, water_glass,
+    DOPAMINE, HARM, HOMEO, INK, MUTED, Agent, Gauge, PacedScene, absorb, apple, brain_light, moon, sun, water_glass,
 )
 from scene12_setpoint import RX, drive, end_frame as scene12_end_frame
 
@@ -73,34 +69,6 @@ def outcome(icon, caption):
     """An outcome on offer: its picture and what it does to H."""
     label = MathTex(caption, font_size=26, color=INK)
     return VGroup(icon, label).arrange(DOWN, buff=0.15)
-
-
-def neon(alpha):
-    """Brightness of a neon sign switching on: a few stutters, a full blaze, then a slow settle back."""
-    for start, end, level in ((0, 0.05, 0.8), (0.05, 0.09, 0.1), (0.09, 0.13, 1), (0.13, 0.17, 0.35)):
-        if start <= alpha < end:
-            return level
-    return 1 if alpha < 0.5 else 1 - smooth((alpha - 0.5) / 0.5)
-
-
-def light_up(agent, brain, run_time=2.4):
-    """The brain flickers on like a neon sign, with a soft teal glow over the head, then settles back."""
-    disc, h = brain
-    base = disc.get_fill_opacity()
-    layers = 18  # stacked translucent discs: a smooth falloff
-    halo = VGroup(*[
-        Circle(radius=1.1 * agent.radius * (k + 1) / layers, stroke_width=0, fill_color=HOMEO, fill_opacity=0)
-        for k in range(layers)
-    ]).move_to(disc).set_z_index(agent.z_index + 0.5)  # over the face, under the disc and the H
-
-    def update(_, alpha):
-        v = neon(alpha)
-        disc.set_fill(opacity=base + (0.8 - base) * v)
-        h.set_color(interpolate_color(ManimColor(HOMEO), ManimColor(INK), v))
-        for layer in halo:
-            layer.set_fill(opacity=0.025 * v)
-
-    return UpdateFromAlphaFunc(halo, update, run_time=run_time, remover=True)
 
 
 class DeviationBar(VGroup):
@@ -276,15 +244,8 @@ class Scene13HomeostaticReward(PacedScene, Scene):
         self.wait(1.4)
         # "...the agent uses it to learn which actions are worth pursuing."  The whole boxed card glides
         # into the brain, which lights up as it arrives.
-        card = VGroup(r_eq, box, core).set_z_index(agent.z_index + 3)  # in front of the head all the way in
-        landed = card.copy().scale(0.08).move_to(agent.brain_point())
-        landed[0].set_opacity(0.5)
-        landed[1].set_stroke(opacity=0.5)  # (set_opacity would also fill the box)
-        landed[2].set_opacity(0.5)
-        self.play(Transform(card, landed, path_arc=0.5, rate_func=smooth), run_time=1.4)
-        self.remove(card)
-        self.play(light_up(agent, brain))
-        self.wait(0.6)
+        self.play(absorb(VGroup(r_eq, box, core), agent, brain, color=HOMEO))
+        self.wait(2.4)
 
         # "So far, this is a theory of motivated behaviour, not yet of addiction. It explains why food,
         # water, or rest become more valuable when they restore a regulated state."

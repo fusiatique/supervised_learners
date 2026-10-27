@@ -20,9 +20,7 @@ from manim import (
     FadeIn,
     FadeOut,
     Indicate,
-    LaggedStart,
     MathTex,
-    Rectangle,
     Square,
     RoundedRectangle,
     Scene,
@@ -33,7 +31,7 @@ from manim import (
     rate_functions,
 )
 
-from common import DOPAMINE, HARM, HOMEO, INK, MUTED, Agent, Gauge, PacedScene, brain_light, water_glass
+from common import DOPAMINE, HARM, HOMEO, INK, MUTED, Agent, Gauge, PacedScene, brain_light
 
 SETPOINT = 50  # H*
 M11_AGENT, M11_GAUGE = np.array([-2.3, -0.2, 0]), np.array([2.2, 0.1, 0])  # where Maths 11 leaves them
@@ -45,21 +43,6 @@ RX = 3.7  # centre of the right-hand column
 def drive(h):
     """Homeostatic deviation D(H) = (H* - H)^2 / H*."""
     return (SETPOINT - h) ** 2 / SETPOINT
-
-
-def mini_case(x, level, caption, reward_height):
-    """One copy of the agent with a small gauge (setpoint marked), the same glass in front, and the
-    reward that glass would give it, as a bar."""
-    who = Agent(radius=0.5).move_to([x - 1.05, -0.35, 0])
-    gauge = Gauge(value=level, radius=0.75, label=None)
-    gauge.shift(np.array([x + 0.55, -0.55, 0]) - gauge.center())
-    target = gauge.mark(0.5)
-    glass = water_glass(height=0.75).move_to([x - 0.25, -1.75, 0])
-    bar = Rectangle(width=0.32, height=reward_height, stroke_width=0, fill_color=DOPAMINE, fill_opacity=0.9)
-    bar.move_to([x + 0.55, -2.15, 0], aligned_edge=DOWN)
-    bar_label = Text("reward", font_size=18, color=DOPAMINE).next_to(bar, RIGHT, buff=0.15).align_to(bar, DOWN)
-    label = Text(caption, font_size=22, color=MUTED).move_to([x, 0.75, 0])
-    return VGroup(label, who, gauge, target, glass), VGroup(bar, bar_label)
 
 
 def squared_deviation():
@@ -153,42 +136,22 @@ class Scene12Setpoint(PacedScene, Scene):
         self.play(FadeIn(frame, scale=1.1), run_time=0.5)
         self.wait(0.9)
 
-        # "An outcome can be rewarding because it corrects an internal imbalance."  Two copies of the
-        # agent, one near its target and one far below it, with the same glass in front: far below,
-        # the glass is worth much more.
-        self.next_section("imbalance")
-        near, near_bar = mini_case(-3.4, 0.43, "close to its target", 0.2)
-        far, far_bar = mini_case(3.4, 0.12, "far from its target", 1.0)
-        # Fade (not set_opacity) so they come back exactly as they were: setting opacity back to 1
-        # would also switch on the fills of outline-only shapes like the gauge's arcs.
-        self.play(FadeOut(agent, brain, gauge), FadeOut(learning, regulating, frame), run_time=0.7)
-        self.play(FadeIn(near, shift=0.15 * UP), FadeIn(far, shift=0.15 * UP), run_time=0.8)
-        self.wait(0.5)
-        self.play(FadeIn(near_bar[0], scale=0.2), FadeIn(far_bar[0], scale=0.2), FadeIn(near_bar[1], far_bar[1]),
-                  run_time=0.8)
-        self.wait(0.8)
-
-        # "Let's call the agent's internal state H. Imagine it as a simplified, dopamine-like signal.
-        # This is only an analogy, because a single number can't capture dopamine's full biology."
+        # "Let's call the agent's internal state H. Imagine it as a simplified, dopamine-like signal."
         self.next_section("H")
         tag = Text("≈ a dopamine-like signal", font_size=24, color=DOPAMINE).next_to(gauge, DOWN, buff=0.3)
-        caveat = Text("an analogy: one number can't capture dopamine's biology", font_size=18, color=MUTED)
-        caveat.next_to(tag, DOWN, buff=0.12)
-        self.play(FadeOut(near, near_bar, far, far_bar, cite), FadeIn(agent, brain, gauge), run_time=0.8)
+        self.play(FadeOut(learning, regulating, frame, cite), run_time=0.7)
         self.play(Indicate(gauge.label, color=HOMEO, scale_factor=1.6), Indicate(brain[1], color=HOMEO, scale_factor=1.5),
                   run_time=0.8)
         self.play(gauge.value.animate.set_value(0.7), run_time=0.9)
         # "...a simplified, dopamine-like signal."
         self.play(FadeIn(tag, shift=0.1 * UP), gauge.value.animate.set_value(0.3), run_time=0.9)
-        self.wait(1.6)
-        # "This is only an analogy..."
-        self.play(FadeIn(caveat), gauge.value.animate.set_value(0.6), run_time=0.9)
-        self.wait(3.3)
+        self.play(gauge.value.animate.set_value(0.6), run_time=0.9)
+        self.wait(0.8)
 
         # "The target is the homeostatic setpoint, H*. It is the level the agent is trying to maintain."
         self.next_section("setpoint")
         target, setpoint_word = setpoint_marks(gauge)
-        self.play(FadeOut(tag, caveat), run_time=0.4)
+        self.play(FadeOut(tag), run_time=0.4)
         self.play(FadeIn(target, scale=1.3), FadeIn(setpoint_word), run_time=0.7)
         self.wait(1.4)
         # "...the level the agent is trying to maintain."  The needle wobbles and settles on it.
@@ -197,15 +160,15 @@ class Scene12Setpoint(PacedScene, Scene):
         self.play(gauge.value.animate(rate_func=rate_functions.ease_out_sine).set_value(0.5), run_time=0.7)
         self.wait(1)
 
-        # "Importantly, the agent shouldn't simply maximise H. Being above the target isn't automatically
-        # better. What matters is the distance from the setpoint."
+        # "Importantly, the agent shouldn't simply maximise H. What matters is the distance from the
+        # setpoint."
         self.next_section("not maximise")
         self.wait(0.6)
         self.play(gauge.value.animate.set_value(1.0), run_time=0.9)
         more = Text("more H  ≠  better", font_size=26, color=HARM).move_to([RX, 1.6, 0])
         cross = Cross(Square(side_length=0.55), stroke_color=HARM, stroke_width=6).move_to(gauge._point(0.97, 1.0))
         self.play(FadeIn(more, shift=0.1 * DOWN), FadeIn(cross, scale=1.3), run_time=0.7)
-        self.wait(1.6)
+        self.wait(0.5)
         # "What matters is the distance from the setpoint."  Below it, then above it: the red arc.
         self.play(FadeOut(cross, more), gauge.value.animate.set_value(0.22), run_time=1.0)
         # Built only now, with the needle below the setpoint, so it fades in pointing the right way;

@@ -39,7 +39,6 @@ for (const [sceneId, playerId, prefix] of [
   ['maths-state-value', 'maths05Player', 'maths05'],
   ['maths-bellman', 'maths06Player', 'maths06'],
   ['maths-policy-improvement', 'maths07Player', 'maths07'],
-  ['maths-policy-iteration', 'maths08Player', 'maths08'],
   ['maths-exploration', 'maths09Player', 'maths09'],
   ['maths-q-learning', 'maths10Player', 'maths10'],
   ['maths-internal-state', 'maths11Player', 'maths11'],

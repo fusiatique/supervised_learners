@@ -2,7 +2,7 @@
 
 Open `animation/index.html` in Live Server. Maths 02 follows Maths 01 in chapter 3; its direct link is `#maths-actions-transitions`. `animation/maths/html/scene02.html` also provides standalone playback.
 
-38 seconds · 1920 × 1080 · 60 FPS · silent (narration is read over it).
+28 seconds · 1920 × 1080 · 60 FPS · silent (narration is read over it).
 
 From `animation/maths/manim`:
 
@@ -13,20 +13,17 @@ uv run manim -pql scenes/scene02_actions_transitions.py Scene02ActionsTransition
 
 ## Narration cues
 
-**Script change:** the worked example uses s5 and "right" (→ s6), where the agent already is after the actions beat, not the script's s2 → s3. Read: "So if the agent's state is s5, and the agent chooses the action 'right', what is the resulting state? Hopefully it's intuitive: s6."
+The script (shortened): "From any state, the agent can choose from several 'actions'. In this case: up, down, left and right. The environment then needs a rule that takes the agent's current state and action, and outputs its new state. So if the agent is in s5 and chooses 'right', where does it end up? s6. This is a transition function, and the environment needs one for every state-action pair."
 
-Start reading at 0:00. Timings assume about 165 words per minute, except the worked example (0:18.5–0:29), which is paced for about 150.
+Start reading at 0:00. Timings assume about 165 words per minute.
 
 | Time | Say | On screen |
 | --- | --- | --- |
 | 0:00 | "From any state, the agent can choose from several 'actions'." | Opens on Maths 01's last frame. The "agent state" readout fades away as the grid slides to the centre; four arrows slide out from under the agent; "actions" writes in above the grid. |
-| 0:03 | "In this case, this would be up, down, left and right." | From 0:04.5, each arrow lights up one by one as it is named, and the agent takes that action: s5 → s2 → s5 → s4 → s5. |
-| 0:07.5 | "Now, for the agent to 'interact' with the environment, the environment needs a set of rules that takes the agent's current state and action as input…" | "actions" fades and the grid slides back to the left; the grid pulses on "environment" (0:09.5); s appears on "current state" (0:14.5) and a a moment later on "action" (0:15.5), each labelled. |
-| 0:17 | "…and output the agent's new state." | f( , ) closes around s and a, then = s′ appears, labelled "new state". |
-| 0:18.5 | "So if the agent's state is s5, and the agent chooses the action 'right', what is the resulting state?" | f(s, a) = s′ becomes the example one piece at a time, each on its word; f(, the comma, ) and = only slide: on "s5" (0:21) s becomes s5 and the agent pulses; on "right" (0:24) a becomes right and the right arrow lights; on "what is the resulting state?" (0:25.5) s′ becomes ?. Each caption fades as its part is filled in. |
-| 0:26.5 | "Hopefully it's intuitive: s6." | On "s6" (0:27.5) ? becomes s6 and the agent moves to s6. |
-| 0:29 | "This is an example of a… [pause] …transition function." | Hold during "This is an example of a…"; on "transition function" (0:30.5) the words write in large with an underline and a pulse. |
-| 0:33 | "…and the environment needs this for every state-action pair." | The large "transition function" fades down into a small heading above the rule, the example turns back into f(s, a) = s′ (same part-by-part morph), and all 36 transitions stream up beneath it (0:34–0:37), speeding up and motion-blurring, then easing to a stop on the last rows and ⋮. |
+| 0:03 | "In this case: up, down, left and right." | Each arrow lights up one by one as it is named, and the agent takes that action: s5 → s2 → s5 → s4 → s5. |
+| 0:07.5 | "The environment then needs a rule that takes the agent's current state and action, and outputs its new state." | "actions" fades and the grid slides back to the left; the grid pulses on "environment"; s appears on "current state" (≈0:10) and a a moment later on "action", each labelled; f( , ) closes around them and = s′ appears, labelled "new state" (≈0:12.5). |
+| 0:14 | "So if the agent is in s5 and chooses 'right', where does it end up? s6." | f(s, a) = s′ becomes the example one piece at a time, each on its word (f(, the comma, ) and = only slide): s becomes s5 and the agent pulses; a becomes right and the right arrow lights; s′ becomes ?, then s6 as the agent moves to s6 (≈0:19). |
+| 0:20 | "This is a transition function, and the environment needs one for every state-action pair." | "transition function" writes in large with an underline and a pulse; then it fades down into a small heading above the rule, the example turns back into f(s, a) = s′, and all 36 transitions stream up beneath it, speeding up and motion-blurring, then easing to a stop on the last rows and ⋮. |
 
 Each gap is a `self.wait(...)` under a comment quoting its narration line in `scene02_actions_transitions.py`.
 

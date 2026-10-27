@@ -31,11 +31,11 @@ from manim import (
 
 from common import (
     ACTIONS, BG, COL_X, DOPAMINE, INK, MODEL, MUTED, WORLD_SHIFT, PacedScene, PolicyBox, Reward, big_world,
-    dashed_trail, glow_square, policy_arrow, policy_route, value_tex,
+    dashed_trail, final_policy, glow_square, policy_arrow, policy_route, value_tex,
 )
 from scene09_exploration import (
     EGREEDY_TEX, GAMMA, GOAL, HIDDEN, HIDDEN_REWARD, JUNCTION, REWARDS_ALL, after_discovery, epsilon_controls,
-    epsilon_heading, fog_cell, glow_opacity, maths08_policy,
+    epsilon_heading, fog_cell, glow_opacity,
 )
 
 ALPHA = 0.5
@@ -84,7 +84,7 @@ class Scene10QLearning(PacedScene, Scene):
         grid = stage.grid
         VGroup(stage.group, *stars.values(), start_tag).shift(WORLD_SHIFT)
         arrows = stage.add_arrows()
-        policy = maths08_policy(grid)
+        policy = final_policy(grid)
         V, known, learned_policy, _, _ = after_discovery(grid, policy)
         glows = {s: glow_square(grid, s, V[s]).set_fill(opacity=glow_opacity(V[s]))
                  for s in known + [GOAL, 18, HIDDEN]}
