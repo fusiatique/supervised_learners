@@ -295,7 +295,7 @@ class Scene13HomeostaticReward(PacedScene, Scene):
         self.play(FadeOut(agent, brain), run_time=0.6)
         self.play(FadeIn(title, shift=0.1 * DOWN), FadeIn(one, m["brain"], g, m["mark"], m["gap"]), run_time=0.8)
         self.play(FadeIn(not_yet), run_time=0.5)
-        self.wait(2)
+        self.wait(2.5)
         # "...food, water, or rest become more valuable when they restore a regulated state."
         items = VGroup(water_glass(height=0.8), apple(size=0.85), moon(size=0.85))
         items.arrange(RIGHT, buff=0.8).move_to([4.6, -0.6, 0])
@@ -305,4 +305,4 @@ class Scene13HomeostaticReward(PacedScene, Scene):
                       g.value.animate.set_value(level), run_time=0.8, rate_func=rate_functions.ease_in_sine)
             self.remove(item)
         self.play(Transform(one.mouth, one.make_mouth("happy")), run_time=0.4)
-        self.wait(0.8)
+        self.wait(1)
