@@ -16,20 +16,23 @@ export const LaboratoryRat:React.FC<{frame:number;amount?:number;x?:number;y?:nu
  <circle cx={207} cy={4} r={3} fill={C.gray} stroke="none" opacity={amount}/>
 </g>;
 
-/** Separate rodent schematic, not a relabelled human brain. Anterior is right. */
+/** Separate rodent schematic, not a relabelled human brain. Anterior is left. */
 const RodentBrainInset:React.FC<{frame:number}>=({frame:f})=>{
  const amount=progress(f,30,60);
  const paths=progress(f,60,105);
  return <g opacity={amount} transform="translate(1260 470)">
   <circle r={211} fill={C.bg} stroke={C.gray} strokeWidth={2} {...draw(amount)}/>
-  <path d="M-155 16Q-166-76-96-101Q-10-132 92-83L136-50Q167-51 173-23Q170-6 148-3L115 27Q58 65-27 49L-59 70-77 48Q-125 70-147 45ZM-145 20Q-119-6-90 21L-90 55M-36 44L-28 87 2 87-5 48" fill="none" stroke={C.gray} strokeWidth={3} {...draw(amount)}/>
+  <g transform="scale(-1 1)"><path d="M-155 16Q-166-76-96-101Q-10-132 92-83L136-50Q167-51 173-23Q170-6 148-3L115 27Q58 65-27 49L-59 70-77 48Q-125 70-147 45ZM-145 20Q-119-6-90 21L-90 55M-36 44L-28 87 2 87-5 48" fill="none" stroke={C.gray} strokeWidth={3} {...draw(amount)}/>
   <ellipse cx={-22} cy={35} rx={13} ry={9} fill={C.yellow} opacity={amount}/>
-  <Label x={-48} y={108} size={23} color={C.yellow}>VTA</Label>
+
   <path d="M-22 35Q25-4 77 4" fill="none" stroke={C.yellow} strokeWidth={3} {...draw(paths)}/>
   <path d="M-22 35Q12-62 125-43" fill="none" stroke={C.blue} strokeWidth={3} {...draw(paths)}/>
   <g opacity={paths}><circle cx={77} cy={4} r={9} fill="none" stroke={C.yellow} strokeWidth={2}/><circle cx={125} cy={-43} r={11} fill="none" stroke={C.blue} strokeWidth={2}/>
-   <Label x={92} y={39} size={20} color={C.yellow}>NAc</Label><Label x={121} y={-69} size={20} color={C.blue}>PFC</Label>
+
   </g>
+  </g>
+  <Label x={48} y={108} size={23} color={C.yellow}>VTA</Label>
+  <g opacity={paths}><Label x={-92} y={39} size={20} color={C.yellow}>NAc</Label><Label x={-121} y={-69} size={20} color={C.blue}>PFC</Label></g>
   <g opacity={progress(f,70,100)}><Label x={-80} y={163} size={22} color={C.yellow}>VTA → NAc</Label><Label x={88} y={163} size={22} color={C.blue}>VTA → PFC</Label></g>
  </g>;
 };
@@ -91,7 +94,7 @@ const ComparisonPanel:React.FC<{frame:number;target:'NAc'|'PFC';x:number}>=({fra
 export const RodentPathwayComparison:React.FC<{frame:number;startingCamera:BrainCamera;endingCamera:BrainCamera}>=({frame:f,startingCamera,endingCamera})=>{
  const split=progress(f,90,120),end=progress(f,570,599);
  const introBrain=1-progress(f,30,60);
- const camera={x:mix(startingCamera.x,960,ease(f,0,30)),y:mix(startingCamera.y,240,ease(f,0,30)),scale:mix(startingCamera.scale,.48,ease(f,0,30)),anteriorRight:true};
+ const camera={x:mix(startingCamera.x,960,ease(f,0,30)),y:mix(startingCamera.y,240,ease(f,0,30)),scale:mix(startingCamera.scale,.48,ease(f,0,30)),anteriorRight:false};
  return <g aria-label="Rodent research: altered inputs onto two populations of VTA projection neurons">
   <g opacity={introBrain}><BrainAnatomy {...camera} cortexOpacity={.6} frame={0} highlights={{VTA:1,NAc:.45,PFC:1}} pathwayProgress={{mesolimbic:1,mesocortical:1}}/></g>
   <g opacity={(1-split)}>

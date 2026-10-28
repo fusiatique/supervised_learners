@@ -1,4 +1,5 @@
 import React from 'react';
+import {brainFocus} from './brain-attention';
 import {AbsoluteFill,Freeze,Sequence,useCurrentFrame} from 'remotion';
 import {anatomyToScreen,BrainAnatomy,BRAIN_REGIONS,BrainRegionLabel,STRUCTURE_PATHS,DopaminePathway,type BrainCamera} from './BrainAnatomy';
 import {getScene04Camera} from './Scene04_MesocorticolimbicIntroduction';
@@ -33,12 +34,12 @@ export const getScene05IntroCamera=(f:number):BrainCamera=>{
   const zoom=ease(f,0,180),back=ease(f,300,390);
   const scale=mix(previous.scale,2.05,zoom);
   const vx=mix(previousVta[0],700,zoom),vy=mix(previousVta[1],650,zoom);
-  return {x:mix(vx+12*scale,900,back),y:mix(vy-137*scale,505,back),scale:mix(scale,1.45,back),anteriorRight:true};
+  return {x:mix(vx-12*scale,900,back),y:mix(vy-137*scale,505,back),scale:mix(scale,1.45,back),anteriorRight:false};
 };
 
 const VtaFocusPulse:React.FC<{camera:BrainCamera;frame:number}>=({camera,frame})=>{
  const amount=1-ease(frame,600,618);
- return <g transform={`translate(${camera.x} ${camera.y}) scale(${camera.scale}) translate(-500 -330) translate(1000 0) scale(-1 1)`} opacity={amount}>
+ return <g transform={`translate(${camera.x} ${camera.y}) scale(${camera.scale}) translate(-500 -330)`} opacity={amount}>
   <path d={STRUCTURE_PATHS.VTA} fill={C.blue} fillOpacity={.15+.18*(.5+.5*Math.sin(frame*Math.PI/30))} stroke={C.blue} strokeWidth={2.6}/>
  </g>;
 };
@@ -53,15 +54,18 @@ const AnatomicalIntroduction:React.FC=()=>{
   const ix=mix(1370,vx,insetReturn),iy=mix(420,vy,insetReturn);
   const ss=mix(1,.06,insetReturn);
   return <g opacity={1-progress(f,600,660)}>
-    <BrainAnatomy {...camera} cortexOpacity={mix(.65,.32,ease(f,0,180))} frame={540+f}
+    <BrainAnatomy {...camera}
+      regionFocus={{VTA:{...(frame<330?brainFocus(frame+270,[60,600]):brainFocus(f,[390,590])),color:C.blue},NAc:brainFocus(frame,[330,700])}}
+      pathwayFocus={{mesolimbic:brainFocus(f,[390,590]).strength}}
+      cortexOpacity={mix(.65,.32,ease(f,0,180))} frame={540+f}
       highlights={{VTA:1,NAc:ease(frame,330,348)*mix(mix(1,.6,ease(f,0,180)),1,ease(f,300,390)),PFC:mix(1,.15,ease(f,0,90))}}
       pathwayProgress={{mesolimbic:1,mesocortical:1}} pathwayOpacity={{mesolimbic:mix(1,.3,ease(f,300,390)),mesocortical:mix(.4,.15,ease(f,0,90))}}
       activity={{mesolimbic:f<300?mix(1,.5,ease(f,0,90)):progress(f,480,510),mesocortical:mix(.22,.1,ease(f,0,90))}}/>
     <VtaFocusPulse camera={camera} frame={frame+SCENE05.bridgeFrames}/>
-    <g transform={`translate(${camera.x} ${camera.y}) scale(${camera.scale}) translate(-500 -330) translate(1000 0) scale(-1 1)`}>
+    <g transform={`translate(${camera.x} ${camera.y}) scale(${camera.scale}) translate(-500 -330)`}>
       <DopaminePathway pathway="mesolimbic" amount={progress(f,390,480)} opacity={progress(f,390,420)} frame={Math.max(0,f-480)} activity={progress(f,480,510)}/>
     </g>
-    <g opacity={fade(f,30,60,300)}>{header('VENTRAL TEGMENTAL AREA (VTA)',100)}</g>
+    <g opacity={progress(f,30,60)*(1-progress(f,295,315))}>{header('VENTRAL TEGMENTAL AREA (VTA)',100)}</g>
     <g opacity={inset}>
       <path d={`M${vx} ${vy}L${ix-180*ss} ${iy+115*ss}`} stroke={C.gray} strokeWidth={2}/>
       <g transform={`translate(${ix} ${iy}) scale(${ss})`}>
@@ -73,7 +77,7 @@ const AnatomicalIntroduction:React.FC=()=>{
       </g>
     </g>
     <g opacity={fade(f,315,355,590)}>{header('NUCLEUS ACCUMBENS (NAc)',110)}</g>
-    <BrainRegionLabel region="NAc" camera={camera} x={1400} y={305} opacity={progress(f,330,370)}/>
+    <BrainRegionLabel mirrorPosition region="NAc" camera={camera} x={1400} y={305} opacity={progress(f,330,370)}/>
     <g opacity={fade(f,390,425,590)}>{header('MESOLIMBIC DOPAMINE PATHWAY',905,C.yellow,29)}</g>
     <g opacity={fade(f,540,565,600)}>{header('REWARD-RELATED MOTIVATION',965,C.white,27)}</g>
   </g>;
@@ -144,7 +148,7 @@ const UpdatingAndExperiments:React.FC=()=>{
   </g>;
 };
 
-export const ENDING_CAMERA05:BrainCamera={x:820,y:480,scale:1.25,anteriorRight:true};
+export const ENDING_CAMERA05:BrainCamera={x:820,y:480,scale:1.25,anteriorRight:false};
 export const getLearnedValue05=(frame:number)=>mix(mix(.35,.78,ease(frame,2250,2340)),.5,ease(frame,2340,2370));
 /** Reuse frame 2370 for the next scene's first frame. */
 export const AccumbensInputsArtwork:React.FC<{frame:number}>=({frame})=>{
@@ -153,14 +157,18 @@ export const AccumbensInputsArtwork:React.FC<{frame:number}>=({frame})=>{
   const [nx,ny]=anatomyToScreen(BRAIN_REGIONS.NAc.center,ENDING_CAMERA05);
   const callouts=[{region:'PFC' as const,x:1440,y:270,label:'PREFRONTAL CORTEX (PFC)'},{region:'vHPC' as const,x:365,y:900,label:'VENTRAL HIPPOCAMPUS'},{region:'BLA' as const,x:1350,y:875,label:'BASOLATERAL AMYGDALA'}];
   return <g>
-    <BrainAnatomy {...ENDING_CAMERA05} cortexOpacity={.65} frame={f} highlights={{VTA:1,NAc:1,PFC:inputs*surround,vHPC:inputs*surround,BLA:inputs*surround}} pathwayProgress={{mesolimbic:1,mesocortical:.15}} pathwayOpacity={{mesolimbic:1,mesocortical:.15}} activity={{mesolimbic:.45}}/>
+    <BrainAnatomy {...ENDING_CAMERA05}
+      regionFocus={{PFC:brainFocus(f,[2160,2205]),vHPC:brainFocus(f,[2175,2220]),BLA:brainFocus(f,[2190,2235]),NAc:brainFocus(f,[2250,2400])}}
+      cortexOpacity={.65} frame={f} highlights={{VTA:1,NAc:1,PFC:inputs*surround,vHPC:inputs*surround,BLA:inputs*surround}} pathwayProgress={{mesolimbic:1,mesocortical:.15}} pathwayOpacity={{mesolimbic:1,mesocortical:.15}} activity={{mesolimbic:.45}}/>
     {Object.keys(NAc_INPUTS).map((region,i)=><NeuralInputPathway key={region} region={region as keyof typeof NAc_INPUTS} camera={ENDING_CAMERA05} frame={f-2250} amount={progress(f,2160+i*15,2220+i*15)} activity={progress(f,2250,2280)*surround}/>) }
-    {callouts.map(({region,x,y,label},i)=>{
+    {callouts.map(({region,x:originalX,y:originalY,label},i)=>{
+      const x=region==='vHPC'?1460:2*ENDING_CAMERA05.x-originalX;
+      const y=region==='vHPC'?590:originalY;
       const [rx,ry]=anatomyToScreen(BRAIN_REGIONS[region].center,ENDING_CAMERA05);
       return <g key={region} opacity={progress(f,2160+i*15,2190+i*15)}><path d={`M${rx} ${ry}L${x} ${region==='PFC'?y+18:y-27}`} stroke={C.gray} strokeWidth={1.5} fill="none"/><Label x={x} y={y} size={25} color={C.blue}>{label}</Label></g>;
     })}
-    <BrainRegionLabel region="VTA" camera={ENDING_CAMERA05} x={700} y={835}/>
-    <g opacity={progress(f,2250,2280)}><ellipse cx={nx-4} cy={ny} rx={10} ry={7} fill={C.yellow} opacity={.35}/><path d={`M${nx} ${ny}L1080 660`} stroke={C.gray} strokeWidth={1.5}/><Label x={1120} y={700} size={25}>NAc core</Label></g>
+    <BrainRegionLabel mirrorPosition region="VTA" camera={ENDING_CAMERA05} x={700} y={835}/>
+    <g opacity={progress(f,2250,2280)}><ellipse cx={nx-4} cy={ny} rx={10} ry={7} fill={C.yellow} opacity={.35}/><path d={`M${nx} ${ny}L560 660`} stroke={C.gray} strokeWidth={1.5}/><Label x={520} y={700} size={25}>NAc core</Label></g>
     <g opacity={1-progress(f,2340,2360)}>{header('NUCLEUS ACCUMBENS (NAc)',110)}</g>
     <g opacity={progress(f,2340,2370)}>{header('LEARNED VALUE CAN CHANGE',110)}</g>
     <g opacity={progress(f,2250,2280)}>
@@ -184,13 +192,13 @@ const SystemToSignalsBridge:React.FC=()=>{
   const pulse=(Math.max(0,f-75)%60)/60;
   const textOpacity=progress(f,0,20)*(1-progress(f,245,270));
   return <g>
-    <BrainAnatomy {...camera} cortexOpacity={.65} frame={540+f}
+    <BrainAnatomy {...camera} regionFocus={{VTA:{...brainFocus(f,[60,600]),color:C.blue}}} cortexOpacity={.65} frame={540+f}
       highlights={{VTA:1,NAc:0,PFC:1}}
       pathwayProgress={{mesolimbic:1,mesocortical:1}}
       pathwayOpacity={{mesolimbic:1,mesocortical:.4}}
       activity={{mesolimbic:.6,mesocortical:.22}}/>
     <VtaFocusPulse camera={camera} frame={f}/>
-    <BrainRegionLabel region="VTA" camera={camera} x={1320} y={895} fullName opacity={1-ease(f,225,240)}/>
+    <BrainRegionLabel mirrorPosition region="VTA" camera={camera} x={1320} y={895} fullName opacity={1-ease(f,225,240)}/>
     <g opacity={textOpacity}>
       <Label x={960} y={100} size={30} color={C.yellow}>FROM THE SYSTEM TO ITS SIGNALS</Label>
       <Label x={960} y={165} size={42}>How does this brain system work?</Label>

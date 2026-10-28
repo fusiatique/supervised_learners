@@ -160,13 +160,16 @@ export const DopamineHandoff: React.FC<{frame:number;neuronOpacity?:number;parti
 export const scene03TimelineFrame=(frame:number)=>frame<1470?frame:frame<1680?1470+(frame-1470)*(90/210):frame-120;
 
 const RewardLearning: React.FC = () => {
-  const f=scene03TimelineFrame(useCurrentFrame()+T03.rewardLearning);
+  const timelineFrame=scene03TimelineFrame(useCurrentFrame()+T03.rewardLearning);
+  // Reveal the settled comparison under the mouse crossfade, rather than replaying
+  // the superseded human layout and introducing symbols while its labels move.
+  const f=timelineFrame>=1296?Math.max(1470,timelineFrame):timelineFrame;
   const pose=getNaturalLearningPose(f);
   const layout=ease(f,1320,1380);
   const compare=ease(f,1380,1470);
   const rowY=mix(610,390,compare);
   const naturalOpacity=mix(1,.68,ease(f,1560,1615));
-  const diagramsOpacity=getScene03Timing(f).diagramOpacity;
+  const diagramsOpacity=getScene03Timing(f).diagramOpacity*(timelineFrame<1296?1:progress(timelineFrame,1308,1320));
   const exampleOpacity=1-layout;
   const ring=NATURAL_TRIALS.reduce((v,trip)=>Math.max(v,progress(f,trip.ring,trip.ring+24)*(1-progress(f,trip.ring+24,trip.ring+25))),0);
   const trial=NATURAL_TRIALS.filter(trip=>f>=trip.arrive).length;

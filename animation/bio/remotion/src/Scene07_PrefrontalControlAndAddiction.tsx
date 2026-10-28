@@ -1,4 +1,5 @@
 import React from 'react';
+import {brainFocus} from './brain-attention';
 import {AbsoluteFill,Sequence,useCurrentFrame} from 'remotion';
 import {anatomyToScreen,BrainAnatomy,BRAIN_REGIONS,type BrainCamera} from './BrainAnatomy';
 import {getScene06Camera,MesocorticalPlanningArtwork} from './Scene06_MesocorticalPathwayAndPlanning';
@@ -17,7 +18,7 @@ export const scene07TimelineFrame=(frame:number)=>{
  const f=extended<1290?extended:extended<1410?1290+(extended-1290)*.75:extended-30;
  return f<870?f:f<1110?870+(f-870)*(60/240):f;
 };
-const blend=(a:BrainCamera,b:BrainCamera,t:number):BrainCamera=>({x:mix(a.x,b.x,t),y:mix(a.y,b.y,t),scale:mix(a.scale,b.scale,t),anteriorRight:true});
+const blend=(a:BrainCamera,b:BrainCamera,t:number):BrainCamera=>({x:mix(a.x,b.x,t),y:mix(a.y,b.y,t),scale:mix(a.scale,b.scale,t),anteriorRight:false});
 export const getScene07Camera=(frame:number)=>{
  const f=Math.min(frame,T07.hold);
  let camera=blend(getScene06Camera(1770),{x:560,y:350,scale:.85},ease(f,60,150));
@@ -42,9 +43,9 @@ const HumanAnatomy:React.FC<{f:number}>=({f})=>{
  const reveal=ease(f,60,150);
  return <g opacity={s.humanOpacity}>
   <g opacity={1-reveal} transform={`translate(${s.camera.x} ${s.camera.y}) scale(${ratio}) translate(${-previous.x} ${-previous.y})`}><MesocorticalPlanningArtwork frame={1770}/></g>
-  <g opacity={reveal}><BrainAnatomy {...s.camera} cortexOpacity={.6} frame={f} highlights={{VTA:1,NAc:.45,PFC:s.pfc}} pathwayProgress={{mesolimbic:1,mesocortical:1}} pathwayOpacity={{mesolimbic:.5,mesocortical:1}} activity={{mesocortical:f>=930&&f<1110?.3:0}}/></g>
+  <g opacity={reveal}><BrainAnatomy {...s.camera} regionFocus={{PFC:{...brainFocus(f,[60,1380]),strength:brainFocus(f,[60,1380]).strength*(.35+.65*s.pfc)}}} cortexOpacity={.6} frame={f} highlights={{VTA:1,NAc:.45,PFC:s.pfc}} pathwayProgress={{mesolimbic:1,mesocortical:1}} pathwayOpacity={{mesolimbic:.5,mesocortical:1}} activity={{mesocortical:f>=930&&f<1110?.3:0}}/></g>
   <circle cx={px} cy={py} r={45+25*ease(f,0,60)} stroke={C.blue} strokeWidth={2} fill="none" opacity={fade(f,8,25,60)*.3}/>
-  <g opacity={fade(f,1290,1320,1380)} transform={`translate(${s.camera.x} ${s.camera.y}) scale(${s.camera.scale}) translate(-500 -330) translate(1000 0) scale(-1 1)`}>
+  <g opacity={fade(f,1290,1320,1380)} transform={`translate(${s.camera.x} ${s.camera.y}) scale(${s.camera.scale}) translate(-500 -330)`}>
     <path d="M180 200L262 227M154 285L245 300M165 375L257 375" fill="none" stroke={C.blue} strokeWidth={2} strokeDasharray="4 7" opacity={progress(f,1290,1350)}/>
   </g>
  </g>;
@@ -76,10 +77,10 @@ export const ReceptorsAndControl:React.FC<{f:number}>=({f})=>{
  const camera=getScene07Camera(f),[sx,sy]=anatomyToScreen([365,330],camera),[px,py]=anatomyToScreen(BRAIN_REGIONS.PFC.center,camera);
  const opacity=progress(f,540,575)*(1-progress(f,930,960));
  return <g opacity={opacity}>
-  <g transform={`translate(${camera.x} ${camera.y}) scale(${camera.scale}) translate(-500 -330) translate(1000 0) scale(-1 1)`}>
+  <g transform={`translate(${camera.x} ${camera.y}) scale(${camera.scale}) translate(-500 -330)`}>
     <path d="M405 250C347 228 299 272 310 322Q322 381 398 418Q358 378 354 329Q350 289 405 281Z" fill={C.yellow} fillOpacity={.08} stroke={C.yellow} strokeWidth={2.5} {...draw(progress(f,540,610))}/>
   </g>
-  <g opacity={progress(f,550,590)}><path d={`M${sx} ${sy}L810 650H870`} stroke={C.gray} strokeWidth={1.5} fill="none"/><Label x={850} y={690} size={25} color={C.yellow}>STRIATUM</Label><Label x={850} y={724} size={19} color={C.gray}>Conceptual projection</Label></g>
+  <g opacity={progress(f,550,590)}><path d={`M${sx} ${sy}L410 650H350`} stroke={C.gray} strokeWidth={1.5} fill="none"/><Label x={370} y={690} size={25} color={C.yellow}>STRIATUM</Label><Label x={370} y={724} size={19} color={C.gray}>Conceptual projection</Label></g>
   <D2ReceptorAvailability x={1200} y={425} scale={.85} availability="higher" amount={progress(f,630,675)} emphasis={mix(1,.35,ease(f,720,780))}/>
   <D2ReceptorAvailability x={1570} y={425} scale={.85} availability="lower" amount={progress(f,650,690)} emphasis={progress(f,720,780)}/>
   <g opacity={progress(f,630,660)}><Label x={1380} y={215} size={31} color={C.yellow}>D2 RECEPTORS</Label></g>
@@ -115,7 +116,7 @@ const RodentTransition:React.FC<{f:number}>=({f})=>{
  return <g>
   <Title f={f} from={1290} until={1380} text="PREFRONTAL CORTEX"/>
   <Title f={f} from={1320} until={1410} text="DIFFERENT REGIONS, DIFFERENT ROLES" y={950} size={28} color={C.blue}/>
-  <RatBrain x={mix(1370,960,zoom)} y={mix(440,380,zoom)} scale={mix(1,1.3,zoom)} amount={progress(f,1380,1450)} opacity={progress(f,1380,1410)*(1-leave)} prelimbic={progress(f,1440,1500)} label/>
+  <RatBrain x={mix(1370,960,zoom)} y={mix(440,380,zoom)} scale={mix(1,1.3,zoom)} amount={progress(f,1380,1450)} opacity={progress(f,1380,1410)*(1-leave)} prelimbic={progress(f,1440,1500)} focus={brainFocus(f,[1440,1530])} label/>
  </g>;
 };
 
@@ -126,9 +127,9 @@ export const PrelimbicExperimentArtwork:React.FC<{frame:number}>=({frame})=>{
  return <g opacity={opacity}>
   <path d="M960 230V915" stroke={C.gray} strokeWidth={1.5} opacity={.2}/>
   <Label x={500} y={190} size={31} color={C.green}>STIMULATION</Label><Label x={1420} y={190} size={31} color={C.red}>INHIBITION</Label>
-  <RatBrain x={500} y={370} scale={.65} prelimbic={left.activity}/><RatBrain x={1420} y={370} scale={.65} prelimbic={right.activity}/>
+  <RatBrain x={500} y={370} scale={.65} prelimbic={left.activity} focus={{...brainFocus(f,[1590,1800]),strength:brainFocus(f,[1590,1800]).strength*left.activity}}/><RatBrain x={1420} y={370} scale={.65} prelimbic={right.activity} focus={{...brainFocus(f,[1680,1800]),strength:brainFocus(f,[1680,1800]).strength*right.activity}}/>
   <Label x={500} y={520} size={21} color={C.gray}>PRELIMBIC CORTEX</Label><Label x={1420} y={520} size={21} color={C.gray}>PRELIMBIC CORTEX</Label>
-  <circle cx={594} cy={346} r={9} fill={C.yellow} opacity={progress(f,1590,1620)*.55}/><circle cx={1514} cy={346} r={mix(6,2,ease(f,1680,1740))} fill={C.yellow} opacity={mix(.4,.08,ease(f,1680,1740))}/>
+  <circle cx={406} cy={346} r={9} fill={C.yellow} opacity={progress(f,1590,1620)*.55}/><circle cx={1326} cy={346} r={mix(6,2,ease(f,1680,1740))} fill={C.yellow} opacity={mix(.4,.08,ease(f,1680,1740))}/>
   <RatIllustration x={left.x} y={745} scale={.7} frame={f} walking={left.walking}/><RatIllustration x={right.x} y={745} scale={.7} frame={f} walking={right.walking}/>
   <CueSymbol x={770} y={730} scale={.45}/><CocainePowderBag x={835} y={735} scale={.3}/><CueSymbol x={1680} y={730} scale={.45}/><CocainePowderBag x={1745} y={735} scale={.3}/>
   <path d="M220 805H865M1110 805H1775" stroke={C.gray} strokeWidth={2} opacity={.25}/>

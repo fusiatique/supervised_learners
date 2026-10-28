@@ -36,7 +36,7 @@ export const RewardLearningUpdate:React.FC=()=>{
  const context=progress(f,60,95),gold=progress(f,150,160)*(1-progress(f,190,210));
  const thought=progress(f,150,165)*(1-progress(f,245,270));
  const walking=(f>=80&&f<=132)||(f>=210&&f<=285)?1:0;
- return <AbsoluteFill style={{backgroundColor:C.bg,opacity:progress(frame,0,12)*(1-progress(frame,348,360))}}><svg viewBox="0 0 1920 1080" width="100%" height="100%" role="img" aria-label="A human and mouse introduce reward learning across organisms. A bell predicts a reward location, one expected apple becomes three, and updated expectations guide another approach.">
+ return <AbsoluteFill style={{backgroundColor:C.bg,opacity:progress(frame,0,12)*(1-progress(frame,336,348))}}><svg viewBox="0 0 1920 1080" width="100%" height="100%" role="img" aria-label="A human and mouse introduce reward learning across organisms. A bell predicts a reward location, one expected apple becomes three, and updated expectations guide another approach.">
   <g opacity={humanOpacity}>
    <Label x={960} y={160} size={36}>LEARNING FROM REWARDS</Label>
    <HumanCharacter x={700} y={720} scale={.9} frame={f} naturalMotion expression="curious" look={5}/>

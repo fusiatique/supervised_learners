@@ -31,7 +31,7 @@ export const DopamineCircuitBridge:React.FC<{frame:number;showBrain?:boolean}>=(
   const brain=progress(frame,0,30)*.35;
   return <g>
     <g opacity={1-progress(frame,0,30)}><SimpleNeuron x={880} y={540} scale={1.3} amount={.72} opacity={.3}/></g>
-    {showBrain&&<BrainAnatomy x={700} y={405} scale={.7} anteriorRight amount={brain} frame={0}/>}
+    {showBrain&&<BrainAnatomy x={700} y={405} scale={.7} anteriorRight={false} amount={brain} frame={0}/>}
     {Array.from({length:9},(_,i)=>{const a=i*Math.PI*2/9;const t=ease(frame,0,60);return <g key={i}>
       <circle cx={mix(880+Math.cos(a)*165,700+Math.cos(a)*150,t)+Math.sin((frame+1680)*.035+i)*4} cy={mix(540+Math.sin(a)*120,405+Math.sin(a)*90,t)+Math.cos((frame+1680)*.03+i)*4} r={12} fill={C.yellow} opacity={.06}/>
       <circle cx={mix(880+Math.cos(a)*165,700+Math.cos(a)*150,t)+Math.sin((frame+1680)*.035+i)*4} cy={mix(540+Math.sin(a)*120,405+Math.sin(a)*90,t)+Math.cos((frame+1680)*.03+i)*4} r={4} fill={C.yellow}/>

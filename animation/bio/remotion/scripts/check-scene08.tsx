@@ -34,5 +34,5 @@ for(const frame of frames){
 for(const frame of [...frames].reverse())assert.equal(render(<Scene08Artwork frame={frame}/>),forward.get(frame),'Deterministic reverse scrubbing');
 assert.equal(forward.get(2070),forward.get(2099),'Final second is an exact stable hold');
 const pfc=anatomyToScreen(BRAIN_REGIONS.PFC.center,CAMERA08),nac=anatomyToScreen(BRAIN_REGIONS.NAc.center,CAMERA08);
-assert.ok(pfc[0]>nac[0]&&pfc[1]<nac[1],'Existing anterior PFC and ventral striatal NAc coordinates are preserved');
+assert.ok(pfc[0]<nac[0]&&pfc[1]<nac[1],'Existing anterior PFC and ventral striatal NAc coordinates are preserved');
 console.log('PASS: 70s / 2100 frames; stable learned network at 30s; dopamine only afterward; drugs at 45s; equal test inputs with ordered responses; invariant network; existing anatomy; citation; deterministic scrubbing and final hold.');

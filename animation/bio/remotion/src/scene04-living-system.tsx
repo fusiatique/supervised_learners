@@ -1,4 +1,5 @@
 import React from 'react';
+import {brainFocus} from './brain-attention';
 import {anatomyToScreen, BrainAnatomy, BrainRegionLabel, BRAIN_REGIONS, DopamineParticle, type BrainCamera, type PathwayId} from './BrainAnatomy';
 import {C, HumanCharacter, Label, SourceCitation} from './components';
 import {curvePoint, draw, ease, fade, mix, progress} from './motion';
@@ -22,7 +23,7 @@ export const living04PlaybackFrame=(frame:number)=>{
 export const living04Camera=(f:number):BrainCamera=>{
   const space=ease(f,360,408)*(1-ease(f,600,630));
   const focus=ease(f,630,690)*(1-ease(f,810,840));
-  return {x:960+100*focus,y:530-20*focus,scale:1.68*(1-.1*space-.1*focus),anteriorRight:true};
+  return {x:960+100*focus,y:530-20*focus,scale:1.68*(1-.1*space-.1*focus),anteriorRight:false};
 };
 
 /** Continuous phase integration increases event frequency without resetting pulses. */
@@ -35,7 +36,7 @@ export const living04Phase=(f:number,offset=0)=>{
 
 const NeuralActivity:React.FC<{frame:number;camera:BrainCamera}>=({frame:f,camera})=>{
   const boost=ease(f,540,585),visible=progress(f,250,280);
-  return <g transform={`translate(${camera.x} ${camera.y}) scale(${camera.scale}) translate(-500 -330) translate(1000 0) scale(-1 1)`}>
+  return <g transform={`translate(${camera.x} ${camera.y}) scale(${camera.scale}) translate(-500 -330)`}>
     {(['mesolimbic','mesocortical'] as PathwayId[]).map((pathway,j)=><g key={pathway}>
       {[0,75].map((offset,i)=>{
         const phase=living04Phase(f,offset+j*26);
@@ -118,7 +119,10 @@ export const Scene04LivingSystem:React.FC<{frame:number;opening:React.ReactNode;
   return <g>
     <g opacity={1-enter}>{opening}</g>
     <g opacity={enter*(1-exit)}>
-      <BrainAnatomy {...camera} amount={1} cortexOpacity={1-.35*focus} highlights={{VTA:1,NAc:progress(f,292,330),PFC:progress(f,320,358)}}
+      <BrainAnatomy {...camera} frame={f}
+        regionFocus={{VTA:brainFocus(f,[240,320],[540,600],[630,825]),NAc:brainFocus(f,[292,350],[540,600],[750,825]),PFC:brainFocus(f,[320,390],[540,600])}}
+        pathwayFocus={{mesolimbic:brainFocus(f,[292,350],[540,600],[750,825]).strength,mesocortical:brainFocus(f,[320,390],[540,600]).strength}}
+        amount={1} cortexOpacity={1-.35*focus} highlights={{VTA:1,NAc:progress(f,292,330),PFC:progress(f,320,358)}}
         pathwayProgress={{mesolimbic:progress(f,250,310),mesocortical:progress(f,303,355)}}
         pathwayWidthScale={{mesolimbic:1+1.8*ease(f,744,774)*(1-ease(f,825,855))}}
         pathwayOpacity={{mesolimbic:1,mesocortical:1-.6*focus}} activity={{mesolimbic:0,mesocortical:0}}/>
@@ -131,7 +135,7 @@ export const Scene04LivingSystem:React.FC<{frame:number;opening:React.ReactNode;
         <text x={960} y={78} textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize={35} fill={C.white}>MESOCORTICOLIMBIC <tspan fill={C.yellow}>DOPAMINE</tspan> SYSTEM</text>
       </g>
       <g opacity={fade(f,548,565,609)}><Label x={960} y={78} size={34} color={C.yellow}>ENHANCED DOPAMINE ACTIVITY</Label></g>
-      <BrainRegionLabel region="VTA" camera={camera} x={1040} y={940} fullName opacity={progress(f,630,651)*(1-progress(f,828,840))}/>
+      <BrainRegionLabel mirrorPosition region="VTA" camera={camera} x={1040} y={940} fullName opacity={progress(f,630,651)*(1-progress(f,828,840))}/>
       <VTAInset frame={f} camera={camera}/>
       <g opacity={fade(f,750,765,780)}><Label x={1100} y={78} size={32} color={C.yellow}>MESOLIMBIC PATHWAY</Label></g>
       <RiskyChoice frame={f}/>

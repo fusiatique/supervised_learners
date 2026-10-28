@@ -29,7 +29,7 @@ for(let f=0;f<900;f++){
   assert.ok(Math.abs(camera.scale-prev.scale)<.04,'Camera zoom must be continuous');
   assert.ok(Math.hypot(camera.x-prev.x,camera.y-prev.y)<15,'No camera position jump');
   const vta=anatomyToScreen(BRAIN_REGIONS.VTA.center,camera),nac=anatomyToScreen(BRAIN_REGIONS.NAc.center,camera),pfc=anatomyToScreen(BRAIN_REGIONS.PFC.center,camera);
-  assert.ok(pfc[0]>nac[0]&&nac[0]>vta[0],'Right-facing anterior orientation must stay consistent');
+  assert.ok(pfc[0]<nac[0]&&nac[0]<vta[0],'Left-facing anterior orientation must stay consistent');
   if(f>=T04.system){
     for(const x of [BRAIN_BOUNDS.left,BRAIN_BOUNDS.right])for(const y of [BRAIN_BOUNDS.top,BRAIN_BOUNDS.bottom]){
       const [sx,sy]=anatomyToScreen([x,y],camera);

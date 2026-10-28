@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {attentionMotion,brainFocus} from '../src/brain-attention';
 import React from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {anatomyToScreen,BrainAnatomy,BrainRegionLabel,BRAIN_PATHWAYS,BRAIN_REGIONS,PATHWAY_TARGETS,STRUCTURE_PATHS,type BrainRegion} from '../src/BrainAnatomy';
@@ -28,9 +29,9 @@ for(const [id,path] of Object.entries(NAc_INPUTS)){
   assert.strictEqual(path[0],r[id as keyof typeof NAc_INPUTS].center,'Input origins use shared references');
   assert.strictEqual(path[3],r.NAc.center,'Input target uses shared reference');
 }
-const camera={x:960,y:530,scale:1.5,anteriorRight:true};
-assert.ok(anatomyToScreen(r.PFC.center,camera)[0]>anatomyToScreen(r.VTA.center,camera)[0]);
-assert.ok(anatomyToScreen(r.cerebellum.center,camera)[0]<anatomyToScreen(r.VTA.center,camera)[0]);
+const camera={x:960,y:530,scale:1.5,anteriorRight:false};
+assert.ok(anatomyToScreen(r.PFC.center,camera)[0]<anatomyToScreen(r.VTA.center,camera)[0]);
+assert.ok(anatomyToScreen(r.cerebellum.center,camera)[0]>anatomyToScreen(r.VTA.center,camera)[0]);
 const highlights=Object.fromEntries(Object.keys(r).map(key=>[key,1]));
 const render=(frame:number)=><svg><BrainAnatomy {...camera} frame={frame} highlights={highlights} pathwayProgress={{mesolimbic:1,mesocortical:1}} activity={{mesolimbic:.4,mesocortical:.4,mesoamygdala:.2,mesohippocampal:.2}}/></svg>;
 for(const region of Object.keys(r) as BrainRegion[]){
@@ -49,3 +50,18 @@ for(const frame of [0,45,180,450,735,899]){
   for(const target of Object.values(PATHWAY_TARGETS))assert.ok(first.includes(`data-projection="VTA-to-${target}"`));
 }
 console.log('PASS: anatomical relationships; independent VTA projections; shared input anchors; consistent mirroring; independent structure highlights/opacity; attached labels; deterministic reverse seeking.');
+
+const mirroredLabel=renderToStaticMarkup(<svg><BrainRegionLabel region="PFC" camera={camera} x={1600} y={420} fullName mirrorPosition/></svg>);
+assert.ok(mirroredLabel.includes('x="320"'),'Fixed PFC callout mirrors to the left of the brain');
+const [labelTargetX,labelTargetY]=anatomyToScreen(r.PFC.center,camera);
+assert.ok(mirroredLabel.includes(`M${labelTargetX} ${labelTargetY}L355 400H320`),'Leader exits toward the nearby label');
+
+assert.equal(brainFocus(99,[100,200]).strength,0);
+assert.equal(brainFocus(200,[100,200]).strength,0);
+assert.equal(attentionMotion(brainFocus(124,[100,200])).scale,1,'Introduction pop returns precisely to its anchor');
+for(let f=0;f<240;f++){
+ const attention=brainFocus(f,[100,200]),motion=attentionMotion(attention);
+ assert.ok(attention.strength>=0&&attention.strength<=1);
+ assert.ok(motion.scale>=1&&motion.scale<=1.055);
+ assert.deepEqual(brainFocus(f,[100,200]),brainFocus(f,[100,200]),'Attention remains deterministic when seeking');
+}
