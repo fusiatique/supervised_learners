@@ -59,18 +59,21 @@ HAMSTER_IMAGE = Path(__file__).resolve().parents[2] / "suffering_hamster.jpg"  #
 WORD_Y = 2.95
 LEFT_X, RIGHT_X2 = COL_X - 1.65, COL_X + 1.65  # the exploitation and exploration sides of the column
 
-# Narration cues (seconds from the start), at about 145 words per minute.
-T_HAMSTER = 1.0  # (during "But there is another problem.")
-T_FOLLOW = 3.2  # "Should the agent always follow the path it knows,
-T_NEW = 6.9  # ...or sometimes try something new?"
-T_EGREEDY = 10.2  # "A common answer is epsilon-greedy:
-T_USUALLY = 13.0  # ...the agent usually takes its best-known action,
-T_RANDOM = 16.3  # ...but with probability epsilon, tries a random one."
-T_MATTERS = 20.8  # "That matters, because the agent only learns about states it visits.
-T_BARELY = 25.7  # Where it has barely been, it can't tell which action is best,
-T_FINDS = 30.6  # ...and what it finds
-T_CHANGE = 32.3  # ...can change its best-known action."
-T_END = 36.6
+# Narration cues (seconds from the start), from the recorded voiceover: the lines start at 0:00, 0:03,
+# 0:09 and 0:18, about 0.43 s a word.
+T_HAMSTER = 0.8  # (during "But there is another problem.")
+T_SHOULD = 3.0  # "Should the agent
+T_FOLLOW = 4.3  # ...always follow the path it knows,
+T_NEW = 6.4  # ...or sometimes try something new?"
+T_EGREEDY = 9.0  # "A common answer is epsilon-greedy:
+T_USUALLY = 12.1  # ...the agent usually takes its best-known action,
+T_RANDOM = 14.4  # ...but with probability epsilon,
+T_TRIES = 16.2  # ...tries a random one."
+T_MATTERS = 18.0  # "That matters, because the agent only learns about states it visits.
+T_BARELY = 22.6  # Where it has barely been, it can't tell which action is best,
+T_FINDS = 27.7  # ...and what it finds
+T_CHANGE = 29.3  # ...can change its best-known action."
+T_END = 32.6
 
 
 def fog_cell(grid, s):
@@ -150,7 +153,10 @@ def pill(text, point, color=DOPAMINE):
 
 
 class Scene09Exploration(PacedScene, MovingCameraScene):
-    """Every animation runs 35% slower than written (PacedScene); each beat waits for its narration cue."""
+    """Animations run as written (no PacedScene slow-down, which made this scene drag); each beat waits
+    for its narration cue."""
+
+    SLOW = 1.0
 
     def reset_to(self, stage, s, run_time=0.3):
         """The agent fades out where it is and reappears at s (each half takes run_time)."""
@@ -191,19 +197,20 @@ class Scene09Exploration(PacedScene, MovingCameraScene):
         fog = {s: fog_cell(grid, s) for s in FOG}
         exploit = Text("Exploitation", font_size=34, color=DOPAMINE).move_to([LEFT_X, WORD_Y, 0])
         explore = Text("Exploration", font_size=34, color=MODEL).move_to([RIGHT_X2, WORD_Y, 0])
-        self.play(stage.place(JUNCTION, run_time=0.8))
+        self.at(T_SHOULD)
+        self.play(stage.place(JUNCTION, run_time=0.6))
         arrows = stage.add_arrows()
-        self.play(LaggedStart(*[FadeIn(a) for a in arrows], lag_ratio=0.1), run_time=0.5)
+        self.play(LaggedStart(*[FadeIn(a) for a in arrows], lag_ratio=0.1), run_time=0.4)
         # "...always follow the path it knows..."
-        self.at(T_FOLLOW + 0.6)
+        self.at(T_FOLLOW)
         self.play(stage.light("up", color=DOPAMINE), Indicate(stars[GOAL], color=DOPAMINE),
-                  FadeIn(exploit, shift=0.3 * RIGHT), run_time=0.8)
+                  FadeIn(exploit, shift=0.3 * RIGHT), run_time=0.7)
         # "...or sometimes try something new?"  The corner below is unexplored.
         under_fog = [glows[s] for s in FOG] + [values[s] for s in FOG] + [arrows_in_cells[s] for s in FOG]
         self.at(T_NEW)
         self.play(LaggedStart(*[FadeIn(fog[s], scale=1.05) for s in FOG], lag_ratio=0.15),
-                  FadeOut(*under_fog), run_time=0.9)
-        self.play(stage.light("down", color=MODEL), FadeIn(explore, shift=0.3 * LEFT), run_time=0.7)
+                  FadeOut(*under_fog), run_time=0.7)
+        self.play(stage.light("down", color=MODEL), FadeIn(explore, shift=0.3 * LEFT), run_time=0.6)
 
         # "A common answer is epsilon-greedy: the agent usually takes its best-known action, but with
         # probability epsilon, tries a random one."  The rule, a slider at 0.1 and a bar split into
@@ -213,9 +220,9 @@ class Scene09Exploration(PacedScene, MovingCameraScene):
         eps = ValueTracker(0.1)
         line, ends, eps_label, knob, readout, bar, bar_labels = epsilon_controls(eps)
         self.at(T_EGREEDY)
-        self.play(FadeOut(exploit, explore), FadeIn(title, shift=0.1 * DOWN), stage.unlight(), run_time=0.6)
+        self.play(FadeOut(exploit, explore), FadeIn(title, shift=0.1 * DOWN), stage.unlight(), run_time=0.5)
         self.play(Write(rule), FadeIn(line, ends, eps_label, knob, readout, bar, bar_labels),
-                  box.swap(EGREEDY_TEX, font_size=32), run_time=1.2)
+                  box.swap(EGREEDY_TEX, font_size=32), run_time=1.0)
 
         def choose(kind):
             part = bar[0] if kind == "explore" else bar[1]
@@ -226,15 +233,17 @@ class Scene09Exploration(PacedScene, MovingCameraScene):
         # known path to the 10, then resets to the junction.
         self.at(T_USUALLY)
         self.play(choose("exploit"), stage.light("up", color=DOPAMINE), run_time=0.5)
-        self.play(stage.move("up", run_time=0.6))
+        self.play(stage.move("up", run_time=0.5))
         self.play(stars[GOAL].collect(), run_time=0.5)
-        self.reset_to(stage, JUNCTION, run_time=0.35)
-        # "...but with probability epsilon, tries a random one."  The violet part pulses: a random step
-        # into the fog, which lifts from the cell it lands on.
+        self.reset_to(stage, JUNCTION, run_time=0.3)
+        # "...but with probability epsilon..."  The violet part pulses.  "...tries a random one."  A random
+        # step into the fog, which lifts from the cell it lands on.
         dice = pill("random!", grid.center_of(JUNCTION) + 0.5 * grid.cell * (RIGHT + UP), color=MODEL)
         self.at(T_RANDOM)
-        self.play(choose("explore"), FadeIn(dice, scale=1.3), stage.light("down", color=MODEL), run_time=0.6)
-        self.play(stage.move("down", run_time=0.6), FadeOut(dice), FadeOut(fog[19], scale=1.1), run_time=0.6)
+        self.play(choose("explore"), run_time=0.6)
+        self.at(T_TRIES)
+        self.play(FadeIn(dice, scale=1.3), stage.light("down", color=MODEL), run_time=0.4)
+        self.play(stage.move("down", run_time=0.5), FadeOut(dice), FadeOut(fog[19], scale=1.1), run_time=0.5)
         self.play(stage.unlight(), run_time=0.3)
 
         # "That matters, because the agent only learns about states it visits. Where it has barely been,
@@ -244,7 +253,7 @@ class Scene09Exploration(PacedScene, MovingCameraScene):
             [grid.get_x(), -3.45, 0])
         self.at(T_MATTERS)
         self.play(Indicate(VGroup(*[fog[s] for s in (20, 24, 25)]), color=MODEL, scale_factor=1.04),
-                  FadeIn(unknown, shift=0.1 * UP), run_time=0.9)
+                  FadeIn(unknown, shift=0.1 * UP), run_time=0.7)
         self.at(T_BARELY)
         self.play(*[fog[s][1].animate(rate_func=rate_functions.there_and_back).scale(1.4) for s in (20, 24, 25)],
                   run_time=0.8)
@@ -268,13 +277,13 @@ class Scene09Exploration(PacedScene, MovingCameraScene):
             *[FadeIn(glow_square(grid, s, V_new[s]).set_fill(opacity=glow_opacity(V_new[s])), value_tex(V_new[s], grid, s))
               for s in revealed],
             FadeIn(glow_square(grid, HIDDEN, HIDDEN_REWARD).set_fill(opacity=glow_opacity(HIDDEN_REWARD))),
-            run_time=1.0,
+            run_time=0.8,
         )
         self.play(LaggedStart(*[Transform(arrows_in_cells[s], policy_arrow(grid, s, new_policy[s])) for s in changed],
                               lag_ratio=0.15),
                   *[FadeIn(policy_arrow(grid, s, new_policy[s])) for s in revealed if s != stage.state],
-                  run_time=1.2)
+                  run_time=1.0)
         route, _ = policy_route(new_policy | {HIDDEN: "up"}, JUNCTION, grid, rewards=REWARDS_ALL)
         new_route = dashed_trail([grid.center_of(s) for s in route], DOPAMINE).set_z_index(9)
-        self.play(Create(new_route), Indicate(arrows_in_cells[JUNCTION], color=DOPAMINE, scale_factor=1.5), run_time=1.0)
+        self.play(Create(new_route), Indicate(arrows_in_cells[JUNCTION], color=DOPAMINE, scale_factor=1.5), run_time=0.9)
         self.at(T_END)

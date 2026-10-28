@@ -57,25 +57,25 @@ B0, TIPPING, NATURAL_REACH = 0.40, 0.30, 0.20  # the baseline, the tipping point
 
 # Narration cues (seconds from the start), at about 150 words per minute with short pauses between
 # sentences. Each beat waits for its cue with self.at(); change them if the narrator is faster or slower.
-T_RAPIDLY = 5.5  # "A drug can change the internal state rapidly and powerfully.
-T_CLOSER = 9.9  # If that brings the agent closer to its setpoint, the drug is valuable because it relieves the deviation."
-T_RELIEF = 18.2  # "So, as Keramati and colleagues put it, drug taking is reinforced by relief,
-T_PLEASURE = 23.4  # ...not just pleasure."
-T_CHRONIC = 25.8  # "Chronic use also changes the system itself.
-T_BASELINE = 29.0  # In our simulation, each dose lowers the baseline that H drifts back to.
-T_TIPPING = 34.5  # Below a tipping point,
-T_NATURAL = 36.1  # natural rewards can no longer bring H up to the setpoint.
-T_ONLY_DRUG = 40.8  # Only the drug can,
-T_FURTHER = 42.4  # and every dose lowers the baseline further."
-T_LOOP = 46.4  # "This creates a feedback loop:
-T_USE = 48.7  # drug use lowers the baseline,
-T_GROWS = 50.7  # the deviation without the drug grows,
-T_NEXT_DOSE = 53.1  # and the next dose becomes more rewarding.
-T_LIKE = 56.3  # The agent doesn't like the drug more;
-T_NEEDS = 59.4  # it needs it more."
-T_PROPOSED = 62.2  # "This is a proposed explanation, not the whole story of addiction,
-T_LINKS = 66.6  # but it links homeostatic regulation with learning."
-T_END = 71.0
+T_RAPIDLY = 4.0  # "A drug can change the internal state rapidly and powerfully.
+T_CLOSER = 7.7  # If that brings the agent closer to its setpoint, the drug is valuable because it relieves the deviation."
+T_RELIEF = 14.0  # "So, as Keramati and colleagues put it, drug taking is reinforced by relief,
+T_PLEASURE = 19.6  # ...not just pleasure."
+T_CHRONIC = 21.5  # "Chronic use also changes the system itself.
+T_BASELINE = 24.4  # In our simulation, each dose lowers the baseline that H drifts back to.
+T_TIPPING = 29.7  # Below a tipping point,
+T_NATURAL = 31.3  # natural rewards can no longer bring H up to the setpoint.
+T_ONLY_DRUG = 35.4  # Only the drug can,
+T_FURTHER = 37.8  # and every dose lowers the baseline further."
+T_LOOP = 40.0  # "This creates a feedback loop:
+T_USE = 42.0  # drug use lowers the baseline,
+T_GROWS = 44.0  # the deviation without the drug grows,
+T_NEXT_DOSE = 47.0  # and the next dose becomes more rewarding.
+T_LIKE = 49.9  # The agent doesn't like the drug more;  ("doesn't" at 49.5; this lands on "like")
+T_NEEDS = 52.0  # it needs it more."
+T_PROPOSED = 54.0  # "This is a proposed explanation, not the whole story of addiction,
+T_LINKS = 58.4  # but it links homeostatic regulation with learning."
+T_END = 62.5
 
 
 def choice(icon, name, gain):
@@ -238,7 +238,7 @@ class Scene14Drugs(PacedScene, Scene):
         for _ in range(2):
             self.take(pill, agent, gauge, 100 * gauge.value.get_value() + DOSE)
             self.play(baseline.animate.increment_value(-0.08), gauge.value.animate.set_value(baseline.get_value() - 0.08),
-                      run_time=1.0, rate_func=rate_functions.ease_out_sine)
+                      run_time=0.7, rate_func=rate_functions.ease_out_sine)
         # "Below a tipping point..."  B is now under it.
         tip = tipping_mark(gauge)
         self.at(T_TIPPING)
@@ -252,9 +252,9 @@ class Scene14Drugs(PacedScene, Scene):
         self.play(Indicate(f["gap"], color=HARM, scale_factor=1.05), run_time=0.6)
         # "Only the drug can..."  Without anything, H sinks back to B; a dose brings it to the setpoint.
         self.at(T_ONLY_DRUG)
-        self.play(gauge.value.animate.set_value(baseline.get_value()), food.animate.set_opacity(0.35), run_time=0.6)
+        self.play(gauge.value.animate.set_value(baseline.get_value()), food.animate.set_opacity(0.35), run_time=0.4)
         self.take(pill, agent, gauge, 100 * baseline.get_value() + DOSE)
-        self.play(Transform(agent.mouth, agent.make_mouth("happy")), FadeIn(steps[2], shift=0.1 * UP), run_time=0.4)
+        self.play(Transform(agent.mouth, agent.make_mouth("happy")), FadeIn(steps[2], shift=0.1 * UP), run_time=0.3)
         # "...and every dose lowers the baseline further."
         self.at(T_FURTHER)
         self.play(baseline.animate.increment_value(-0.08), gauge.value.animate.set_value(baseline.get_value() - 0.06),
@@ -289,13 +289,13 @@ class Scene14Drugs(PacedScene, Scene):
         # "...and the next dose becomes more rewarding."  The loop closes through drug seeking, and a dot
         # runs once around it.
         self.at(T_NEXT_DOSE)
-        self.play(Create(arrows[2]), FadeIn(nodes[3], shift=0.1 * LEFT), run_time=0.6)
-        self.play(Create(arrows[3]), FadeIn(nodes[4], shift=0.1 * UP), run_time=0.5)
-        self.play(Create(arrows[4]), run_time=0.4)
+        self.play(Create(arrows[2]), FadeIn(nodes[3], shift=0.1 * LEFT), run_time=0.5)
+        self.play(Create(arrows[3]), FadeIn(nodes[4], shift=0.1 * UP), run_time=0.4)
+        self.play(Create(arrows[4]), run_time=0.3)
         runner = Dot(arcs[0].get_start(), radius=0.09, color=INK)
-        self.play(FadeIn(runner, scale=0.5), run_time=0.2)
-        self.play(Succession(*[MoveAlongPath(runner, arc, rate_func=linear) for arc in arcs]), run_time=1.4)
-        self.play(FadeOut(runner), run_time=0.2)
+        self.play(FadeIn(runner, scale=0.5), run_time=0.1)
+        self.play(Succession(*[MoveAlongPath(runner, arc, rate_func=linear) for arc in arcs]), run_time=0.8)
+        self.play(FadeOut(runner), run_time=0.1)
         # "The agent doesn't like the drug more; it needs it more."  In the middle of the loop.
         liking = Text("likes it more", font_size=28, color=MUTED).move_to([0, -0.75, 0])
         no = strike(liking)

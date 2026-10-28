@@ -2,7 +2,7 @@
 
 Open `animation/index.html` in Live Server. Maths 09 follows Maths 07 in chapter 3; its direct link is `#maths-exploration`. `animation/maths/html/scene09.html` also provides standalone playback.
 
-37 seconds · 1920 × 1080 · 60 FPS · silent (narration is read over it).
+33 seconds · 1920 × 1080 · 60 FPS · silent (narration is read over it).
 
 From `animation/maths/manim`:
 
@@ -17,20 +17,20 @@ The script (shortened, and pointed at our simulation): "But there is another pro
 
 The point about states the agent has barely visited is what the grey cells of the simulation's policy map show: states visited too rarely to have learned a preference.
 
-Start reading at 0:00. Timings assume about 145 words per minute.
+Start reading at 0:00. The cues follow the recorded voiceover, whose lines start at 0:00, 0:03, 0:09 and 0:18.
 
 | Time | Say | On screen |
 | --- | --- | --- |
 | 0:00 | "But there is another problem." | Opens on Maths 07's last frame. The right column clears and the agent's smile fades. At 0:01 the suffering hamster (`animation/maths/suffering_hamster.jpg`) flashes up full-height in the centre of the screen, half see-through, for about half a second. |
-| 0:03 | "Should the agent always follow the path it knows, or sometimes try something new?" | The agent steps down to s14, a junction, and its arrows appear. On "the path it knows" (0:04) the up arrow lights amber towards the known 10 and "Exploitation" (amber) slides in. On "try something new" (0:07) fog rolls over the bottom-right corner (unexplored, a "?" in each cell), the down arrow into it lights violet and "Exploration" (violet) slides in. |
-| 0:10 | "A common answer is epsilon-greedy: the agent usually takes its best-known action, but with probability epsilon, tries a random one." | "ε-greedy" and its rule (random action with probability ε, best-known action with probability 1 − ε), an ε slider at 0.1 and a bar split into "explore" (violet) and "exploit" (amber); the policy box becomes π = ε-greedy on Q^π. On "usually takes its best-known action" (0:13) the amber part pulses and the agent takes the known path to the 10 (a burst), then resets to the junction. On "tries a random one" (0:16.5) the violet part pulses, "random!", and the agent steps down into the fog, which lifts from that cell. |
-| 0:21 | "That matters, because the agent only learns about states it visits. Where it has barely been, it can't tell which action is best, and what it finds can change its best-known action." | The rest of the corner is still fogged: it pulses and "never visited: no idea yet which action is best" appears under the grid; on "barely been" (0:25.5) the question marks pulse. On "what it finds" (0:30.5) the fog lifts from the next cells, revealing a 20, which bursts. On "can change its best-known action" (0:32.5) every value is recalculated with the 20 and the glow is rescaled; the arrows that now have a better action swing (s14's flips from up to down), and the new route from the junction draws in, down to the 20. |
+| 0:03 | "Should the agent always follow the path it knows, or sometimes try something new?" | The agent steps down to s14, a junction, and its arrows appear. On "always follow the path it knows" (0:04.3) the up arrow lights amber towards the known 10 and "Exploitation" (amber) slides in. On "or sometimes try something new" (0:06.4) fog rolls over the bottom-right corner (unexplored, a "?" in each cell), the down arrow into it lights violet and "Exploration" (violet) slides in. |
+| 0:09 | "A common answer is epsilon-greedy: the agent usually takes its best-known action, but with probability epsilon, tries a random one." | "ε-greedy" and its rule (random action with probability ε, best-known action with probability 1 − ε), an ε slider at 0.1 and a bar split into "explore" (violet) and "exploit" (amber); the policy box becomes π = ε-greedy on Q^π. On "usually takes its best-known action" (0:12) the amber part pulses and the agent takes the known path to the 10 (a burst), then resets to the junction. On "but with probability epsilon" (0:14.5) the violet part pulses; on "tries a random one" (0:16) "random!" appears and the agent steps down into the fog, which lifts from that cell. |
+| 0:18 | "That matters, because the agent only learns about states it visits. Where it has barely been, it can't tell which action is best, and what it finds can change its best-known action." | The rest of the corner is still fogged: it pulses and "never visited: no idea yet which action is best" appears under the grid; on "Where it has barely been" (0:22.5) the question marks pulse. On "and what it finds" (0:27.5) the fog lifts from the next cells, revealing a 20, which bursts. On "can change its best-known action" (0:29.5) every value is recalculated with the 20 and the glow is rescaled; the arrows that now have a better action swing (s14's flips from up to down), and the new route from the junction draws in, down to the 20. |
 
 Each beat waits for its cue with `self.at(T_...)`; the cue times are constants at the top of `scene09_exploration.py`.
 
 ## Implementation
 
-- Every animation plays 35% slower than written (`PacedScene`, `SLOW`); `PacedScene.at(t)` waits for an absolute cue and clears the extra time owed (the cue already allows for it).
+- Animations play as written: the scene sets `SLOW = 1.0`, turning off `PacedScene`'s 35% slow-down, which made it drag. `PacedScene.at(t)` waits for each absolute cue.
 - The opening frame is `scene07_policy_improvement.end_frame()`, so the scenes join exactly.
 - The suffering hamster is shown as an `ImageMobject` fitted to the frame height at 50% opacity for about 0.6 s. It is loaded through Pillow as RGBA, because Manim cannot set the opacity of a plain RGB JPEG.
 - Manim 0.22 cannot draw images with Pillow 12 or later (it passes a `mode` argument Pillow has removed), so `pyproject.toml` pins `pillow>=11,<12`; after pulling, run `uv sync`.
