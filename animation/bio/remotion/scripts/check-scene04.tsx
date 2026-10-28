@@ -66,8 +66,8 @@ for(let f=240;f<870;f++){
 // Compare the complete unchanged legacy artwork/citations, rather than just timing constants.
 for(const frame of [0,60,120,209,239,870,871,900,1020,1200,1319]){
   const f=scene04TimelineFrame(frame);
-  const old=renderToStaticMarkup(<><MesocorticolimbicArtwork frame={f}/><g opacity={1-progress(f,585,600)}><SourceCitation frame={f} source="Piantadosi et al., 2021"/></g><g opacity={progress(f,600,615)}><SourceCitation frame={f} source="Feltenstein et al., 2009"/></g></>);
-  assert.equal(renderToStaticMarkup(<Scene04PlaybackArtwork frame={frame}/>),old,`Preserve all artwork outside revised interval at ${frame}`);
+  const normalizeIds=(svg:string)=>svg.replace(/R[a-zA-Z0-9]+(cortex|white|clip)/g,'brain-$1');
+  assert.equal(normalizeIds(renderToStaticMarkup(<svg><Scene04PlaybackArtwork frame={frame}/></svg>)),normalizeIds(renderToStaticMarkup(<svg><MesocorticolimbicArtwork frame={f}/><g opacity={1-progress(f,585,600)}><SourceCitation frame={f} source="Piantadosi et al., 2021"/></g><g opacity={progress(f,600,615)}><SourceCitation frame={f} source="Feltenstein et al., 2009"/></g></svg>)),`Preserve all artwork outside revised interval at ${frame}`);
 }
 for(const frame of [240,330,450,570,660,735,795,830,869]){
   const render=()=>renderToStaticMarkup(<svg style={{background:C.bg}}><Scene04PlaybackArtwork frame={frame}/></svg>);

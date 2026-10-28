@@ -40,7 +40,7 @@ export const getScene05IntroCamera=(f:number):BrainCamera=>{
 const VtaFocusPulse:React.FC<{camera:BrainCamera;frame:number}>=({camera,frame})=>{
  const amount=1-ease(frame,600,618);
  return <g transform={`translate(${camera.x} ${camera.y}) scale(${camera.scale}) translate(-500 -330)`} opacity={amount}>
-  <path d={STRUCTURE_PATHS.VTA} fill={C.blue} fillOpacity={.15+.18*(.5+.5*Math.sin(frame*Math.PI/30))} stroke={C.blue} strokeWidth={2.6}/>
+  <path d={STRUCTURE_PATHS.VTA} fill={C.yellow} fillOpacity={.15+.18*(.5+.5*Math.sin(frame*Math.PI/30))} stroke={C.yellow} strokeWidth={2.6}/>
  </g>;
 };
 
@@ -55,7 +55,7 @@ const AnatomicalIntroduction:React.FC=()=>{
   const ss=mix(1,.06,insetReturn);
   return <g opacity={1-progress(f,600,660)}>
     <BrainAnatomy {...camera}
-      regionFocus={{VTA:{...(frame<330?brainFocus(frame+270,[60,600]):brainFocus(f,[390,590])),color:C.blue},NAc:brainFocus(frame,[330,700])}}
+      regionFocus={{VTA:{...(frame<330?brainFocus(frame+270,[60,600]):brainFocus(f,[390,590])),color:C.yellow},NAc:brainFocus(frame,[330,700])}}
       pathwayFocus={{mesolimbic:brainFocus(f,[390,590]).strength}}
       cortexOpacity={mix(.65,.32,ease(f,0,180))} frame={540+f}
       highlights={{VTA:1,NAc:ease(frame,330,348)*mix(mix(1,.6,ease(f,0,180)),1,ease(f,300,390)),PFC:mix(1,.15,ease(f,0,90))}}
@@ -192,7 +192,7 @@ const SystemToSignalsBridge:React.FC=()=>{
   const pulse=(Math.max(0,f-75)%60)/60;
   const textOpacity=progress(f,0,20)*(1-progress(f,245,270));
   return <g>
-    <BrainAnatomy {...camera} regionFocus={{VTA:{...brainFocus(f,[60,600]),color:C.blue}}} cortexOpacity={.65} frame={540+f}
+    <BrainAnatomy {...camera} regionFocus={{VTA:{...brainFocus(f,[60,600]),color:C.yellow}}} cortexOpacity={.65} frame={540+f}
       highlights={{VTA:1,NAc:0,PFC:1}}
       pathwayProgress={{mesolimbic:1,mesocortical:1}}
       pathwayOpacity={{mesolimbic:1,mesocortical:.4}}
@@ -205,8 +205,8 @@ const SystemToSignalsBridge:React.FC=()=>{
       <g opacity={progress(f,65,100)}>
         <Label x={960} y={1010} size={28}>Start where many dopamine signals originate.</Label>
       </g>
-      <circle cx={vx} cy={vy} r={25+28*pulse} fill="none" stroke={C.blue} strokeWidth={2.5} opacity={focus*(1-pulse)*.8}/>
-      <circle cx={vx} cy={vy} r={19} fill={C.blue} opacity={focus*(.08+.04*Math.sin(f*.08))}/>
+      <circle cx={vx} cy={vy} r={25+28*pulse} fill="none" stroke={C.yellow} strokeWidth={2.5} opacity={focus*(1-pulse)*.8}/>
+      <circle cx={vx} cy={vy} r={19} fill={C.yellow} opacity={focus*(.08+.04*Math.sin(f*.08))}/>
     </g>
     <SourceCitation frame={f} source="Feltenstein et al., 2009"/>
   </g>;

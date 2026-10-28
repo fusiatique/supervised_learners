@@ -49,7 +49,9 @@ export const RatBrain:React.FC<SymbolPlacement & {prelimbic?:number;label?:boole
  const attention=focus??{strength:0,age:0},motion=attentionMotion(attention);
  return <g transform={`translate(${x} ${y}) scale(${scale})`} opacity={opacity}>
   <g transform="scale(-1 1)"><g stroke={C.gray} strokeWidth={3} fill={C.bg} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M-185 15C-215 -55 -120 -114 -20 -115C72 -119 152 -97 188 -44Q204 -20 193 24Q154 74 65 72L-90 80Q-165 80 -185 15Z" fill={C.blue} fillOpacity={.035} {...draw(amount)}/>
+    <path d="M-185 15C-215 -55 -120 -114 -20 -115C72 -119 152 -97 188 -44Q204 -20 193 24Q154 74 65 72L-90 80Q-165 80 -185 15Z" fill="#617188" fillOpacity={.25*amount} {...draw(amount)}/>
+    <path d="M-133 -12C-98 -67 5 -76 86 -49C118 -38 137 -16 126 2C97 -19 18 -38 -53 -19L-113 8Z" fill="#8d9bad" fillOpacity={.18*amount} stroke="none"/>
+    <path d="M-33 4C-22 -17 18 -23 42 -5C65 17 43 43 13 44C-15 44 -43 27 -33 4Z" fill="#8291a6" fillOpacity={.2*amount} strokeWidth={1.5} opacity={amount}/>
     <path d="M185 -38Q235 -64 253 -27Q257 4 196 22M-184 10Q-243 0 -248 42Q-243 85 -174 71M-181 74L-139 109H-89L-96 78" {...draw(amount)}/>
     <path d="M-146 -28Q-62 -78 52 -54Q102 -43 130 -11M-138 0Q-36 -35 53 -6Q82 18 40 32M-232 35L-190 44M-231 51L-194 59" opacity={.45} {...draw(amount)}/>
   </g>

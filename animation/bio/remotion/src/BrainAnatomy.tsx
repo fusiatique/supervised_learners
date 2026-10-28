@@ -1,4 +1,6 @@
 import React from 'react';
+import {BrainSurface} from './BrainSurface';
+import {BRAIN_COLORS,STRIATUM_PATHS} from './brain-anatomy-geometry';
 import {attentionMotion,type BrainAttention} from './brain-attention';
 import {C, Label} from './components';
 import {curvePoint, draw, progress} from './motion';
@@ -17,7 +19,7 @@ const pathD=(p:number[][])=>`M${p[0].join(' ')}C${p.slice(1).map(v=>v.join(' '))
 const Stroke:React.FC<{d:string;amount:number;opacity?:number;width?:number;fill?:string}>=({d,amount,opacity=1,width=2.5,fill='none'})=><path d={d} fill={fill} stroke={C.gray} strokeWidth={width} opacity={opacity} strokeLinecap="round" strokeLinejoin="round" {...draw(amount)}/>;
 
 export const BrainRegionHighlight:React.FC<{region:BrainRegion;amount?:number;activity?:number;opacity?:number;attention?:BrainAttention}>=({region,amount=1,activity=0,opacity=1,attention})=>{
-  const color=region==='VTA'?C.yellow:C.blue;
+  const color=region==='VTA'?BRAIN_COLORS.VTA:region==='NAc'?BRAIN_COLORS.NAc:region==='PFC'?BRAIN_COLORS.PFC:C.blue;
   const focus=attention??{strength:0,age:0},motion=attentionMotion(focus);
   const [cx,cy]=BRAIN_REGIONS[region].center;
   return <g opacity={opacity*amount} data-highlight={region} transform={focus.strength>0?`translate(${cx} ${cy}) scale(${motion.scale}) translate(${-cx} ${-cy})`:undefined}>
@@ -32,13 +34,14 @@ export const BrainRegionHighlight:React.FC<{region:BrainRegion;amount?:number;ac
 
 export const DopamineParticle:React.FC<{pathway:PathwayId;phase:number;opacity?:number}>=({pathway,phase,opacity=1})=>{
   const [x,y]=curvePoint(Math.max(0,Math.min(1,phase)),BRAIN_PATHWAYS[pathway]);
-  return <g opacity={opacity}><circle cx={x} cy={y} r={7} fill={C.yellow} opacity={.09}/><circle cx={x} cy={y} r={2.8} fill={C.yellow}/></g>;
+  const color=pathway==='mesolimbic'?BRAIN_COLORS.mesolimbic:pathway==='mesocortical'?BRAIN_COLORS.mesocortical:C.yellow;
+  return <g opacity={opacity}><circle cx={x} cy={y} r={7} fill={color} opacity={.09}/><circle cx={x} cy={y} r={2.8} fill={color}/></g>;
 };
 export const DopaminePathway:React.FC<{pathway:PathwayId;amount?:number;opacity?:number;frame?:number;activity?:number;widthScale?:number;attention?:number}>=({pathway,amount=1,opacity=1,frame=0,activity=0,widthScale=1,attention=0})=><g opacity={opacity} data-projection={`VTA-to-${PATHWAY_TARGETS[pathway]}`}>
-  <path d={pathD(BRAIN_PATHWAYS[pathway])} fill="none" stroke={C.yellow} strokeWidth={(pathway==='mesolimbic'?2.4:pathway==='mesocortical'?2:1.4)*widthScale} strokeLinecap="round" {...draw(amount)}/>
+  <path d={pathD(BRAIN_PATHWAYS[pathway])} fill="none" stroke={pathway==='mesolimbic'?BRAIN_COLORS.mesolimbic:pathway==='mesocortical'?BRAIN_COLORS.mesocortical:C.yellow} strokeWidth={(pathway==='mesolimbic'?2.4:pathway==='mesocortical'?2:1.4)*widthScale} strokeLinecap="round" {...draw(amount)}/>
   {attention>0&&<g opacity={attention} data-pathway-attention={pathway}>
-    <path d={pathD(BRAIN_PATHWAYS[pathway])} fill="none" stroke={pathway==='mesocortical'?C.blue:C.yellow} strokeWidth={13} strokeOpacity={.1} strokeLinecap="round" {...draw(amount)}/>
-    <path d={pathD(BRAIN_PATHWAYS[pathway])} fill="none" stroke={pathway==='mesocortical'?C.blue:C.yellow} strokeWidth={3.2+.6*Math.sin(frame*Math.PI/27)} strokeLinecap="round" {...draw(amount)}/>
+    <path d={pathD(BRAIN_PATHWAYS[pathway])} fill="none" stroke={pathway==='mesocortical'?BRAIN_COLORS.mesocortical:pathway==='mesolimbic'?BRAIN_COLORS.mesolimbic:C.yellow} strokeWidth={13} strokeOpacity={.1} strokeLinecap="round" {...draw(amount)}/>
+    <path d={pathD(BRAIN_PATHWAYS[pathway])} fill="none" stroke={pathway==='mesocortical'?BRAIN_COLORS.mesocortical:pathway==='mesolimbic'?BRAIN_COLORS.mesolimbic:C.yellow} strokeWidth={3.2+.6*Math.sin(frame*Math.PI/27)} strokeLinecap="round" {...draw(amount)}/>
   </g>}
   {Array.from({length:pathway==='mesolimbic'||pathway==='mesocortical'?3:1},(_,i)=>{
     const phase=((Math.max(0,frame)+i*45)%135)/135;
@@ -81,17 +84,17 @@ export const BrainAnatomy:React.FC<BrainAnatomyProps>=(props)=>{
     <g transform={`translate(${x} ${y}) scale(${scale}) translate(-500 -330)`}>
       <g transform={anteriorRight?'translate(1000 0) scale(-1 1)':undefined}>
         <g opacity={cortexOpacity} data-anatomy="cerebral-cortex">
-          <Stroke d={CORTEX_OUTLINE} amount={amount} fill={C.bg}/>
-          <path d={CORTEX_OUTLINE} fill={C.gray} fillOpacity={.025*amount} stroke="none"/>
-          {CORTICAL_SULCI.map(d=><Stroke key={d} d={d} amount={progress(amount,.2,1)} opacity={.4} width={1.5}/>)}
-          <g opacity={detail*.6}>{FINE_SULCI.map(d=><Stroke key={d} d={d} amount={progress(amount,.5,1)} opacity={.5} width={1.1}/>)}</g>
+          <BrainSurface amount={amount} detail={detail}/>
         </g>
         {structural.map((region,i)=><g key={region} data-anatomy={region} opacity={(regionOpacity[region]??1)*cortexOpacity}>
-          <path d={STRUCTURE_PATHS[region]} fill={C.gray} fillOpacity={(projected.has(region)?.045:region==='corpusCallosum'?.11:.055)*progress(amount,.2,1)} stroke="none"/>
+          <path d={STRUCTURE_PATHS[region]} fill={region==='corpusCallosum'?'#b3bac5':region==='cerebellum'?'#6d788c':region==='thalamus'?'#8990a1':'#66758a'} fillOpacity={(projected.has(region)?.10:region==='corpusCallosum'?.48:.25)*progress(amount,.2,1)} stroke="none"/>
           <Stroke d={STRUCTURE_PATHS[region]} amount={progress(amount,.15+Math.min(i*.018,.2),1)} opacity={projected.has(region)?.32:.65} width={region==='corpusCallosum'?2.3:1.7}/>
           {region==='cerebellum'&&CEREBELLAR_FOLIA.map(d=><Stroke key={d} d={d} amount={progress(amount,.3,1)} opacity={.5} width={1.3}/>)}
           {region==='thalamus'&&<ellipse cx={BRAIN_REGIONS.thalamus.center[0]} cy={BRAIN_REGIONS.thalamus.center[1]} rx={6} ry={4} fill={C.gray} opacity={detail*.2*amount}/>}
         </g>)}
+        <g data-layer="striatal-context" opacity={cortexOpacity*progress(amount,.3,1)}>
+          {Object.entries(STRIATUM_PATHS).map(([name,d])=><path key={name} data-anatomy={name} d={d} fill={BRAIN_COLORS.striatum} fillOpacity={.07} stroke={BRAIN_COLORS.striatum} strokeOpacity={.26} strokeWidth={1.3}/>)}
+        </g>
         <g opacity={detail*cortexOpacity*.5} data-anatomy="fornix-and-hypothalamic-landmarks">
           <Stroke d="M369 346C398 324 445 311 496 312C544 312 593 325 613 348M443 395Q432 416 425 431M453 431L447 446Q449 455 457 453" amount={progress(amount,.5,1)} width={1.2}/>
         </g>

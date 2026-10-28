@@ -87,3 +87,13 @@ export const CEREBELLAR_FOLIA=[
   'M622 545Q676 533 721 548T774 560','M644 557Q685 550 723 563L749 570',
   'M674 479Q670 513 683 543L699 573',
 ];
+
+/** Shared deep-striatal projection. Caudate follows the ventricular arc;
+ * putamen is lateral and the NAc occupies its anteroventral junction.
+ * References: UTHealth Neuroanatomy Online, Lab 10; NCBI PMC4202840.
+ */
+export const STRIATUM_PATHS={
+ caudate:'M414 367C387 371 369 353 373 329C377 294 412 268 457 256C510 242 568 249 608 278C640 301 655 335 650 369C645 407 613 434 570 447L561 440C597 424 620 400 625 369C630 340 616 314 589 297C553 274 506 272 466 283C432 293 416 310 425 329C438 351 433 363 414 367Z',
+ putamen:'M394 351C415 341 436 355 441 378C447 403 433 424 412 429C392 432 375 414 373 391C371 374 380 358 394 351Z',
+} as const;
+export const BRAIN_COLORS={VTA:'#f2cd70',NAc:'#72c99d',PFC:'#72b9ec',striatum:'#a597c4',mesolimbic:'#72c99d',mesocortical:'#72b9ec'} as const;

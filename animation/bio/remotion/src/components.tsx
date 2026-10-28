@@ -1,4 +1,6 @@
 import React from 'react';
+import {BrainSurface} from './BrainSurface';
+import {CEREBELLAR_FOLIA,STRUCTURE_PATHS} from './brain-anatomy-geometry';
 import {draw, pop, progress} from './motion';
 
 export const C = {bg: '#101827', white: '#F5F5F5', blue: '#65C7F7', yellow: '#FFD166', green: '#6DD5A0', red: '#F07178', gray: '#AAB4C3'};
@@ -45,10 +47,12 @@ export const DecisionPath: React.FC<{amount: number; color?: string; success?: n
   {frame>=120&&frame<200&&[0,1,2].map(i=><g key={i} opacity={pop(frame,120+i*10)} transform={`translate(${470+i*95} ${420+i*65}) rotate(${Math.sin(frame*.1+i)*22})`}><path d={i%2?'M25 0H-25L-13 -10M-25 0L-13 10':'M-25 0H25L13 -10M25 0L13 10'} stroke={C.red}/></g>)}
 </g>;
 
-const brainOutline='M-170 80C-231 50 -239 -12 -212 -62C-203 -111 -159 -141 -109 -146C-77 -182 -21 -188 18 -169C71 -184 126 -159 148 -123C196 -107 221 -65 213 -22C235 24 209 72 167 84C133 113 83 105 48 90L62 146L33 152L-5 91C-57 114 -127 114 -170 80Z';
 export const BrainIllustration: React.FC<Placement & {frame: number; signal?: number}> = ({x=0,y=0,scale=1,color=C.yellow,amount=1,frame,signal=0}) => <g transform={`translate(${x} ${y}) scale(${scale})`} stroke={color} strokeWidth={4} fill="none" strokeLinecap="round" strokeLinejoin="round">
-  <path d={brainOutline} {...draw(amount)}/>
-  {['M-193 -46Q-143 -85 -127 -40T-61 -13Q-34 4 -53 47','M-105 -137Q-125 -89 -76 -86T-7 -121Q20 -142 47 -112','M-30 -154Q-4 -96 25 -72T37 -17Q9 12 31 58','M68 -142Q112 -106 83 -66T106 -8Q151 13 180 -25','M-195 33Q-147 5 -126 43T-65 66','M78 77Q136 47 166 72','M132 -95Q165 -68 187 -86'].map(d=><path key={d} d={d} {...draw(progress(amount,.3,1))}/>)}
+  <g transform="scale(.59) translate(-500 -330)">
+    <BrainSurface amount={amount} detail={.65}/>
+    {(['corpusCallosum','thalamus','midbrain','pons','medulla','cerebellum'] as const).map(region=><path key={region} d={STRUCTURE_PATHS[region]} stroke="#8c99aa" strokeWidth={2.3} fill="#7c899b" fillOpacity={.15*amount} {...draw(amount)}/>)}
+    {CEREBELLAR_FOLIA.map(d=><path key={d} d={d} stroke="#8c99aa" strokeWidth={1.7} opacity={.55} {...draw(progress(amount,.3,1))}/>)}
+  </g>
   {[[-155,-35],[-81,-96],[-37,24],[43,-83],[111,-8],[135,57]].map(([nx,ny],i)=><g key={i} opacity={signal*progress(frame,45+i*9,65+i*9)}><circle cx={nx} cy={ny} r={13+Math.sin(frame*.12-i)*3} fill={color} stroke="none" opacity={.12}/><circle cx={nx} cy={ny} r={5} fill={color} stroke="none"/></g>)}
   {signal>0&&[0,1,2].map(i=>{const t=((frame+i*31)%100)/100;return <circle key={i} cx={-160+t*300} cy={Math.sin(t*Math.PI*2)*50-i*17} r={4} fill={color} stroke="none" opacity={signal}/>;})}
 </g>;

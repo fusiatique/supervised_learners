@@ -78,7 +78,7 @@ export const MesocorticolimbicArtwork:React.FC<{frame:number;showBrain?:boolean}
     <g opacity={fade(f,360,390,630)}>
       <text x={960} y={78} textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize={35} fill={C.white}>MESOCORTICOLIMBIC <tspan fill={C.yellow}>DOPAMINE</tspan> SYSTEM</text>
     </g>
-    <g opacity={fade(f,460,490,630)}><Label x={1350} y={805} size={25} color={C.yellow}>MESOLIMBIC PATHWAY</Label></g>
+    <g opacity={fade(f,460,490,630)}><Label x={1350} y={805} size={25} color={C.green}>MESOLIMBIC PATHWAY</Label></g>
     <g opacity={fade(f,570,595,630)}><Label x={960} y={1000} size={26}>REWARD-RELATED LEARNING &amp; MOTIVATION</Label></g>
     <g opacity={s.externalOpacity}>
       <NaturalRewardIcons amount={progress(f,630,690)}/>

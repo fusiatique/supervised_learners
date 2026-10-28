@@ -65,3 +65,19 @@ for(let f=0;f<240;f++){
  assert.ok(motion.scale>=1&&motion.scale<=1.055);
  assert.deepEqual(brainFocus(f,[100,200]),brainFocus(f,[100,200]),'Attention remains deterministic when seeking');
 }
+
+// Visual redesign must preserve independent activation and signal endpoints.
+import {BRAIN_COLORS,STRIATUM_PATHS} from '../src/brain-anatomy-geometry';
+for(const region of ['VTA','NAc','PFC'] as const){
+ const svg=renderToStaticMarkup(<svg><BrainAnatomy {...camera} highlights={{[region]:1}} regionFocus={{[region]:{strength:1,age:32}}}/></svg>);
+ assert.ok(svg.includes(`stroke="${BRAIN_COLORS[region]}"`));
+ assert.ok(svg.includes(`data-region-attention="${region}"`));
+}
+for(const id of ['mesolimbic','mesocortical'] as const){
+ const first=renderToStaticMarkup(<svg><BrainAnatomy {...camera} frame={32} pathwayProgress={{[id]:1}} activity={{[id]:1}}/></svg>);
+ const next=renderToStaticMarkup(<svg><BrainAnatomy {...camera} frame={40} pathwayProgress={{[id]:1}} activity={{[id]:1}}/></svg>);
+ assert.notEqual(first,next,'Signals must travel, not become static highlights');
+ assert.ok(first.includes(`stroke="${BRAIN_COLORS[id]}"`));
+}
+assert.equal(Object.keys(STRIATUM_PATHS).length,2);
+console.log('PASS: independent activation colors; moving pathway signals; shared caudate and putamen contours.');

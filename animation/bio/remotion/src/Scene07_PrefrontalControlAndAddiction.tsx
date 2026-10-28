@@ -1,6 +1,7 @@
 import React from 'react';
+import {BRAIN_COLORS,STRIATUM_PATHS} from './brain-anatomy-geometry';
 import {brainFocus} from './brain-attention';
-import {AbsoluteFill,Sequence,useCurrentFrame} from 'remotion';
+import {AbsoluteFill,useCurrentFrame} from 'remotion';
 import {anatomyToScreen,BrainAnatomy,BRAIN_REGIONS,type BrainCamera} from './BrainAnatomy';
 import {getScene06Camera,MesocorticalPlanningArtwork} from './Scene06_MesocorticalPathwayAndPlanning';
 import {AnimatedArrow,C,HumanCharacter,Label,SourceCitation} from './components';
@@ -10,7 +11,7 @@ import {CueSymbol} from './reward-components';
 import {RewardSymbol,WarningSymbol} from './risk-components';
 import {BehavioralBrake,D2ReceptorAvailability,getRatExperimentPose,RatBrain,RatIllustration} from './prefrontal-control-components';
 
-export const SCENE07={width:1920,height:1080,fps:30,durationInFrames:1920} as const;
+export const SCENE07={width:1920,height:1080,fps:30,durationInFrames:1560} as const;
 export const T07={bridge:0,options:60,conflict:150,brake:240,approach:330,stop:375,weaken:420,resist:480,receptors:540,receptorInset:630,association:720,functions:810,urges:870,adaptation:930,synapse:1020,cueResponse:1110,responseLabels:1200,subregions:1290,rodent:1380,prelimbic:1470,experiment:1530,stimulate:1590,inhibit:1680,summary:1740,hold:1770,end:1800} as const;
 // Give the entire removed pathway/adaptation section to the urges screen.
 export const scene07TimelineFrame=(frame:number)=>{
@@ -74,13 +75,18 @@ const ControlMetaphor:React.FC<{f:number}>=({f})=>{
  </g>;
 };
 export const ReceptorsAndControl:React.FC<{f:number}>=({f})=>{
- const camera=getScene07Camera(f),[sx,sy]=anatomyToScreen([365,330],camera),[px,py]=anatomyToScreen(BRAIN_REGIONS.PFC.center,camera);
+ const camera=getScene07Camera(f),[sx,sy]=anatomyToScreen([405,380],camera),[px,py]=anatomyToScreen(BRAIN_REGIONS.PFC.center,camera);
  const opacity=progress(f,540,575)*(1-progress(f,930,960));
  return <g opacity={opacity}>
   <g transform={`translate(${camera.x} ${camera.y}) scale(${camera.scale}) translate(-500 -330)`}>
-    <path d="M405 250C347 228 299 272 310 322Q322 381 398 418Q358 378 354 329Q350 289 405 281Z" fill={C.yellow} fillOpacity={.08} stroke={C.yellow} strokeWidth={2.5} {...draw(progress(f,540,610))}/>
+    {/* Projected deep structures: the caudate arches around the thalamus;
+        the putamen is a separate, fuller lateral mass, not a second ring. */}
+    <g fill={BRAIN_COLORS.striatum} fillOpacity={.16} stroke={BRAIN_COLORS.striatum} strokeWidth={2.5} strokeLinejoin="round">
+      <path data-anatomy="caudate" d={STRIATUM_PATHS.caudate} {...draw(progress(f,540,610))}/>
+      <path data-anatomy="putamen" d={STRIATUM_PATHS.putamen} {...draw(progress(f,550,620))}/>
+    </g>
   </g>
-  <g opacity={progress(f,550,590)}><path d={`M${sx} ${sy}L410 650H350`} stroke={C.gray} strokeWidth={1.5} fill="none"/><Label x={370} y={690} size={25} color={C.yellow}>STRIATUM</Label><Label x={370} y={724} size={19} color={C.gray}>Conceptual projection</Label></g>
+  <g opacity={progress(f,550,590)}><path d={`M${sx} ${sy}L410 650H350`} stroke={C.gray} strokeWidth={1.5} fill="none"/><Label x={370} y={690} size={25} color={BRAIN_COLORS.striatum}>STRIATUM</Label><Label x={370} y={724} size={19} color={C.gray}>Caudate + putamen · schematic</Label></g>
   <D2ReceptorAvailability x={1200} y={425} scale={.85} availability="higher" amount={progress(f,630,675)} emphasis={mix(1,.35,ease(f,720,780))}/>
   <D2ReceptorAvailability x={1570} y={425} scale={.85} availability="lower" amount={progress(f,650,690)} emphasis={progress(f,720,780)}/>
   <g opacity={progress(f,630,660)}><Label x={1380} y={215} size={31} color={C.yellow}>D2 RECEPTORS</Label></g>
@@ -140,15 +146,31 @@ export const PrelimbicExperimentArtwork:React.FC<{frame:number}>=({frame})=>{
   <Label x={960} y={95} size={24} color={C.gray}>Cocaine-exposed rats · schematic comparison</Label>
  </g>;
 };
-export const Scene07_PrefrontalControlAndAddiction:React.FC=()=>{
- const f=Math.min(scene07TimelineFrame(useCurrentFrame()),T07.hold),s=getScene07State(f);
+export const Scene07OriginalTimeline:React.FC<{frame:number}>=({frame})=>{
+ const f=Math.min(scene07TimelineFrame(frame),T07.hold),s=getScene07State(f);
  return <AbsoluteFill style={{backgroundColor:C.bg}}><svg viewBox="0 0 1920 1080" width="100%" height="100%" role="img" aria-label="Prefrontal impulse control, a schematic association between striatal D2 receptor availability and PFC activity, chronic-cocaine adaptations, and opposite effects of stimulating or inhibiting rat prelimbic cortex on drug seeking.">
   <HumanAnatomy f={f}/>
-  <Sequence from={0} durationInFrames={580} layout="none"><ControlMetaphor f={f}/></Sequence>
-  <Sequence from={540} durationInFrames={600} layout="none"><ReceptorsAndControl f={f}/></Sequence>
-  <Sequence from={1110} durationInFrames={310} layout="none"><Adaptations f={f}/></Sequence>
-  <Sequence from={1380} durationInFrames={330} layout="none"><RodentTransition f={f}/></Sequence>
-  <Sequence from={1650} durationInFrames={270} layout="none"><PrelimbicExperimentArtwork frame={f}/></Sequence>
+  {frame<580&&<ControlMetaphor f={f}/>}
+  {frame>=540&&frame<1140&&<ReceptorsAndControl f={f}/>}
+  {frame>=1110&&frame<1420&&<Adaptations f={f}/>}
+  {frame>=1380&&frame<1710&&<RodentTransition f={f}/>}
+  {frame>=1650&&frame<1920&&<PrelimbicExperimentArtwork frame={f}/>}
   {s.citation&&<g opacity={f<930?fade(f,450,480,900):progress(f,930,960)}><SourceCitation frame={f} source={s.citation}/></g>}
  </svg></AbsoluteFill>;
+};
+
+/** Remove the former 36–48s section; retain the original scene clock afterward. */
+export const SCENE07_CUT={from:1080,to:1440,fadeFrames:18} as const;
+export const scene07PlaybackFrame=(frame:number)=>frame<SCENE07_CUT.from?frame:frame+SCENE07_CUT.to-SCENE07_CUT.from;
+export const scene07CutOpacity=(frame:number)=>frame<SCENE07_CUT.from
+ ?1-ease(frame,SCENE07_CUT.from-SCENE07_CUT.fadeFrames,SCENE07_CUT.from)
+ :ease(frame,SCENE07_CUT.from,SCENE07_CUT.from+SCENE07_CUT.fadeFrames);
+export const Scene07_PrefrontalControlAndAddiction:React.FC=()=>{
+ const frame=useCurrentFrame();
+ return <AbsoluteFill style={{backgroundColor:C.bg}}>
+  <AbsoluteFill style={{opacity:scene07CutOpacity(frame)}}>
+   {/* Explicit source clock avoids Freeze clamping to the shorter composition. */}
+   <Scene07OriginalTimeline frame={scene07PlaybackFrame(frame)}/>
+  </AbsoluteFill>
+ </AbsoluteFill>;
 };
