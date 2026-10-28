@@ -16,6 +16,11 @@ export const scene03StoryFrame=(frame:number)=>{
   const f=reinforcementFrame<180?reinforcementFrame:Math.max(180,reinforcementFrame-SCENE03.addictionHold);
   return f<750?f:Math.max(750,f-SCENE03.bridgeFrames);
 };
+// Complete consequence symbols on an uninterrupted clock while the story holds.
+export const scene03WarningFrame=(frame:number)=>{
+ const f=scene03StoryFrame(frame);
+ return f>=150&&f<240?Math.min(frame,240):f;
+};
 export const T03={
   addiction:0, initialReward:240, positiveReinforcement:420, repeatedLearning:480,
   diagramMorph:750, goneTooFar:810, climaxTitle:930, rewardLearning:990,
@@ -59,6 +64,7 @@ const AddictionStory: React.FC<{intro?:boolean}> = ({intro=false}) => {
   // Retrace a complete choice during the question, returning to the original starting pose.
   const f=intro?frame*96/179:scene03StoryFrame(frame);
   const circleFrame=intro?f:f+96;
+  const warningFrame=intro?f:scene03WarningFrame(frame);
   const pose=getAddictionPose(f);
   const feedback=getDrugFeedback(intro?0:f);
   const diagram=ease(f,T03.diagramMorph,T03.goneTooFar);
@@ -81,9 +87,9 @@ const AddictionStory: React.FC<{intro?:boolean}> = ({intro=false}) => {
       <WarningSymbol x={1670} y={237} opacity={warningsDim*(1-feedback.glow*.65)}/>
       {!intro&&[{x:1700,y:410,after:1},{x:1580,y:555,after:2},{x:1305,y:600,after:3},{x:1775,y:575,after:4}].map(({x,y,after},i)=>{
         const start=[96,150,345,555][i]+20;
-        return <WarningSymbol key={i} x={x} y={y} scale={.46+i*.05} amount={progress(f,start,start+18)} opacity={feedback.visits>=after?progress(f,start,start+15)*(1-feedback.glow*.5):0}/>;
+        return <WarningSymbol key={i} x={x} y={y} scale={.46+i*.05} amount={progress(warningFrame,start,start+18)} opacity={feedback.visits>=after?progress(warningFrame,start,start+15)*(1-feedback.glow*.5):0}/>;
       })}
-      <g opacity={fade(f,150,190,240)}><WarningSymbol x={1560} y={530} scale={.7} amount={progress(f,150,178)}/><WarningSymbol x={1305} y={600} scale={.6} amount={progress(f,175,205)}/><BrokenHeart x={1710} y={590} scale={.7} amount={progress(f,172,215)} opacity={.65}/></g>
+      <g opacity={fade(f,150,190,240)}><WarningSymbol x={1560} y={530} scale={.7} amount={progress(warningFrame,150,178)}/><WarningSymbol x={1305} y={600} scale={.6} amount={progress(warningFrame,175,205)}/><BrokenHeart x={1710} y={590} scale={.7} amount={progress(warningFrame,172,215)} opacity={.65}/></g>
       <g opacity={fade(circleFrame,28,50,306)} stroke={C.yellow} strokeWidth={3} fill="none"><path d="M1058 418A45 45 0 1 1 1081 380" {...draw(progress(circleFrame,28,65))}/><path d="M1081 380L1062 377L1081 359Z" fill={C.yellow} stroke="none" opacity={progress(circleFrame,55,65)}/></g>
       <g opacity={progress(f,360,405)}><LearnedAssociation d="M1550 305Q1635 240 1550 165" amount={progress(f,360,420)} strength={strength}/></g>
       {f>=480&&<RewardPulse x={1550} y={225} age={outcomeAge} opacity={outcomeAge>=0&&outcomeAge<=45?1:0} strength={1+.25*strength}/>}
@@ -246,12 +252,14 @@ const Scene03BeforeExtension:React.FC=()=> <AbsoluteFill style={{backgroundColor
   <Sequence from={-SCENE03_CUT.to}><Scene03OriginalTimeline/></Sequence>
   <Sequence from={0} durationInFrames={12}><BridgeCutFade/></Sequence>
  </Sequence>
- <Sequence from={REWARD_UPDATE.from} durationInFrames={REWARD_UPDATE.duration}><RewardLearningUpdate/></Sequence>
 </AbsoluteFill>;
 
 // Add two seconds at 59s, preserving the following scene and its crossfade.
 export const scene03ExtendedFrame=(frame:number)=>frame<1770?frame:frame<1830?1770:frame-60;
 export const Scene03_AddictionAndRewardLearning:React.FC=()=>{
  const frame=useCurrentFrame();
- return <Freeze frame={scene03ExtendedFrame(frame)}><Scene03BeforeExtension/></Freeze>;
+ return <AbsoluteFill style={{backgroundColor:C.bg}}>
+  <Freeze frame={scene03ExtendedFrame(frame)}><Scene03BeforeExtension/></Freeze>
+  <Sequence from={REWARD_UPDATE.from} durationInFrames={REWARD_UPDATE.duration}><RewardLearningUpdate/></Sequence>
+ </AbsoluteFill>;
 };

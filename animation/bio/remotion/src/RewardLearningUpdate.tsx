@@ -5,7 +5,7 @@ import {CueSymbol} from './reward-components';
 import {RewardSymbol} from './risk-components';
 import {draw,ease,mix,progress} from './motion';
 
-export const REWARD_UPDATE={from:1440,duration:360,focus:60,firstArrival:132,surprise:150,update:210,nextTrial:240,out:288} as const;
+export const REWARD_UPDATE={from:1440,duration:420,focus:60,firstArrival:132,surprise:150,update:210,nextTrial:240,out:288} as const;
 export const getRewardUpdateState=(frame:number)=>{
  const f=Math.max(0,Math.min(300,frame));
  const focus=ease(f,60,82),first=ease(f,80,132),back=ease(f,210,240),again=ease(f,240,285);
@@ -26,17 +26,26 @@ const Mouse:React.FC<{x:number;y:number;frame:number;surprised:number;walking:nu
 const AppleSet:React.FC<{x:number;y:number;count:number;scale?:number;amount?:number}>=({x,y,count,scale=.65,amount=1})=><g opacity={amount}>
  {Array.from({length:count},(_,i)=><RewardSymbol key={i} x={x+(count===1?0:(i-1)*84)} y={y+(count===3&&i===1?-24:0)} scale={scale}/>)}</g>;
 
-/** Begins at 48s; a longer organism introduction keeps later events and the 60s exit aligned. */
+/** Complete the final approach before the 59–61s hold; only the bell stays active. */
+export const rewardLearningStoryFrame=(frame:number)=>frame<120?frame*.5
+ :frame<300?frame-60
+ :frame<330?240+(frame-300)*1.5
+ :frame<390?285
+ :285+(frame-390)*.5;
+export const rewardLearningBellRing=(frame:number)=>{
+ const f=rewardLearningStoryFrame(frame);
+ return progress(f,240,258)*(1-progress(frame,390,396))*(.55+.3*Math.sin((frame-300)*Math.PI/15));
+};
 export const RewardLearningUpdate:React.FC=()=>{
  const frame=useCurrentFrame();
- const storyFrame=frame<120?frame*.5:frame-60;
+ const storyFrame=rewardLearningStoryFrame(frame);
  const s=getRewardUpdateState(storyFrame),f=s.frame;
  const humanOpacity=1-progress(f,60,80),examples=progress(f,60,82);
- const ring1=progress(f,65,85)*(1-progress(f,90,100)),ring2=progress(f,240,258)*(1-progress(f,260,272));
+ const ring1=progress(f,65,85)*(1-progress(f,90,100)),ring2=rewardLearningBellRing(frame);
  const context=progress(f,60,95),gold=progress(f,150,160)*(1-progress(f,190,210));
  const thought=progress(f,150,165)*(1-progress(f,245,270));
- const walking=(f>=80&&f<=132)||(f>=210&&f<=285)?1:0;
- return <AbsoluteFill style={{backgroundColor:C.bg,opacity:progress(frame,0,12)*(1-progress(frame,336,348))}}><svg viewBox="0 0 1920 1080" width="100%" height="100%" role="img" aria-label="A human and mouse introduce reward learning across organisms. A bell predicts a reward location, one expected apple becomes three, and updated expectations guide another approach.">
+ const walking=(f>=80&&f<=132)||(f>=210&&f<285)?1:0;
+ return <AbsoluteFill style={{backgroundColor:C.bg,opacity:progress(frame,0,12)*(1-progress(frame,396,408))}}><svg viewBox="0 0 1920 1080" width="100%" height="100%" role="img" aria-label="A human and mouse introduce reward learning across organisms. A bell predicts a reward location, one expected apple becomes three, and updated expectations guide another approach.">
   <g opacity={humanOpacity}>
    <Label x={960} y={160} size={36}>LEARNING FROM REWARDS</Label>
    <HumanCharacter x={700} y={720} scale={.9} frame={f} naturalMotion expression="curious" look={5}/>

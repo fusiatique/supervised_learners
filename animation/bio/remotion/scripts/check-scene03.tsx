@@ -54,7 +54,7 @@ assert.equal(scene03SourceFrame(47*30),49*30,'Climax appears two seconds earlier
 assert.equal(scene03SourceFrame(42*30),44*30,'Bridge connects directly to man-pill-plus scene');
 
 assert.equal(REWARD_UPDATE.from,48*30);
-assert.equal(REWARD_UPDATE.duration,12*30);
+assert.equal(REWARD_UPDATE.duration,14*30);
 assert.equal(getRewardUpdateState(149).received,1);
 assert.equal(getRewardUpdateState(150).received,3,'Unexpected reward is three apples');
 assert.equal(getRewardUpdateState(209).expected,1);
@@ -70,3 +70,19 @@ assert.equal(scene03ExtendedFrame(1770),1770);
 assert.equal(scene03ExtendedFrame(1829),1770);
 assert.equal(scene03ExtendedFrame(1830),1770);
 assert.equal(scene03ExtendedFrame(1860),1800);
+
+// The opening hold must never freeze partially drawn consequences.
+import {scene03WarningFrame,scene03StoryFrame} from '../src/Scene03_AddictionAndRewardLearning';
+for(let frame=150;frame<=215;frame++)assert.equal(scene03WarningFrame(frame),frame,'Warnings keep a linear drawing clock across the story hold');
+for(let frame=215;frame<=275;frame++)assert.ok(scene03WarningFrame(frame)>=215,'Completed warnings and heart stay complete until the scene resumes');
+assert.equal(scene03WarningFrame(300),scene03StoryFrame(300),'Effect clock rejoins the unchanged story clock');
+console.log('PASS: consequence drawings finish continuously before the opening hold.');
+
+import {rewardLearningStoryFrame,rewardLearningBellRing} from '../src/RewardLearningUpdate';
+assert.equal(rewardLearningStoryFrame(300),240);
+assert.equal(rewardLearningStoryFrame(330),285,'Rat reaches the reward before the hold at 59s');
+for(let frame=301;frame<=330;frame++)assert.ok(getRewardUpdateState(rewardLearningStoryFrame(frame)).mouseX>=getRewardUpdateState(rewardLearningStoryFrame(frame-1)).mouseX,'Final approach never pauses or reverses');
+for(let frame=330;frame<=390;frame++)assert.equal(getRewardUpdateState(rewardLearningStoryFrame(frame)).mouseX,getRewardUpdateState(285).mouseX,'Rat stays at its completed destination');
+assert.notEqual(rewardLearningBellRing(333),rewardLearningBellRing(340),'Bell keeps ringing during the hold');
+assert.equal(rewardLearningBellRing(396),0,'Bell settles before the unchanged crossfade');
+console.log('PASS: rat completes its approach before the hold; bell keeps moving independently and settles before the scene exit.');
