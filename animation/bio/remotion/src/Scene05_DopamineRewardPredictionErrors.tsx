@@ -1,14 +1,14 @@
 import React from 'react';
-import {AbsoluteFill,Sequence,useCurrentFrame} from 'remotion';
-import {anatomyToScreen,BrainAnatomy,BRAIN_REGIONS,BrainRegionLabel,DopaminePathway,type BrainCamera} from './BrainAnatomy';
+import {AbsoluteFill,Freeze,Sequence,useCurrentFrame} from 'remotion';
+import {anatomyToScreen,BrainAnatomy,BRAIN_REGIONS,BrainRegionLabel,STRUCTURE_PATHS,DopaminePathway,type BrainCamera} from './BrainAnatomy';
 import {getScene04Camera} from './Scene04_MesocorticolimbicIntroduction';
 import {AnimatedArrow,C,Label,ProcessorIllustration,SourceCitation} from './components';
 import {curvePoint,draw,ease,fade,mix,pop,progress} from './motion';
 import {CueSymbol,RewardPulse} from './reward-components';
 import {RewardSymbol} from './risk-components';
-import {CueRewardTimeline,DopamineNeuron,DopamineSpikeTrain,FoodDeliveryExample,getFoodEvents,getFoodSpikeTimes,getSpikeTimes,MotivationalValueIndicator,NAc_INPUTS,NeuralInputPathway,RewardPredictionError,RodentExperimentIllustration} from './dopamine-learning-components';
+import {DopamineNeuron,DopamineSpikeTrain,FoodDeliveryExample,getFoodEvents,getFoodSpikeTimes,getSpikeTimes,MotivationalValueIndicator,NAc_INPUTS,NeuralInputPathway,RewardPredictionError,RodentExperimentIllustration} from './dopamine-learning-components';
 
-export const SCENE05={width:1920,height:1080,fps:30,durationInFrames:3990,bridgeFrames:270,experimentBridgeFrom:2370,experimentBridgeFrames:210,contextBridgeFrom:2880,contextBridgeFrames:390} as const;
+export const SCENE05={width:1920,height:1080,fps:30,durationInFrames:3930,bridgeFrames:270,experimentBridgeFrom:2370,experimentBridgeFrames:210,contextBridgeFrom:2880,contextBridgeFrames:390} as const;
 export const scene05ContentFrame=(frame:number)=>{
   const f=frame<1920?frame:Math.max(1920,frame-SCENE05.experimentBridgeFrames);
   // Spread the extra second across the update animation instead of freezing a pose.
@@ -36,6 +36,13 @@ export const getScene05IntroCamera=(f:number):BrainCamera=>{
   return {x:mix(vx+12*scale,900,back),y:mix(vy-137*scale,505,back),scale:mix(scale,1.45,back),anteriorRight:true};
 };
 
+const VtaFocusPulse:React.FC<{camera:BrainCamera;frame:number}>=({camera,frame})=>{
+ const amount=1-ease(frame,600,618);
+ return <g transform={`translate(${camera.x} ${camera.y}) scale(${camera.scale}) translate(-500 -330) translate(1000 0) scale(-1 1)`} opacity={amount}>
+  <path d={STRUCTURE_PATHS.VTA} fill={C.blue} fillOpacity={.15+.18*(.5+.5*Math.sin(frame*Math.PI/30))} stroke={C.blue} strokeWidth={2.6}/>
+ </g>;
+};
+
 const AnatomicalIntroduction:React.FC=()=>{
   const frame=useCurrentFrame();
   const f=frame<300?frame:frame<690?300+(frame-300)*(300/390):frame-90;
@@ -47,13 +54,14 @@ const AnatomicalIntroduction:React.FC=()=>{
   const ss=mix(1,.06,insetReturn);
   return <g opacity={1-progress(f,600,660)}>
     <BrainAnatomy {...camera} cortexOpacity={mix(.65,.32,ease(f,0,180))} frame={540+f}
-      highlights={{VTA:1,NAc:mix(mix(1,.6,ease(f,0,180)),1,ease(f,300,390)),PFC:mix(1,.15,ease(f,0,90))}}
+      highlights={{VTA:1,NAc:ease(frame,330,348)*mix(mix(1,.6,ease(f,0,180)),1,ease(f,300,390)),PFC:mix(1,.15,ease(f,0,90))}}
       pathwayProgress={{mesolimbic:1,mesocortical:1}} pathwayOpacity={{mesolimbic:mix(1,.3,ease(f,300,390)),mesocortical:mix(.4,.15,ease(f,0,90))}}
       activity={{mesolimbic:f<300?mix(1,.5,ease(f,0,90)):progress(f,480,510),mesocortical:mix(.22,.1,ease(f,0,90))}}/>
+    <VtaFocusPulse camera={camera} frame={frame+SCENE05.bridgeFrames}/>
     <g transform={`translate(${camera.x} ${camera.y}) scale(${camera.scale}) translate(-500 -330) translate(1000 0) scale(-1 1)`}>
       <DopaminePathway pathway="mesolimbic" amount={progress(f,390,480)} opacity={progress(f,390,420)} frame={Math.max(0,f-480)} activity={progress(f,480,510)}/>
     </g>
-    <g opacity={fade(f,30,60,300)}>{header('VENTRAL TEGMENTAL AREA (VTA)',100)}<path d={`M${vx} ${vy}L650 175H590`} stroke={C.gray} strokeWidth={1.5} fill="none"/></g>
+    <g opacity={fade(f,30,60,300)}>{header('VENTRAL TEGMENTAL AREA (VTA)',100)}</g>
     <g opacity={inset}>
       <path d={`M${vx} ${vy}L${ix-180*ss} ${iy+115*ss}`} stroke={C.gray} strokeWidth={2}/>
       <g transform={`translate(${ix} ${iy}) scale(${ss})`}>
@@ -97,22 +105,16 @@ const FoodLearning:React.FC=()=>{
   const frame=useCurrentFrame();
   const f=frame>=585?1800+(frame-585):1200+(frame<315?Math.floor(frame/105)*90+(frame%105)*(90/105):frame-45);
   const events=getFoodEvents(f);
-  const compare=progress(f,1470,1500)*(1-progress(f,1560,1590));
-  const roomOpacity=mix(1,.38,compare);
   const dip=events.omitted;
   return <g opacity={opacityFor(f,1200,1800)}>
-    <FoodDeliveryExample frame={f} opacity={roomOpacity}/>
-    <g opacity={1-compare}>
+    <FoodDeliveryExample frame={f}/>
+    <g>
       <DopamineSpikeTrain x={400} y={850} width={1140} mode={dip?'dip':'burst'} eventTime={dip?events.eventTime:events.burstTime} spikeTimes={getFoodSpikeTimes(f)} reveal={events.reveal} cursor={f<1470||dip} caption/>
-    </g>
-    <g opacity={compare}>
-      <CueRewardTimeline x={530} y={790} width={1050} mode="reward" label="Unexpected reward"/>
-      <CueRewardTimeline x={530} y={925} width={1050} mode="cue" label="Learned cue"/>
     </g>
     <g opacity={fade(f,1220,1240,1290)}>{header('UNEXPECTED REWARD',140)}</g>
     <g opacity={fade(f,1390,1410,1560)}>{header('PREDICTIVE CUE',140)}</g>
     {!dip&&<RewardPulse x={1450} y={470} age={f-events.reward} opacity={f>=events.reward?1-progress(f,events.reward+25,events.reward+40):0} scale={Math.min(1,pop(f,events.reward))}/>}
-    <g opacity={fade(f,1660,1690,1740)}>{header('WORSE THAN EXPECTED',140,C.red)}
+    <g opacity={fade(f,1660,1690,1770)}>{header('WORSE THAN EXPECTED',140,C.red)}
       <Label x={960} y={195} size={25} color={C.gray}>Negative prediction error</Label>
     </g>
   </g>;
@@ -124,7 +126,7 @@ const UpdatingAndExperiments:React.FC=()=>{
   const f=scene05ContentFrame(frame);
   const updateOpacity=frame>=1920+SCENE05.experimentBridgeFrames?0:1-progress(f,1890,1920);
   const p=curvePoint(progress(f,1825,1880),[[1460,400],[1420,200],[1050,200],[960,360]]);
-  return <g opacity={opacityFor(f,1800,2070)}>
+  return <g opacity={ease(f,1800,1845)*(1-progress(f,2070,2100))}>
     {frame<1920&&<g opacity={updateOpacity}>
       {header('UPDATE EXPECTATIONS')}
       <CueSymbol x={420} y={445}/><RewardSymbol x={960} y={445} scale={mix(.65,.38,ease(f,1820,1880))}/><RewardSymbol x={1500} y={445} opacity={.25}/>
@@ -183,19 +185,20 @@ const SystemToSignalsBridge:React.FC=()=>{
   const textOpacity=progress(f,0,20)*(1-progress(f,245,270));
   return <g>
     <BrainAnatomy {...camera} cortexOpacity={.65} frame={540+f}
-      highlights={{VTA:1,NAc:1,PFC:1}}
+      highlights={{VTA:1,NAc:0,PFC:1}}
       pathwayProgress={{mesolimbic:1,mesocortical:1}}
       pathwayOpacity={{mesolimbic:1,mesocortical:.4}}
       activity={{mesolimbic:.6,mesocortical:.22}}/>
-    <BrainRegionLabel region="VTA" camera={camera} x={1320} y={895} fullName/>
+    <VtaFocusPulse camera={camera} frame={f}/>
+    <BrainRegionLabel region="VTA" camera={camera} x={1320} y={895} fullName opacity={1-ease(f,225,240)}/>
     <g opacity={textOpacity}>
       <Label x={960} y={100} size={30} color={C.yellow}>FROM THE SYSTEM TO ITS SIGNALS</Label>
       <Label x={960} y={165} size={42}>How does this brain system work?</Label>
       <g opacity={progress(f,65,100)}>
         <Label x={960} y={1010} size={28}>Start where many dopamine signals originate.</Label>
       </g>
-      <circle cx={vx} cy={vy} r={25+28*pulse} fill="none" stroke={C.yellow} strokeWidth={2.5} opacity={focus*(1-pulse)*.8}/>
-      <circle cx={vx} cy={vy} r={19} fill={C.yellow} opacity={focus*(.08+.04*Math.sin(f*.08))}/>
+      <circle cx={vx} cy={vy} r={25+28*pulse} fill="none" stroke={C.blue} strokeWidth={2.5} opacity={focus*(1-pulse)*.8}/>
+      <circle cx={vx} cy={vy} r={19} fill={C.blue} opacity={focus*(.08+.04*Math.sin(f*.08))}/>
     </g>
     <SourceCitation frame={f} source="Feltenstein et al., 2009"/>
   </g>;
@@ -248,7 +251,7 @@ const ContextToAccumbensBridge:React.FC=()=>{
   </g>;
 };
 
-export const Scene05_DopamineRewardPredictionErrors:React.FC=()=>{
+const Scene05OriginalTimeline:React.FC=()=>{
   const screenFrame=useCurrentFrame();
   const actualFrame=screenFrame<2880?screenFrame:screenFrame<3270?2880+(screenFrame-2880)*(360/390):screenFrame<3960?3240+(screenFrame-3270)*(570/690):screenFrame-150;
   const currentFrame=actualFrame<2580?actualFrame:actualFrame<2880?2580+(actualFrame-2580)*.6:actualFrame-120;
@@ -274,4 +277,20 @@ export const Scene05_DopamineRewardPredictionErrors:React.FC=()=>{
       <Sequence from={SCENE05.contextBridgeFrom} durationInFrames={SCENE05.contextBridgeFrames} layout="none"><ContextToAccumbensBridge/></Sequence>
     </svg>
   </AbsoluteFill>;
+};
+
+// Omit the unwanted 1:06–1:09 comparison shot; preserve every later scene.
+export const scene05CutFrame=(frame:number)=>frame<1980?frame:frame+90;
+// Spread one extra second across the negative-outcome/expectation-update transition.
+export const scene05GentleUpdateFrame=(frame:number)=>{
+ const t=Math.max(0,Math.min(1,(frame-2100)/120));
+ return frame-30*t*t*(3-2*t);
+};
+export const Scene05_DopamineRewardPredictionErrors:React.FC=()=>{
+ const frame=scene05GentleUpdateFrame(useCurrentFrame());
+ return <AbsoluteFill style={{backgroundColor:C.bg}}>
+  <AbsoluteFill style={{opacity:frame<1980?1-ease(frame,1974,1980):ease(frame,1980,1986)}}>
+   <Freeze frame={scene05CutFrame(frame)}><Scene05OriginalTimeline/></Freeze>
+  </AbsoluteFill>
+ </AbsoluteFill>;
 };

@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 import React from 'react';
+import {REWARD_UPDATE,getRewardUpdateState} from '../src/RewardLearningUpdate';
+import {DRUG_REWARD_EVENTS,getDrugFeedback} from '../src/addiction-feedback-components';
 import {renderToStaticMarkup} from 'react-dom/server';
-import {DopamineHandoff, getAddictionPose, getNaturalLearningPose, getScene03Timing, SCENE03, T03} from '../src/Scene03_AddictionAndRewardLearning';
+import {DopamineHandoff, getAddictionPose, getNaturalLearningPose, getScene03Timing, SCENE03, T03, scene03ExtendedFrame, scene03SourceFrame} from '../src/Scene03_AddictionAndRewardLearning';
 import {getRiskScenePose} from '../src/Scene02_RiskAndAddiction';
 
 assert.equal(SCENE03.durationInFrames,2340);
@@ -37,3 +39,34 @@ const final=()=>renderToStaticMarkup(<svg><DopamineHandoff frame={1679}/></svg>)
 assert.equal(final(),final());
 assert.ok(!final().includes('<text'),'No large title in the final frame');
 console.log('PASS: 78 seconds; two-second positive reinforcement hold; two-second addiction title hold; eight-second reward-learning bridge; six-second opening question; exact 33/27-second split; Scene 02 position continuity; critical title and citation timing; no teleports; deterministic scrubbing; text-free neuron handoff.');
+
+for(const end of DRUG_REWARD_EVENTS){
+ assert.ok(getDrugFeedback(end+5).glow>.9,'Each arrival produces an immediate reward flash');
+ assert.equal(getDrugFeedback(end+5).expression,'satisfied');
+ assert.equal(getDrugFeedback(end+28).glow,0,'Reward flash fades before harmful aftermath');
+ assert.ok(['disappointed','conflicted'].includes(getDrugFeedback(end+28).expression));
+}
+assert.ok(getDrugFeedback(770).distress>getDrugFeedback(125).distress,'Repeated returns increase distress');
+for(const frame of [307,524,615,705])assert.ok(getAddictionPose(frame).x<960,'An attempted safer choice moves left of the crossroads');
+console.log('PASS: repeated reward/aftermath responses, mounting distress, and continuous attempts toward the safe path.');
+
+assert.equal(scene03SourceFrame(47*30),49*30,'Climax appears two seconds earlier');
+assert.equal(scene03SourceFrame(42*30),44*30,'Bridge connects directly to man-pill-plus scene');
+
+assert.equal(REWARD_UPDATE.from,48*30);
+assert.equal(REWARD_UPDATE.duration,12*30);
+assert.equal(getRewardUpdateState(149).received,1);
+assert.equal(getRewardUpdateState(150).received,3,'Unexpected reward is three apples');
+assert.equal(getRewardUpdateState(209).expected,1);
+assert.equal(getRewardUpdateState(210).expected,3,'Expectation updates after the surprise');
+assert.ok(getRewardUpdateState(285).mouseX>getRewardUpdateState(240).mouseX,'Next trial approaches the reward location');
+assert.equal(getRewardUpdateState(0).opacity,0);
+assert.equal(getRewardUpdateState(300).opacity,0);
+for(const frame of [0,60,132,150,210,285,299])assert.deepEqual(getRewardUpdateState(frame),getRewardUpdateState(frame));
+console.log('PASS: 48–62 second replacement with a two-second hold at 59s, one-versus-three reward, expectation update before next approach, deterministic fades.');
+
+assert.equal(scene03ExtendedFrame(1769),1769);
+assert.equal(scene03ExtendedFrame(1770),1770);
+assert.equal(scene03ExtendedFrame(1829),1770);
+assert.equal(scene03ExtendedFrame(1830),1770);
+assert.equal(scene03ExtendedFrame(1860),1800);

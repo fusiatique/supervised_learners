@@ -5,16 +5,16 @@ import {BRAIN_REGIONS} from '../src/BrainAnatomy';
 import {C,HumanCharacter} from '../src/components';
 import {SimpleNeuron} from '../src/reward-components';
 import {getScene04Camera} from '../src/Scene04_MesocorticolimbicIntroduction';
-import {AccumbensInputsArtwork,CITATIONS05,getScene05IntroCamera,SCENE05,T05} from '../src/Scene05_DopamineRewardPredictionErrors';
+import {AccumbensInputsArtwork,CITATIONS05,getScene05IntroCamera,SCENE05,scene05GentleUpdateFrame,scene05CutFrame,T05} from '../src/Scene05_DopamineRewardPredictionErrors';
 import {FOOD_TRIALS,getFoodEvents,getFoodSpikeTimes,getSpikeTimes,NAc_INPUTS,RewardPredictionError} from '../src/dopamine-learning-components';
 
-assert.equal(SCENE05.durationInFrames,3990);
-assert.equal(SCENE05.durationInFrames/SCENE05.fps,133);
+assert.equal(SCENE05.durationInFrames,3930);
+assert.equal(SCENE05.durationInFrames/SCENE05.fps,131);
 assert.equal(SCENE05.bridgeFrames/SCENE05.fps,9);
 assert.equal(SCENE05.experimentBridgeFrames/SCENE05.fps,7);
 assert.equal(SCENE05.experimentBridgeFrom,SCENE05.bridgeFrames+1890+210);
 assert.equal(SCENE05.contextBridgeFrames/SCENE05.fps,13);
-assert.equal(SCENE05.contextBridgeFrom+SCENE05.contextBridgeFrames+720,SCENE05.durationInFrames);
+assert.equal(SCENE05.contextBridgeFrom+SCENE05.contextBridgeFrames+720,SCENE05.durationInFrames+60);
 const endCamera=getScene04Camera(900),opening=getScene05IntroCamera(0);
 for(const key of ['x','y','scale'] as const)assert.ok(Math.abs(opening[key]-endCamera[key])<1e-8,'Scene 04 camera continuity');
 for(let f=1;f<=600;f++){
@@ -57,3 +57,12 @@ frames.reverse().forEach((f,i)=>assert.equal(end(f),forward[forward.length-i-1],
 assert.equal(renderToStaticMarkup(<svg><HumanCharacter frame={100}/></svg>),renderToStaticMarkup(<svg><HumanCharacter frame={100} seated={false}/></svg>));
 assert.equal(renderToStaticMarkup(<svg><SimpleNeuron/></svg>),renderToStaticMarkup(<svg><SimpleNeuron color={C.yellow}/></svg>));
 console.log('PASS: 2400 frames; camera handoff; sparse/burst/pause patterns; event-aligned reward and cue bursts; omitted reward pause; fixed input endpoints; citation coverage; three error signs; deterministic final hold; preserved shared defaults.');
+
+assert.equal(scene05CutFrame(1979),1979);
+assert.equal(scene05CutFrame(1980),2070);
+assert.equal(scene05CutFrame(3899),3989);
+
+assert.equal(scene05GentleUpdateFrame(2100),2100);
+assert.equal(scene05GentleUpdateFrame(2220),2190);
+assert.equal(scene05GentleUpdateFrame(3929),3899);
+for(let f=2101;f<=2220;f++)assert.ok(scene05GentleUpdateFrame(f)>scene05GentleUpdateFrame(f-1));

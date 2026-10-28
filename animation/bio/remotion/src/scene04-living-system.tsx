@@ -8,6 +8,16 @@ import {CapsuleSymbol, RewardSymbol, WarningSymbol} from './risk-components';
 export const LIVING04={start:240,diversity:360,convergence:510,vta:630,neurons:690,mesolimbic:750,behavior:780,return:840,end:870} as const;
 export const usesLiving04=(frame:number)=>frame>=LIVING04.start&&frame<LIVING04.end;
 
+/** Ease into faster playback after 10s; the enhanced-activity title is fully visible at 17s.
+ * Gradually rejoin the original clock so later transitions and total length stay intact. */
+export const living04PlaybackFrame=(frame:number)=>{
+  const smooth=(t:number)=>t*t*(3-2*t);
+  const offset=frame<=300||frame>=690?0:frame<=510
+    ?55*smooth((frame-300)/210)
+    :55*(1-smooth((frame-510)/180));
+  return frame+offset;
+};
+
 /** Playback frames, independent of the legacy source clock used by Scene 05. */
 export const living04Camera=(f:number):BrainCamera=>{
   const space=ease(f,360,408)*(1-ease(f,600,630));
@@ -101,7 +111,8 @@ const RiskyChoice:React.FC<{frame:number}>=({frame:f})=>{
   </g>;
 };
 
-export const Scene04LivingSystem:React.FC<{frame:number;opening:React.ReactNode;ending:React.ReactNode}>=({frame:f,opening,ending})=>{
+export const Scene04LivingSystem:React.FC<{frame:number;opening:React.ReactNode;ending:React.ReactNode}>=({frame,opening,ending})=>{
+  const f=living04PlaybackFrame(frame);
   const camera=living04Camera(f),enter=ease(f,240,270),exit=ease(f,840,869);
   const boost=ease(f,540,585),focus=ease(f,630,690);
   return <g>
@@ -109,6 +120,7 @@ export const Scene04LivingSystem:React.FC<{frame:number;opening:React.ReactNode;
     <g opacity={enter*(1-exit)}>
       <BrainAnatomy {...camera} amount={1} cortexOpacity={1-.35*focus} highlights={{VTA:1,NAc:progress(f,292,330),PFC:progress(f,320,358)}}
         pathwayProgress={{mesolimbic:progress(f,250,310),mesocortical:progress(f,303,355)}}
+        pathwayWidthScale={{mesolimbic:1+1.8*ease(f,744,774)*(1-ease(f,825,855))}}
         pathwayOpacity={{mesolimbic:1,mesocortical:1-.6*focus}} activity={{mesolimbic:0,mesocortical:0}}/>
       <NeuralActivity frame={f} camera={camera}/>
       <DrugEffects frame={f} camera={camera}/>

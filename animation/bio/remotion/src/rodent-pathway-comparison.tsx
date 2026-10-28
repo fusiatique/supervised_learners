@@ -1,7 +1,7 @@
 import React from 'react';
 import {BrainAnatomy,type BrainCamera} from './BrainAnatomy';
 import {C,Label,SourceCitation} from './components';
-import {CocaineContainer} from './dopamine-introduction-components';
+import {CocainePowderBag} from './dopamine-introduction-components';
 import {WarningSymbol} from './risk-components';
 import {curvePoint,draw,ease,mix,pop,progress} from './motion';
 
@@ -79,7 +79,7 @@ const ComparisonPanel:React.FC<{frame:number;target:'NAc'|'PFC';x:number}>=({fra
  return <g transform={`translate(${x} 0)`} opacity={active}>
   <LaboratoryRat frame={f} x={-60} y={335} scale={.62} amount={progress(f,90,120)}/>
   <g opacity={symbol} transform={`translate(225 255) scale(${settle})`}>
-   {left?<CocaineContainer scale={.52} amount={symbol}/>:<WarningSymbol scale={.8} amount={symbol}/>}
+   {left?<CocainePowderBag scale={.52} amount={symbol}/>:<WarningSymbol scale={.8} amount={symbol}/>}
   </g>
   <g opacity={symbol}><Label x={0} y={175} size={left?28:25} color={left?C.white:C.red}>{left?'COCAINE':'UNPLEASANT EXPERIENCE'}</Label></g>
   <g transform="translate(-30 620)" opacity={progress(f,105,135)}><VtaInputNeuron frame={f} start={start} target={target} reveal={120}/></g>
