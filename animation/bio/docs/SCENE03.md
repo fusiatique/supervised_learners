@@ -37,3 +37,19 @@ npm run render:scene03 -- --browser-executable="/Applications/Google Chrome.app/
 `bio/remotion/src/reward-components.tsx` contains reusable reward pulses, association strokes, a bell cue and a simple neuron. `DopamineHandoff` is exported for Scene 04: begin it at `frame={1680}` and continue that value for uninterrupted particle motion.
 
 The provided attribution `Feltenstein et al., 2009` fades in around 12 seconds and out around 30 seconds. No attribution is added to the unsourced remainder. Association thickness and pulse sizes are conceptual illustrations, not measured neural quantities; the narrative depicts positive reinforcement as a contributing mechanism rather than a complete explanation of addiction.
+
+## Pathways and continued-use feedback
+
+The addiction portion uses `addiction-feedback-components.tsx` for thicker rounded paths with layered glows and frame-based light pulses. The green route remains calm; the red route progressively darkens. Each completed pill approach triggers a short yellow glow and reaching gesture, then a distressed expression and accumulating red warnings. Later trips briefly enter the green route before turning back toward the pill. Shared pathway geometry and all composition timing remain unchanged. Checks cover each reward-to-distress transition, escalating distress, attempted safer choices, continuity and deterministic scrubbing.
+
+The 42–44 second source interval is removed: the bridge now leads directly into the man/pill/reward diagram. A 12-frame crossfade preserves continuity without the brief returning shot. The climax formerly at 49 seconds now appears at 47 seconds; the full video is 76 seconds.
+
+## Reward-learning update: seconds 50–60
+
+`RewardLearningUpdate.tsx` replaces only this ten-second window with a human/mouse introduction, bell cue, marked reward location, expected one apple versus three received, and a visibly updated expectation before the next approach. Dotted cue/action/reward connections brighten after the surprise. Both edges crossfade into the existing video, and total duration remains 76 seconds. No audio or new scientific citations are introduced.
+
+The new reward-learning sequence now enters at second 48 with a 12-frame crossfade from the held climax artwork. Its organism introduction is extended; later learning events and the exit at second 60 retain their timing. The old intervening shot is fully covered.
+
+The mouse/apple example holds for two additional seconds at 59s. The existing exit crossfade and all following footage shift two seconds later unchanged; total duration is now 78 seconds.
+
+Removed the redundant frozen outgoing overlay at the 48-second entry. The incoming opaque scene now crossfades directly over the live closing artwork, avoiding a held frame and double-blended ghosting. Duration remains 78 seconds.

@@ -1,11 +1,12 @@
 import React from 'react';
 import {AbsoluteFill, Sequence, useCurrentFrame} from 'remotion';
+import {OpeningLearningCycle} from './OpeningLearningCycle';
 import {AnimatedArrow, C, HumanCharacter, type HumanExpression, Label, SourceCitation} from './components';
 import {curvePoint, draw, ease, fade, mix, pop, progress} from './motion';
 import {CapsuleSymbol, CROSSROADS, CrossroadsPaths, MysteryBox, RewardSymbol, Scene01ClosingArtwork, ThoughtBubble, WarningSymbol} from './risk-components';
 
-export const SCENE02 = {width:1920,height:1080,fps:30,durationInFrames:960,holdFrom:660,openingHold:270} as const;
-// Keep the opening question on screen for nine additional seconds before the transition.
+export const SCENE02 = {width:1920,height:1080,fps:30,durationInFrames:960,holdFrom:660,openingHold:240} as const;
+// Preserve the first second; transition directly from the negative loop to the character at 8s.
 export const scene02TimelineFrame=(frame:number)=>Math.max(0,frame-SCENE02.openingHold);
 
 /** Pure frame-to-pose function: forward playback and reverse scrubbing agree. */
@@ -80,11 +81,13 @@ export const RiskAndAddictionArtwork: React.FC<{frame: number}> = ({frame}) => {
   </g>;
 };
 
-const OpeningTransition: React.FC = () => {
-  const f=scene02TimelineFrame(useCurrentFrame());
-  const a=ease(f,0,65);
-  return <g opacity={1-a} transform={`translate(960 600) scale(${mix(1,.78,a)}) translate(-960 -600)`}><Scene01ClosingArtwork/></g>;
+export const Scene02OpeningArtwork: React.FC<{frame:number}> = ({frame}) => {
+  if(frame<=30)return <g opacity={1} transform="translate(960 600) scale(1) translate(-960 -600)"><Scene01ClosingArtwork/></g>;
+  const a=ease(frame,SCENE02.openingHold,SCENE02.openingHold+65);
+  return <g opacity={1-a} transform={`translate(960 600) scale(${mix(1,.78,a)}) translate(-960 -600)`}><OpeningLearningCycle frame={Math.min(frame,240)}/></g>;
 };
+
+const OpeningTransition: React.FC = () => <Scene02OpeningArtwork frame={useCurrentFrame()}/>;
 
 export const Scene02_RiskAndAddiction: React.FC = () => {
   const frame=scene02TimelineFrame(useCurrentFrame());

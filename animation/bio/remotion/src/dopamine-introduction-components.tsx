@@ -38,3 +38,14 @@ export const DopamineCircuitBridge:React.FC<{frame:number;showBrain?:boolean}>=(
     </g>;})}
   </g>;
 };
+
+/** Powder in a sealed bag for the cocaine illustration in Scene 06. */
+export const CocainePowderBag:React.FC<SymbolPlacement>=({x=0,y=0,scale=1,amount=1,opacity=1})=><g transform={`translate(${x} ${y}) scale(${scale})`} opacity={opacity} strokeWidth={3.5} strokeLinecap="round" strokeLinejoin="round">
+ <path d="M-57 -78H57L51 -48 64 65Q65 80 48 82H-48Q-65 80 -64 65L-51 -48Z" stroke={C.white} fill={C.bg} {...draw(amount)}/>
+ <path d="M-50 -61H50M-48 -53H48" stroke={C.gray} fill="none" {...draw(amount)}/>
+ <g opacity={amount}>
+  <path d="M-49 64L-33 42 -18 45 0 20 17 38 30 34 49 64Z" fill={C.white} fillOpacity={.7} stroke={C.white} strokeWidth={2}/>
+  <path d="M-20 55l8 -5m19 5 7 2m-10 -17 4 3" stroke={C.bg} strokeWidth={2}/>
+  <Label x={0} y={-12} size={20} color={C.white}>COCAINE</Label>
+ </g>
+</g>;

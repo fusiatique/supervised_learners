@@ -1,11 +1,15 @@
 import React from 'react';
-import {AbsoluteFill, Sequence, useCurrentFrame} from 'remotion';
+import {AbsoluteFill, Freeze, Sequence, useCurrentFrame} from 'remotion';
+import {REWARD_UPDATE,RewardLearningUpdate} from './RewardLearningUpdate';
 import {AnimatedArrow, C, HumanCharacter, Label, SourceCitation} from './components';
 import {curvePoint, draw, ease, fade, mix, pop, progress} from './motion';
-import {CapsuleSymbol, CROSSROADS, CrossroadsPaths, RewardSymbol, WarningSymbol} from './risk-components';
+import {CapsuleSymbol, CROSSROADS, RewardSymbol, WarningSymbol} from './risk-components';
+import {AddictionPathways, getDrugFeedback, PillRewardGlow} from './addiction-feedback-components';
 import {BrokenHeart, CueSymbol, LearnedAssociation, RewardPulse, SimpleNeuron} from './reward-components';
 
 export const SCENE03={width:1920,height:1080,fps:30,durationInFrames:2340,openingFrames:180,bridgeFrom:1050,bridgeFrames:240,addictionHold:60,reinforcementHold:60} as const;
+export const SCENE03_CUT={from:1260,to:1320,sourceDuration:2340} as const;
+export const scene03SourceFrame=(frame:number)=>frame<SCENE03_CUT.from?frame:frame+60;
 export const scene03StoryFrame=(frame:number)=>{
   // Hold the fully visible addiction title at scene second 12 for two extra seconds.
   const reinforcementFrame=frame<540?frame:Math.max(540,frame-SCENE03.reinforcementHold);
@@ -32,13 +36,19 @@ const DRUG_TRIPS=[{back:0,start:60,end:96},{back:96,start:123,end:150},{back:240
 export const getAddictionPose=(frame:number)=>{
   const f=Math.max(0,frame);
   let t=1,walk=0;
+  let route=CROSSROADS.uncertain;
   for(const trip of DRUG_TRIPS){
     if(f<trip.back)break;
     if(f<trip.start){t=1-ease(f,trip.back,trip.start);walk=Math.sin(progress(f,trip.back,trip.start)*Math.PI);}
-    else if(f<trip.end){t=ease(f,trip.start,trip.end);walk=Math.sin(progress(f,trip.start,trip.end)*Math.PI);}
+    else if(f<trip.end){
+      const u=progress(f,trip.start,trip.end);
+      if(trip.back>=240&&u<.3){route=CROSSROADS.safe;t=.23*Math.sin(u/.3*Math.PI)**2;}
+      else t=ease(f,trip.start+(trip.back>=240?(trip.end-trip.start)*.3:0),trip.end);
+      walk=Math.sin(u*Math.PI);
+    }
     else{t=1;walk=0;}
   }
-  const [routeX,routeY]=curvePoint(t,CROSSROADS.uncertain);
+  const [routeX,routeY]=curvePoint(t,route);
   const morph=ease(f,T03.diagramMorph,T03.goneTooFar);
   const drawnToward=ease(f,870,927);
   return {x:mix(routeX,960-230*drawnToward,morph),footY:mix(routeY,780-65*drawnToward,morph),walking:walk*(1-morph)+Math.sin(drawnToward*Math.PI)*morph,t};
@@ -50,6 +60,7 @@ const AddictionStory: React.FC<{intro?:boolean}> = ({intro=false}) => {
   const f=intro?frame*96/179:scene03StoryFrame(frame);
   const circleFrame=intro?f:f+96;
   const pose=getAddictionPose(f);
+  const feedback=getDrugFeedback(intro?0:f);
   const diagram=ease(f,T03.diagramMorph,T03.goneTooFar);
   const strength=progress(f,T03.repeatedLearning,T03.goneTooFar);
   const warningsDim=mix(1,.3,ease(f,240,285));
@@ -63,12 +74,17 @@ const AddictionStory: React.FC<{intro?:boolean}> = ({intro=false}) => {
   const scale=mix(1,1.32,ease(f,810,870));
   return <g opacity={1-progress(f,T03.rewardLearning,T03.rewardLearning+60)}>
     <g opacity={1-diagram}>
-      <g opacity={.88}><CrossroadsPaths amount={1} safeHighlight={1} riskyDim={1} drug={1} finalDim={1}/></g>
+      <AddictionPathways frame={f}/>
       <RewardSymbol x={375} y={350} opacity={.88*(1-.3*strength)}/>
+      <PillRewardGlow glow={feedback.glow}/>
       <CapsuleSymbol x={1550} y={350}/>
-      <WarningSymbol x={1670} y={237} opacity={warningsDim}/>
+      <WarningSymbol x={1670} y={237} opacity={warningsDim*(1-feedback.glow*.65)}/>
+      {!intro&&[{x:1700,y:410,after:1},{x:1580,y:555,after:2},{x:1305,y:600,after:3},{x:1775,y:575,after:4}].map(({x,y,after},i)=>{
+        const start=[96,150,345,555][i]+20;
+        return <WarningSymbol key={i} x={x} y={y} scale={.46+i*.05} amount={progress(f,start,start+18)} opacity={feedback.visits>=after?progress(f,start,start+15)*(1-feedback.glow*.5):0}/>;
+      })}
       <g opacity={fade(f,150,190,240)}><WarningSymbol x={1560} y={530} scale={.7} amount={progress(f,150,178)}/><WarningSymbol x={1305} y={600} scale={.6} amount={progress(f,175,205)}/><BrokenHeart x={1710} y={590} scale={.7} amount={progress(f,172,215)} opacity={.65}/></g>
-      <g opacity={fade(circleFrame,28,50,306)} stroke={C.yellow} strokeWidth={3} fill="none"><path d="M1058 418A45 45 0 1 1 1081 380M1080 363L1081 380 1064 379" {...draw(progress(circleFrame,28,65))}/></g>
+      <g opacity={fade(circleFrame,28,50,306)} stroke={C.yellow} strokeWidth={3} fill="none"><path d="M1058 418A45 45 0 1 1 1081 380" {...draw(progress(circleFrame,28,65))}/><path d="M1081 380L1062 377L1081 359Z" fill={C.yellow} stroke="none" opacity={progress(circleFrame,55,65)}/></g>
       <g opacity={progress(f,360,405)}><LearnedAssociation d="M1550 305Q1635 240 1550 165" amount={progress(f,360,420)} strength={strength}/></g>
       {f>=480&&<RewardPulse x={1550} y={225} age={outcomeAge} opacity={outcomeAge>=0&&outcomeAge<=45?1:0} strength={1+.25*strength}/>}
     </g>
@@ -81,7 +97,7 @@ const AddictionStory: React.FC<{intro?:boolean}> = ({intro=false}) => {
       <path d={`M${pose.x-85} 561l25 17 -4 -29`} fill="none" stroke={C.yellow} strokeWidth={4} opacity={progress(f,795,810)} strokeLinecap="round" strokeLinejoin="round"/>
     </g>
     <g transform={`translate(${pose.x} ${pose.footY-64-Math.abs(Math.sin(f*.33))*3*pose.walking})`}>
-      <HumanCharacter frame={f===0?660:f} naturalMotion walking={pose.walking} expression={f>=345&&f<385?'satisfied':f>=240&&f<345?'curious':'conflicted'} look={diagram>.9?-5:5}/>
+      <HumanCharacter frame={f===0?660:f} naturalMotion walking={pose.walking} expression={feedback.expression} rightHand={f<750&&feedback.glow>0?{x:mix(48,105,feedback.glow),y:mix(-27,-18,feedback.glow)}:undefined} headTilt={feedback.distress*10} look={diagram>.9?-5:5}/>
     </g>
     <g opacity={progress(f,345,360)}>
       <RewardPulse x={pulseX} y={pulseY} scale={mix(reward,mix(.2,1,diagram),dot)} age={f-345} plus={dot<.9||diagram>.5} strength={1+.3*strength}/>
@@ -207,11 +223,31 @@ const RewardLearningBridge: React.FC = () => {
   </g>;
 };
 
-export const Scene03_AddictionAndRewardLearning: React.FC = () => <AbsoluteFill style={{backgroundColor:C.bg}}>
+const Scene03OriginalTimeline: React.FC = () => <AbsoluteFill style={{backgroundColor:C.bg}}>
   <svg viewBox="0 0 1920 1080" width="100%" height="100%" role="img" aria-label="Persistent drug-seeking despite harm, positive reinforcement, and learned cue–action–reward associations. A conceptual illustration of one contributing mechanism, ending with particles and a forming neuron.">
     <Sequence from={0} durationInFrames={SCENE03.openingFrames} layout="none"><AddictionStory intro/><OpeningQuestion/></Sequence>
     <Sequence from={SCENE03.openingFrames} durationInFrames={1050+SCENE03.bridgeFrames+SCENE03.addictionHold+SCENE03.reinforcementHold} layout="none"><AddictionStory/></Sequence>
-    <Sequence from={SCENE03.openingFrames+SCENE03.bridgeFrames+SCENE03.addictionHold+SCENE03.reinforcementHold+T03.rewardLearning} durationInFrames={SCENE03.durationInFrames-SCENE03.openingFrames-SCENE03.bridgeFrames-SCENE03.addictionHold-SCENE03.reinforcementHold-T03.rewardLearning} layout="none"><RewardLearning/></Sequence>
+    <Sequence from={SCENE03.openingFrames+SCENE03.bridgeFrames+SCENE03.addictionHold+SCENE03.reinforcementHold+T03.rewardLearning} durationInFrames={SCENE03_CUT.sourceDuration-SCENE03.openingFrames-SCENE03.bridgeFrames-SCENE03.addictionHold-SCENE03.reinforcementHold-T03.rewardLearning} layout="none"><RewardLearning/></Sequence>
     <Sequence from={SCENE03.bridgeFrom} durationInFrames={SCENE03.bridgeFrames} layout="none"><RewardLearningBridge/></Sequence>
   </svg>
 </AbsoluteFill>;
+
+const BridgeCutFade:React.FC=()=>{
+ const f=useCurrentFrame();
+ return <AbsoluteFill style={{opacity:1-progress(f,0,12)}}><Freeze frame={SCENE03_CUT.from-1}><Scene03OriginalTimeline/></Freeze></AbsoluteFill>;
+};
+const Scene03BeforeExtension:React.FC=()=> <AbsoluteFill style={{backgroundColor:C.bg}}>
+ <Sequence from={0} durationInFrames={SCENE03_CUT.from}><Scene03OriginalTimeline/></Sequence>
+ <Sequence from={SCENE03_CUT.from}>
+  <Sequence from={-SCENE03_CUT.to}><Scene03OriginalTimeline/></Sequence>
+  <Sequence from={0} durationInFrames={12}><BridgeCutFade/></Sequence>
+ </Sequence>
+ <Sequence from={REWARD_UPDATE.from} durationInFrames={REWARD_UPDATE.duration}><RewardLearningUpdate/></Sequence>
+</AbsoluteFill>;
+
+// Add two seconds at 59s, preserving the following scene and its crossfade.
+export const scene03ExtendedFrame=(frame:number)=>frame<1770?frame:frame<1830?1770:frame-60;
+export const Scene03_AddictionAndRewardLearning:React.FC=()=>{
+ const frame=useCurrentFrame();
+ return <Freeze frame={scene03ExtendedFrame(frame)}><Scene03BeforeExtension/></Freeze>;
+};

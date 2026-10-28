@@ -4,7 +4,7 @@ import {anatomyToScreen,BrainAnatomy,BrainRegionLabel,BRAIN_REGIONS,type BrainCa
 import {ENDING_CAMERA05} from './Scene05_DopamineRewardPredictionErrors';
 import {AnimatedArrow,C,Label,SourceCitation} from './components';
 import {draw,ease,fade,mix,progress} from './motion';
-import {CocaineContainer} from './dopamine-introduction-components';
+import {CocainePowderBag} from './dopamine-introduction-components';
 import {RewardSymbol,WarningSymbol} from './risk-components';
 import {RodentPathwayComparison} from './rodent-pathway-comparison';
 import {Scene06Opening} from './scene06-opening';
@@ -79,7 +79,7 @@ export const PathwayComparison:React.FC<{frame:number}>=({frame:f})=>{
     <g opacity={progress(f,1380,1410)}><Label x={570} y={100} color={C.yellow} size={27}>MESOLIMBIC · VTA → NAc</Label><Label x={1350} y={100} color={C.yellow} size={27}>MESOCORTICAL · VTA → PFC</Label></g>
     <g opacity={nacOpacity}>
       <ProjectionNeuronInset frame={f} target="NAc" x={560} y={745} change={incomingNac}/>
-      <CocaineContainer x={230} y={690} scale={.65}/><Label x={260} y={830} color={C.gray} size={20}>REWARDING STIMULUS</Label>
+      <CocainePowderBag x={230} y={690} scale={.65}/><Label x={260} y={830} color={C.gray} size={20}>REWARDING STIMULUS</Label>
     </g>
     <g opacity={pfcOpacity}><ProjectionNeuronInset frame={f} target="PFC" x={1360} y={745} change={incomingPfc}/><WarningSymbol x={1680} y={690} scale={.8}/><Label x={1650} y={830} color={C.red} size={20}>AVERSIVE EXPERIENCE</Label></g>
     <g opacity={fade(f,1490,1510,1560)}><Label x={960} y={550} size={27}>ALTERED INPUT TO NAc-PROJECTING NEURONS</Label></g>

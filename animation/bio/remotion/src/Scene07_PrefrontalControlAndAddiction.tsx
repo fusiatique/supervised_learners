@@ -4,7 +4,7 @@ import {anatomyToScreen,BrainAnatomy,BRAIN_REGIONS,type BrainCamera} from './Bra
 import {getScene06Camera,MesocorticalPlanningArtwork} from './Scene06_MesocorticalPathwayAndPlanning';
 import {AnimatedArrow,C,HumanCharacter,Label,SourceCitation} from './components';
 import {draw,ease,fade,mix,progress} from './motion';
-import {CocaineContainer} from './dopamine-introduction-components';
+import {CocainePowderBag} from './dopamine-introduction-components';
 import {CueSymbol} from './reward-components';
 import {RewardSymbol,WarningSymbol} from './risk-components';
 import {BehavioralBrake,D2ReceptorAvailability,getRatExperimentPose,RatBrain,RatIllustration} from './prefrontal-control-components';
@@ -38,9 +38,11 @@ const Title:React.FC<{f:number;from:number;until?:number;text:string;y?:number;c
 
 const HumanAnatomy:React.FC<{f:number}>=({f})=>{
  const s=getScene07State(f),[px,py]=anatomyToScreen(BRAIN_REGIONS.PFC.center,s.camera);
+ const previous=getScene06Camera(1770),ratio=s.camera.scale/previous.scale;
+ const reveal=ease(f,60,150);
  return <g opacity={s.humanOpacity}>
-  <g opacity={1-progress(f,60,120)}><MesocorticalPlanningArtwork frame={1770}/></g>
-  <g opacity={progress(f,60,120)}><BrainAnatomy {...s.camera} cortexOpacity={.6} frame={f} highlights={{VTA:1,NAc:.45,PFC:s.pfc}} pathwayProgress={{mesolimbic:1,mesocortical:1}} pathwayOpacity={{mesolimbic:.5,mesocortical:1}} activity={{mesocortical:f>=930&&f<1110?.3:0}}/></g>
+  <g opacity={1-reveal} transform={`translate(${s.camera.x} ${s.camera.y}) scale(${ratio}) translate(${-previous.x} ${-previous.y})`}><MesocorticalPlanningArtwork frame={1770}/></g>
+  <g opacity={reveal}><BrainAnatomy {...s.camera} cortexOpacity={.6} frame={f} highlights={{VTA:1,NAc:.45,PFC:s.pfc}} pathwayProgress={{mesolimbic:1,mesocortical:1}} pathwayOpacity={{mesolimbic:.5,mesocortical:1}} activity={{mesocortical:f>=930&&f<1110?.3:0}}/></g>
   <circle cx={px} cy={py} r={45+25*ease(f,0,60)} stroke={C.blue} strokeWidth={2} fill="none" opacity={fade(f,8,25,60)*.3}/>
   <g opacity={fade(f,1290,1320,1380)} transform={`translate(${s.camera.x} ${s.camera.y}) scale(${s.camera.scale}) translate(-500 -330) translate(1000 0) scale(-1 1)`}>
     <path d="M180 200L262 227M154 285L245 300M165 375L257 375" fill="none" stroke={C.blue} strokeWidth={2} strokeDasharray="4 7" opacity={progress(f,1290,1350)}/>
@@ -50,11 +52,11 @@ const HumanAnatomy:React.FC<{f:number}>=({f})=>{
 const ControlMetaphor:React.FC<{f:number}>=({f})=>{
  const pose=getControlPose07(f),cam=getScene07Camera(f),[px,py]=anatomyToScreen(BRAIN_REGIONS.PFC.center,cam);
  const strength=mix(1,.25,ease(f,420,480));
- const visible=progress(f,60,100)*(1-progress(f,540,580));
+ const visible=ease(f,90,150)*(1-progress(f,540,580));
  return <g>
   <Title f={f} from={8} until={150} text="WHAT IF CONTROL BECOMES IMPAIRED?"/>
   <g opacity={visible}>
-    <RewardSymbol x={700} y={755} scale={.85}/><CocaineContainer x={1510} y={750} scale={.75}/><WarningSymbol x={1640} y={745} scale={.6}/>
+    <RewardSymbol x={700} y={755} scale={.85}/><CocainePowderBag x={1510} y={750} scale={.75}/><WarningSymbol x={1640} y={745} scale={.6}/>
     <HumanCharacter x={pose.x} y={870} scale={.8} frame={f} walking={pose.walking} naturalMotion expression={f<240?'curious':'conflicted'} look={f<120?-5:5}/>
     <AnimatedArrow x={1250} y={920} length={190} amount={progress(f,100,165)} color={C.yellow}/>
     <path d={`M${px} ${py}Q1050 500 ${pose.x} 680`} stroke={C.blue} strokeWidth={2} opacity={.65*strength*progress(f,150,210)} fill="none" strokeDasharray="5 8"/>
@@ -89,7 +91,7 @@ export const ReceptorsAndControl:React.FC<{f:number}>=({f})=>{
       <Label x={0} y={85} size={20} color={C.gray}>{['SALIENCE','IMPULSE CONTROL','DECISION-MAKING'][i]}</Label>
     </g>)}
   </g>
-  <g opacity={progress(f,870,895)}><HumanCharacter x={540} y={875} scale={.48} frame={f} expression="conflicted" look={5}/><CocaineContainer x={710} y={830} scale={.42}/><WarningSymbol x={810} y={830} scale={.4}/></g>
+  <g opacity={progress(f,870,895)}><HumanCharacter x={540} y={875} scale={.48} frame={f} expression="conflicted" look={5}/><CocainePowderBag x={710} y={830} scale={.42}/><WarningSymbol x={810} y={830} scale={.4}/></g>
   <Title f={f} from={870} until={930} text="RESISTING URGES MAY BECOME HARDER" y={965} color={C.red} size={29}/>
  </g>;
 };
@@ -97,7 +99,7 @@ const Adaptations:React.FC<{f:number}>=({f})=>{
  const response=ease(f,1110,1170),opacity=progress(f,930,960)*(1-progress(f,1290,1320));
  return <g opacity={opacity}>
   <g opacity={progress(f,1110,1150)}>
-    <CueSymbol x={1090} y={580} scale={.7}/><CocaineContainer x={970} y={580} scale={.35}/><RewardSymbol x={1570} y={580} scale={.8}/>
+    <CueSymbol x={1090} y={580} scale={.7}/><CocainePowderBag x={970} y={580} scale={.35}/><RewardSymbol x={1570} y={580} scale={.8}/>
     <HumanCharacter x={mix(1320,1200,response)} y={875} scale={.75} frame={f} naturalMotion walking={Math.sin(response*Math.PI)} expression="recognition" look={-5}/>
     <path d="M1230 730Q1160 670 1110 650" stroke={C.yellow} strokeWidth={5} fill="none" {...draw(response)}/>
     <path d="M1390 730Q1490 670 1550 650" stroke={C.yellow} strokeWidth={2} opacity={.25} fill="none" {...draw(response)}/>
@@ -128,7 +130,7 @@ export const PrelimbicExperimentArtwork:React.FC<{frame:number}>=({frame})=>{
   <Label x={500} y={520} size={21} color={C.gray}>PRELIMBIC CORTEX</Label><Label x={1420} y={520} size={21} color={C.gray}>PRELIMBIC CORTEX</Label>
   <circle cx={594} cy={346} r={9} fill={C.yellow} opacity={progress(f,1590,1620)*.55}/><circle cx={1514} cy={346} r={mix(6,2,ease(f,1680,1740))} fill={C.yellow} opacity={mix(.4,.08,ease(f,1680,1740))}/>
   <RatIllustration x={left.x} y={745} scale={.7} frame={f} walking={left.walking}/><RatIllustration x={right.x} y={745} scale={.7} frame={f} walking={right.walking}/>
-  <CueSymbol x={770} y={730} scale={.45}/><CocaineContainer x={835} y={735} scale={.3}/><CueSymbol x={1680} y={730} scale={.45}/><CocaineContainer x={1745} y={735} scale={.3}/>
+  <CueSymbol x={770} y={730} scale={.45}/><CocainePowderBag x={835} y={735} scale={.3}/><CueSymbol x={1680} y={730} scale={.45}/><CocainePowderBag x={1745} y={735} scale={.3}/>
   <path d="M220 805H865M1110 805H1775" stroke={C.gray} strokeWidth={2} opacity={.25}/>
   <path d="M660 670V790" stroke={C.green} strokeWidth={4} opacity={progress(f,1620,1650)}/>
   <g opacity={progress(f,1590,1660)}><Label x={500} y={890} size={29}><tspan fill={C.green}>REDUCED</tspan> DRUG SEEKING</Label></g>

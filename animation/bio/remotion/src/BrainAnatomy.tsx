@@ -27,8 +27,8 @@ export const DopamineParticle:React.FC<{pathway:PathwayId;phase:number;opacity?:
   const [x,y]=curvePoint(Math.max(0,Math.min(1,phase)),BRAIN_PATHWAYS[pathway]);
   return <g opacity={opacity}><circle cx={x} cy={y} r={7} fill={C.yellow} opacity={.09}/><circle cx={x} cy={y} r={2.8} fill={C.yellow}/></g>;
 };
-export const DopaminePathway:React.FC<{pathway:PathwayId;amount?:number;opacity?:number;frame?:number;activity?:number}>=({pathway,amount=1,opacity=1,frame=0,activity=0})=><g opacity={opacity} data-projection={`VTA-to-${PATHWAY_TARGETS[pathway]}`}>
-  <path d={pathD(BRAIN_PATHWAYS[pathway])} fill="none" stroke={C.yellow} strokeWidth={pathway==='mesolimbic'?2.4:pathway==='mesocortical'?2:1.4} strokeLinecap="round" {...draw(amount)}/>
+export const DopaminePathway:React.FC<{pathway:PathwayId;amount?:number;opacity?:number;frame?:number;activity?:number;widthScale?:number}>=({pathway,amount=1,opacity=1,frame=0,activity=0,widthScale=1})=><g opacity={opacity} data-projection={`VTA-to-${PATHWAY_TARGETS[pathway]}`}>
+  <path d={pathD(BRAIN_PATHWAYS[pathway])} fill="none" stroke={C.yellow} strokeWidth={(pathway==='mesolimbic'?2.4:pathway==='mesocortical'?2:1.4)*widthScale} strokeLinecap="round" {...draw(amount)}/>
   {Array.from({length:pathway==='mesolimbic'||pathway==='mesocortical'?3:1},(_,i)=>{
     const phase=((Math.max(0,frame)+i*45)%135)/135;
     return <DopamineParticle key={i} pathway={pathway} phase={phase} opacity={activity*progress(frame,0,25)*amount*progress(phase,0,.07)*(1-progress(phase,.92,1))}/>;
@@ -47,12 +47,13 @@ export type BrainAnatomyProps=BrainCamera&{
   labels?:Partial<Record<BrainRegion,boolean>>;
   pathwayProgress?:Partial<Record<PathwayId,number>>;
   pathwayOpacity?:Partial<Record<PathwayId,number>>;
+  pathwayWidthScale?:Partial<Record<PathwayId,number>>;
   activity?:Partial<Record<PathwayId,number>>;
   /** 0–1; default increases with zoom. Fine sulci never replace the major anatomy. */
   detail?:number;
 };
 export const BrainAnatomy:React.FC<BrainAnatomyProps>=(props)=>{
-  const {x,y,scale,anteriorRight=true,amount=1,opacity=1,cortexOpacity=1,frame=0,highlights={},regionOpacity={},labels={},pathwayProgress={},pathwayOpacity={},activity={}}=props;
+  const {x,y,scale,anteriorRight=true,amount=1,opacity=1,cortexOpacity=1,frame=0,highlights={},regionOpacity={},labels={},pathwayProgress={},pathwayOpacity={},pathwayWidthScale={},activity={}}=props;
   const detail=Math.max(0,Math.min(1,props.detail??progress(scale,.7,1.6)));
   const regions=Object.keys(BRAIN_REGIONS) as BrainRegion[];
   const structural:BrainRegion[]=['midbrain','pons','medulla','cerebellum','corpusCallosum','thalamus','hypothalamus','vHPC','BLA','NAc'];
@@ -85,7 +86,7 @@ export const BrainAnatomy:React.FC<BrainAnatomyProps>=(props)=>{
           const target=PATHWAY_TARGETS[pathway];
           const reveal=pathwayProgress[pathway]??(branch?limbic:0);
           const pathOpacity=pathwayOpacity[pathway]??(branch?(pathwayOpacity.mesolimbic??1)*(.28+.35*(highlights[target]??0)):1);
-          return <DopaminePathway key={pathway} pathway={pathway} amount={reveal} opacity={pathOpacity} frame={frame} activity={activity[pathway]??0}/>;
+          return <DopaminePathway key={pathway} pathway={pathway} amount={reveal} opacity={pathOpacity} frame={frame} activity={activity[pathway]??0} widthScale={pathwayWidthScale[pathway]??1}/>;
         })}
       </g>
     </g>

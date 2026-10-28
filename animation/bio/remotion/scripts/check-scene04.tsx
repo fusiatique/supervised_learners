@@ -6,7 +6,7 @@ import {DopamineHandoff} from '../src/Scene03_AddictionAndRewardLearning';
 import {getScene04Camera,getScene04State,MesocorticolimbicArtwork,Scene04PlaybackArtwork,SCENE04,T04,scene04TimelineFrame} from '../src/Scene04_MesocorticolimbicIntroduction';
 import {C,SourceCitation} from '../src/components';
 import {curvePoint,progress} from '../src/motion';
-import {living04Camera,living04Phase,usesLiving04} from '../src/scene04-living-system';
+import {living04Camera,living04Phase,living04PlaybackFrame,usesLiving04} from '../src/scene04-living-system';
 
 assert.equal(SCENE04.durationInFrames,1320);
 assert.equal(SCENE04.durationInFrames/SCENE04.fps,44);
@@ -79,3 +79,11 @@ for(const frame of [240,330,450,570,660,735,795,830,869]){
 }
 console.log('PASS: exact 8–29s edit window; unchanged legacy artwork outside window; matched camera boundaries; contained/smooth camera; deterministic activity and reverse seeking; narration citation.');
 console.log('PASS: 1320 frames / 44s; rewards start at 29s; fixed anatomical projection endpoints; anterior orientation; full anatomy stays in frame; smooth camera; reverse scrubbing; preserved Scene 03 handoff; reusable ending.');
+
+assert.equal(living04PlaybackFrame(300),300);
+assert.equal(living04PlaybackFrame(510),565,'Enhanced dopamine title fully visible at 17 seconds');
+assert.equal(living04PlaybackFrame(690),690,'Rejoin original timing before later transitions');
+for(let f=301;f<=690;f++){
+ const step=living04PlaybackFrame(f)-living04PlaybackFrame(f-1);
+ assert.ok(step>0&&step<1.5,'Speed-up stays smooth and never reverses');
+}

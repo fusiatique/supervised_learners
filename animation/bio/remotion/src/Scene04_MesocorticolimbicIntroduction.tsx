@@ -91,11 +91,31 @@ export const MesocorticolimbicArtwork:React.FC<{frame:number;showBrain?:boolean}
   </g>;
 };
 
+// Half-second accents follow the spoken list once the reward icons have appeared.
+const RewardExampleHighlights:React.FC<{frame:number}>=({frame})=>{
+ if(frame<=975||frame>=1041||(frame>=1020&&frame<=1026))return null;
+ const pulse=(start:number)=>ease(frame,start,start+4)*(1-ease(frame,start+10,start+15));
+ return <g fill="none" strokeWidth={3.5}>
+  {[440,595,750].map((y,i)=>{
+   const amount=pulse(975+i*15);
+   return <g key={y} opacity={amount}>
+    <circle cx={230} cy={y} r={63} stroke={C.green}/>
+    <circle cx={230} cy={y} r={67} stroke={C.green} strokeWidth={9} opacity={.12}/>
+   </g>;
+  })}
+  <g opacity={pulse(1026)}>
+   <circle cx={1690} cy={580} r={94} stroke={C.yellow}/>
+   <circle cx={1690} cy={580} r={99} stroke={C.yellow} strokeWidth={11} opacity={.12}/>
+  </g>
+ </g>;
+};
+
 export const Scene04PlaybackArtwork:React.FC<{frame:number}>=({frame})=>{
   const f=scene04TimelineFrame(frame);
   if(usesLiving04(frame))return <Scene04LivingSystem frame={frame} opening={<MesocorticolimbicArtwork frame={240}/>} ending={<MesocorticolimbicArtwork frame={629}/>}/>;
   return <>
     <MesocorticolimbicArtwork frame={f}/>
+    <RewardExampleHighlights frame={frame}/>
     <g opacity={1-progress(f,585,600)}><SourceCitation frame={f} source="Piantadosi et al., 2021"/></g>
     <g opacity={progress(f,600,615)}><SourceCitation frame={f} source="Feltenstein et al., 2009"/></g>
   </>;
