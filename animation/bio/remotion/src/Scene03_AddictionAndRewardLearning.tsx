@@ -161,9 +161,10 @@ export const scene03TimelineFrame=(frame:number)=>frame<1470?frame:frame<1680?14
 
 const RewardLearning: React.FC = () => {
   const timelineFrame=scene03TimelineFrame(useCurrentFrame()+T03.rewardLearning);
-  // Reveal the settled comparison under the mouse crossfade, rather than replaying
-  // the superseded human layout and introducing symbols while its labels move.
-  const f=timelineFrame>=1296?Math.max(1470,timelineFrame):timelineFrame;
+  // Start with the settled comparison, but keep its animation clock advancing.
+  // Rejoin the original clock at the particle handoff without extending the video.
+  const f=timelineFrame<1296?timelineFrame:timelineFrame<1560
+    ?1470+(timelineFrame-1296)*(90/264):timelineFrame;
   const pose=getNaturalLearningPose(f);
   const layout=ease(f,1320,1380);
   const compare=ease(f,1380,1470);
