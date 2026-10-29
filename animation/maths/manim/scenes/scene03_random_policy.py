@@ -35,8 +35,8 @@ from common import (
 REWARD_STATE = 7
 # The "random" walk is scripted to tell the story: it wanders, sits right next to the reward
 # without caring, stumbles onto it by chance, and wanders off again.
-BEFORE_REWARD = ["up", "up", "left", "down", "down"]  # s6 -> s3 -> (bump) -> s2 -> s5 -> s8
-AFTER_REWARD = ["up", "right", "left", "down", "left", "right"]  # s8 -> s5 -> s6 -> s5 -> s8 -> s7 (reward) -> s8
+BEFORE_REWARD = ["down", "left"]  # s6 -> s9 -> s8
+AFTER_REWARD = ["up", "down", "left", "right"]  # s8 -> s5 -> s8 -> s7 (reward) -> s8
 QUARTER = r"\tfrac{1}{4}"
 
 
@@ -138,7 +138,7 @@ class Scene03RandomPolicy(Scene):
 
         # "So how can we give it a better policy?"
         self.next_section("question")
-        self.wait(1.2)
+        self.wait(0.8)
         dim = Rectangle(width=config.frame_width, height=config.frame_height, stroke_width=0,
                         fill_color=BG, fill_opacity=0.8).set_z_index(20)
         question = Text("?", font_size=380, color=INK).set_z_index(21)

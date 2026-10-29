@@ -117,19 +117,12 @@ class Scene04RewardFunction(Scene):
         # "If no action leads to a higher value, it chooses randomly, like before."
         tie = Text("if tied: choose at random", font_size=24, color=MUTED).next_to(greedy, DOWN, buff=0.3)
         self.play(FadeIn(tie, shift=0.1 * UP), run_time=0.5)
-        self.wait(1.5)
-        # The rule goes into the agent's brain and replaces the random policy in the box;
-        # the 1/4s go with the old policy.
+        self.wait(0.8)
+        # The rule glides into the agent's brain, which lights up, and replaces the random policy in
+        # the box; the 1/4s go with the old policy.
         thought = VGroup(new_policy, greedy, tie)
-        self.play(
-            absorb(thought, stage.agent),
-            box.swap(GREEDY_TEX, font_size=30),
-            FadeOut(quarters),
-            run_time=1.4,
-        )
-        self.remove(thought)
+        self.play(absorb(thought, stage.agent), box.swap(GREEDY_TEX, font_size=30), FadeOut(quarters))
         stage.riders.remove(quarters)
-        self.wait(1)
 
         # "Now if the agent is next to a reward state, it will go towards that!"
         # Beside each arrow: the reward of the state it leads to. The 10 wins.

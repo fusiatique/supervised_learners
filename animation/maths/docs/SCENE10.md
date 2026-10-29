@@ -28,7 +28,7 @@ Each gap is a `self.wait(...)` under a comment quoting its narration line in `sc
 ## Implementation
 
 - Paced like Maths 09 with `common/pacing.py`'s `PacedScene`: every animation runs 35% slower than written (`SLOW`), and the extra time comes out of the pauses that follow. Unlike Maths 09, `REPAY_ACROSS_SECTIONS = False`: extra time a line cannot absorb in its own pauses lengthens that line instead of eating into the next one, so every narration line keeps its full time.
-- The opening frame rebuilds Maths 09's end from that scene's own helpers (`maths08_policy`, `after_discovery`, `glow_opacity`, `fog_cell`, `epsilon_heading`, `epsilon_controls`), imported from `scene09_exploration.py`, so the scenes join exactly.
+- The opening frame rebuilds Maths 09's end from that scene's own helpers (`after_discovery`, `glow_opacity`, `fog_cell`, `epsilon_heading`, `epsilon_controls`, and `common.final_policy`), imported from `scene09_exploration.py`, so the scenes join exactly.
 - The two updates are real Q-learning steps with α = 0.5 and γ = 0.9, starting from Q = 0: stepping into the 20 gives 0 + 0.5 × (20 + 0 − 0) = 10; stepping from s14 to s19 then gives 0 + 0.5 × (0 + 0.9 × 10 − 0) = 4.5. The number line shows each one as "the estimate moves halfway towards what actually happened".
 - When the grey lifts, the values and arrows are the ones Maths 09 ended on (what enough experience would converge to), plus s25, which Maths 09 never explored.
 - Pulses on boxes and fog cells animate their outlines, not their fill, so text stays readable.

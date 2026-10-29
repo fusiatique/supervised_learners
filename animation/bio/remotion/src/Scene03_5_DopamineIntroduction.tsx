@@ -5,7 +5,7 @@ import {draw, ease, fade, mix, pop, progress} from './motion';
 import {RewardSymbol, WarningSymbol} from './risk-components';
 import {RewardPulse, SimpleNeuron} from './reward-components';
 import {DopamineHandoff} from './Scene03_AddictionAndRewardLearning';
-import {CocaineContainer, Cookie, CookiePlate, DopamineCircuitBridge, DopamineMessenger, Pair, ShoppingBag, Smile} from './dopamine-introduction-components';
+import {CocainePowderBag, Cookie, CookiePlate, DopamineCircuitBridge, DopamineMessenger, Pair, ShoppingBag, Smile} from './dopamine-introduction-components';
 
 export const SCENE03_5={width:1920,height:1080,fps:30,durationInFrames:1950} as const;
 // Hold at 32 seconds for three extra seconds; cut the original 42–47s tail
@@ -114,12 +114,14 @@ export const CocaineReinforcementExample:React.FC<{f:number}>=({f})=>{
   return <g opacity={stage(f,810,990)}>
     <CookiePlate x={mix(1200,440,shift)} y={mix(565,540,shift)} scale={mix(1.3,.8,shift)} frame={f}/>
     <HumanCharacter x={mix(760,960,shift)} y={730} scale={.85} frame={f} naturalMotion expression="conflicted" look={5}/>
-    <CocaineContainer x={1480} y={535} amount={progress(f,820,870)} opacity={progress(f,820,845)}/>
+    <CocainePowderBag x={1480} y={535} amount={progress(f,820,870)} opacity={progress(f,820,845)}/>
     <g opacity={progress(f,840,860)}><Label x={1480} y={720} size={30} color={C.red}>COCAINE</Label></g>
     <path d="M1000 770Q1280 850 1450 660" fill="none" stroke={C.yellow} strokeWidth={5} {...draw(association)}/><path d="M1000 770Q1280 850 1450 660" fill="none" stroke={C.yellow} strokeWidth={18} opacity={.08*association} {...draw(association)}/>
     <RewardPulse x={1440} y={510} age={f-880} strength={1.5}/><WarningSymbol x={1640} y={520} scale={.7} amount={progress(f,890,920)} opacity={progress(f,890,910)}/>
+    <g opacity={1-progress(f,970,990)}>
     <Title f={f} start={930} text="POWERFUL REINFORCEMENT" color={C.yellow}/>
     <g opacity={progress(f,930,960)}><Label x={960} y={240} size={32}>CAN CONTRIBUTE TO <tspan fill={C.red}>ADDICTION</tspan></Label></g>
+    </g>
   </g>;
 };
 

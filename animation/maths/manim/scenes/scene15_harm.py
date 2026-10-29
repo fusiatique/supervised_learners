@@ -44,6 +44,27 @@ UNIT = 0.06  # block height per unit of reward
 HEALTHY = (50, 74)  # H before and after a dose
 WITHDRAWAL = (20, 43)
 
+# Narration cues (seconds from the start), from the recorded voiceover: the lines start at 0:00, 0:07,
+# 0:13.5, 0:23, 0:29, 0:40 and 0:48.
+T_REAL_LIFE = 4.0  # "But in real life, drugs come with a cost."
+T_HARM_TERM = 7.0  # "Our simulation also adds a harm term:
+T_COST = 8.3  # ...a cost, c,
+T_EVERY = 11.3  # ...that the agent pays every time it takes the drug."
+T_EXAMPLE = 14.8  # "In our example, the drug's pleasure, R0, is worth 2,
+T_HARM_VALUE = 17.3  # ...and its harm, c, costs 10.
+T_FIVE = 20.3  # The harm is five times bigger than the pleasure."
+T_STOP = 23.0  # "Shouldn't that stop it? Not necessarily.
+T_TOTAL = 26.0  # What matters is the total."
+T_HEALTHY = 29.0  # "For a healthy agent,
+T_OVERSHOOT = 31.2  # ...the drug overshoots the setpoint, so it makes things worse, not better.
+T_ADD = 34.9  # Add the harm, and the total is -19.5.
+T_WALKS = 38.8  # It walks away."
+T_WITHDRAWAL = 40.0  # "An agent in withdrawal gets huge relief.
+T_SAME = 43.1  # Same cost, but the total is +9.0.
+T_TAKES = 46.2  # It takes the drug."
+T_OUTWEIGHED = 48.0  # "The harm hasn't disappeared. It's just been outweighed."
+T_END = 52.5
+
 
 def block(value, color, label):
     """A weight: a block as tall as |value|, with its number above it."""
@@ -102,9 +123,7 @@ def sum_line(relief, total):
 
 
 class Scene15Harm(PacedScene, Scene):
-    """Paced like Maths 10–14: animations 35% slower, every narration line keeps its full time."""
-
-    REPAY_ACROSS_SECTIONS = False
+    """Paced like Maths 10–14 (animations 35% slower); each beat waits for its narration cue."""
 
     def construct(self):
         f = end_frame()
@@ -124,13 +143,12 @@ class Scene15Harm(PacedScene, Scene):
         self.play(FadeOut(f["proposal"], f["claims"], f["boxes"], f["link"]), run_time=0.6)
         self.play(Write(so_far), FadeIn(pill, scale=0.8), run_time=1.0)
         self.play(FadeIn(harmless), run_time=0.5)
-        self.wait(2.0)
         # "But in real life, drugs come with a cost."
+        self.at(T_REAL_LIFE)
         self.play(FadeOut(harmless), FadeIn(cost_tag, shift=0.15 * LEFT), run_time=0.6)
-        self.wait(2.0)
 
-        # "This is where our own simulation comes in. We added a harm term: a cost, c, that the agent pays
-        # every time it takes the drug."  The reward grows its drug term; the cost tag becomes c.
+        # "Our simulation also adds a harm term: a cost, c, that the agent pays every time it takes the
+        # drug."  The reward grows its drug term; the cost tag becomes c.
         self.next_section("harm term")
         ours = Text("our simulation", font_size=24, color=MUTED).move_to([0, 2.55, 0])
         full = MathTex("r", "=", "D(H) - D(H')", "+", "(", "R_0", "-", "c", ")", r"\cdot", r"[\text{drug}]",
@@ -148,16 +166,16 @@ class Scene15Harm(PacedScene, Scene):
         names[2].shift(0.15 * RIGHT)
         each_time = Text("[drug] = 1 when it takes the drug", font_size=20, color=MUTED).next_to(full[10], DOWN, buff=0.6)
         each_time.align_to(full[10], RIGHT)
+        self.at(T_HARM_TERM)
         self.play(FadeIn(ours), Transform(so_far, full[:3]), pill.animate.scale(0.7).move_to([-5.4, -1.0, 0]),
                   cost_tag.animate.scale(0.8).next_to([-5.4, -1.0, 0], RIGHT, buff=0.55), run_time=0.9)
-        self.wait(1.6)
-        # "We added a harm term: a cost, c..."
+        # "...a harm term: a cost, c..."
+        self.at(T_COST)
         self.play(Write(full[3:7]), Write(full[8:]), FadeTransform(cost_tag, full[7]), run_time=1.3)
         self.play(FadeIn(names[2], shift=0.1 * UP), run_time=0.5)
-        self.wait(1.0)
         # "...that the agent pays every time it takes the drug."
+        self.at(T_EVERY)
         self.play(FadeIn(names[0], names[1], each_time, shift=0.1 * UP), run_time=0.7)
-        self.wait(2.9)
 
         # "In our example, the drug's pleasure, R0, is worth 2, and its harm, c, costs 10. The harm is five
         # times bigger than the pleasure."  Each becomes a block: the harm's is five times taller.
@@ -166,19 +184,19 @@ class Scene15Harm(PacedScene, Scene):
         harm_value = MathTex("c", "=", str(COST), font_size=36, color=HARM).move_to([4.5, -1.0, 0])
         pleasure_block = block(R0, DOPAMINE, f"+{R0}").next_to(pleasure_value, RIGHT, buff=0.4).align_to(pleasure_value, DOWN)
         harm_block = block(COST, HARM, f"-{COST}").next_to(harm_value, RIGHT, buff=0.4).align_to(harm_value, DOWN)
+        self.at(T_EXAMPLE)
         self.play(FadeIn(pleasure_value, shift=0.1 * UP), run_time=0.6)
         self.play(FadeIn(pleasure_block, shift=0.1 * UP), run_time=0.5)
-        self.wait(1.6)
+        # "...and its harm, c, costs 10."
+        self.at(T_HARM_VALUE)
         self.play(FadeIn(harm_value, shift=0.1 * UP), run_time=0.6)
         self.play(FadeIn(harm_block, shift=0.1 * UP), run_time=0.5)
-        self.wait(0.8)
         # "The harm is five times bigger than the pleasure."  Five pleasure blocks stack up beside the harm.
         five = VGroup(*[pleasure_block[0].copy() for _ in range(5)]).arrange(UP, buff=0)
         five.next_to(harm_block[0], RIGHT, buff=0.15).align_to(harm_block[0], DOWN).set_stroke(DOPAMINE, width=1.5)
         times = MathTex(r"\times 5", font_size=28, color=DOPAMINE).next_to(five, RIGHT, buff=0.12)
+        self.at(T_FIVE)
         self.play(*[FadeTransform(pleasure_block[0].copy(), b) for b in five], FadeIn(times), run_time=0.9)
-        self.wait(2.1)
-        self.play(FadeOut(five, times), run_time=0.4)
 
         # "Shouldn't that stop it? Not necessarily. What matters is the total."  A balance: what is for
         # the drug on the left, what is against it on the right.
@@ -186,13 +204,15 @@ class Scene15Harm(PacedScene, Scene):
         scale = Balance(pivot=[0.4, -0.95, 0])
         for_name = Text("for the drug", font_size=24, color=MUTED).move_to([0.4 - 2.3, -3.55, 0])
         against_name = Text("against", font_size=24, color=MUTED).move_to([0.4 + 2.3, -3.55, 0])
-        self.play(FadeIn(scale, for_name, against_name), run_time=0.7)
+        self.at(T_STOP)
+        self.play(FadeOut(five, times), FadeIn(scale, for_name, against_name), run_time=0.7)
+        # "What matters is the total."  The two weights go onto the pans.
         pleasure_weight, harm_weight = pleasure_block.copy(), harm_block.copy()
+        self.at(T_TOTAL)
         self.play(pleasure_weight.animate.move_to(scale.spot(-1, 1), aligned_edge=DOWN),
                   harm_weight.animate.move_to(scale.spot(1, -1), aligned_edge=DOWN), run_time=0.8)
         scale.put(pleasure_weight, -1, 1)
         scale.put(harm_weight, 1, -1)
-        self.wait(2.2)
 
         # "For a healthy agent, the drug overshoots the setpoint, so it makes things worse, not better.
         # Add the harm, and the total is -19.5. It walks away."
@@ -206,63 +226,63 @@ class Scene15Harm(PacedScene, Scene):
         gauge.shift(np.array([-5.4, -2.45, 0]) - gauge.center())
         mark, gap = gauge.mark(0.5), gauge.gap(0.5)
         who = Text("healthy", font_size=24, color=INK).next_to(agent, UP, buff=0.2)
+        self.at(T_HEALTHY)
         self.play(FadeIn(agent, brain, who, gauge, mark, gap), pill.animate.move_to([-3.85, -0.35, 0]), run_time=0.7)
-        self.wait(1.3)
         # "...the drug overshoots the setpoint, so it makes things worse..."  Its expected effect on H.
         line = sum_line(relief, total).move_to([0.4, 0.0, 0])
         overshoot = block(relief, HOMEO, f"{relief:.1f}")
+        self.at(T_OVERSHOOT)
         self.play(gauge.value.animate.set_value(after / 100), run_time=0.8)
         self.play(FadeIn(line[0], shift=0.1 * UP), FadeIn(overshoot.move_to(line[0]), scale=0.6), run_time=0.6)
         self.play(overshoot.animate.move_to(scale.spot(1, 1), aligned_edge=DOWN), run_time=0.7)
         scale.put(overshoot, 1, 1)
-        self.wait(0.6)
         # "Add the harm, and the total is -19.5."
+        self.at(T_ADD)
         self.play(FadeIn(line[1:5], shift=0.1 * UP), run_time=0.6)
         self.play(FadeIn(line[5:], shift=0.1 * UP), scale.tilt.animate.set_value(tilt_for(total)), run_time=1.0,
                   rate_func=rate_functions.ease_out_back)
-        self.wait(0.8)
         # "It walks away."
+        self.at(T_WALKS)
         walks = Text("walks away", font_size=26, color=INK).next_to(gauge, DOWN, buff=0.2)
         self.play(gauge.value.animate.set_value(before / 100), VGroup(agent, brain).animate.shift(0.35 * LEFT),
                   pill.animate.set_opacity(0.35), FadeIn(walks), run_time=0.8)
-        self.wait(0.6)
 
         # "An agent in withdrawal gets huge relief. Same cost, but the total is +9.0. It takes the drug."
         self.next_section("withdrawal")
         before, after = WITHDRAWAL
         relief = drive(before) - drive(after)
         total = relief + R0 - COST
-        sick = Agent(radius=0.6).move_to([-5.4, 0.35, 0])
-        sick_mouth, sick_marks = sick.mood("tired")
-        sick.mouth.become(sick_mouth)
+        sick = Agent(radius=0.6).move_to([-5.4, 0.35, 0]).show_mood("tired")
         sick_brain = brain_light(sick)
         who2 = Text("in withdrawal", font_size=24, color=INK).next_to(sick, UP, buff=0.2)
         new_line = sum_line(relief, total).move_to(line)
         relief_weight = block(relief, HOMEO, f"+{relief:.1f}")
-        self.play(FadeOut(agent, brain, who, walks, line, overshoot), FadeIn(sick, sick_marks, sick_brain, who2),
+        self.at(T_WITHDRAWAL)
+        self.play(FadeOut(agent, brain, who, walks, line, overshoot), FadeIn(sick, sick_brain, who2),
                   gauge.value.animate.set_value(before / 100), pill.animate.set_opacity(1),
                   scale.tilt.animate.set_value(tilt_for(R0 - COST)), run_time=0.8)
+        sick.idle()  # nodding off, sweating
         # "...gets huge relief."
-        self.play(gauge.value.animate.set_value(after / 100), run_time=0.8)
-        self.play(FadeIn(new_line[0], shift=0.1 * UP), FadeIn(relief_weight.move_to(new_line[0]), scale=0.6), run_time=0.5)
-        self.play(relief_weight.animate.move_to(scale.spot(-1, -1), aligned_edge=DOWN), run_time=0.6)
+        self.play(gauge.value.animate.set_value(after / 100), run_time=0.6)
+        self.play(FadeIn(new_line[0], shift=0.1 * UP), FadeIn(relief_weight.move_to(new_line[0]), scale=0.6), run_time=0.4)
+        self.play(relief_weight.animate.move_to(scale.spot(-1, -1), aligned_edge=DOWN), run_time=0.5)
         scale.put(relief_weight, -1, -1)
         # "Same cost, but the total is +9.0."
+        self.at(T_SAME)
         self.play(FadeIn(new_line[1:], shift=0.1 * UP), scale.tilt.animate.set_value(tilt_for(total)), run_time=1.0,
                   rate_func=rate_functions.ease_out_back)
-        self.wait(0.4)
         # "It takes the drug."
-        happy_mouth, _ = sick.mood("satisfied")
+        self.at(T_TAKES)
         self.play(pill.animate.scale(0.3).move_to(sick.mouth.get_center()).set_opacity(0), run_time=0.6,
                   rate_func=rate_functions.ease_in_sine)
         self.remove(pill)
-        self.play(Transform(sick.mouth, happy_mouth), FadeOut(sick_marks), run_time=0.5)
-        self.wait(0.4)
+        self.play(sick.set_mood("satisfied"), run_time=0.5)
 
         # "The harm hasn't disappeared. It's just been outweighed."  The red block is still on the scale.
         self.next_section("outweighed")
         still = Text("still there", font_size=24, color=HARM).next_to(harm_weight, UP, buff=0.15)
         still.add_updater(lambda m: m.next_to(harm_weight, UP, buff=0.15))
+        self.at(T_OUTWEIGHED)
         self.play(harm_weight[0].animate(rate_func=rate_functions.there_and_back).set_fill(opacity=1).set_stroke(INK, width=4),
                   FadeIn(still), run_time=0.9)
-        self.wait(1.6)
+        self.at(T_END)

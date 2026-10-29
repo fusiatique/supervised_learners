@@ -4,34 +4,92 @@ Narration: from "Addiction as an exploitation of the reward learning system..."
 to "These states are, for example, positions the agent can be in."
 """
 
+import numpy as np
 from manim import (
     DOWN,
     LEFT,
     ORIGIN,
-    RIGHT,
     UP,
-    UR,
+    ArcBetweenPoints,
     Circle,
     Create,
-    DashedVMobject,
     Ellipse,
     FadeIn,
     FadeOut,
     GrowFromCenter,
     LaggedStart,
     MathTex,
+    Rectangle,
+    ReplacementTransform,
     Scene,
     Square,
     Text,
     Transform,
+    Union,
+    UpdateFromAlphaFunc,
     VGroup,
-    ReplacementTransform,
     Write,
+    rate_functions,
+    smooth,
 )
 
-from common import AGENT_RATIO, CELL, CELL_3X3, GRID_SHIFT, HIGHLIGHT, INK, MODEL, MUTED, Agent, GridWorld, Maze, state_panel
+from common import (
+    AGENT_RATIO, CELL, CELL_3X3, DOPAMINE, GRID_SHIFT, HIGHLIGHT, HOMEO, INK, MODEL, MUTED, Agent, GridWorld, Maze,
+    neon, state_panel,
+)
 
 CELL_MAZE = 0.9
+ZOOM = 22  # how far we zoom into the agent's head: far enough that its forehead fills the screen
+BRAIN_WIDTH = 9.0
+# The equations still to come, each placed inside the brain (as fractions of its width) and coloured
+# like the scenes that introduce them: violet for the agent's values and policies, amber for rewards,
+# teal for the internal state.
+PROPERTIES = [
+    (r"R(s)", DOPAMINE, (-0.1, 0.3)),
+    (r"V(s)", MODEL, (0.12, 0.3)),
+    (r"f(s, a) = s'", INK, (-0.25, 0.165)),
+    (r"G_t = R_{t+1} + \gamma R_{t+2} + \cdots", DOPAMINE, (0.13, 0.165)),
+    (r"Q(s, a) = r(s, a, s') + \gamma V(s')", MODEL, (-0.05, 0.035)),
+    (r"\gamma", MODEL, (0.33, 0.04)),
+    (r"Q(s, a) \leftarrow Q(s, a) + \alpha\,[\,\cdots]", MODEL, (-0.1, -0.095)),
+    (r"\pi(a \mid s)", MODEL, (0.27, -0.09)),
+    (r"\varepsilon", MODEL, (-0.31, -0.19)),
+    (r"D(H) = \frac{(H^* - H)^2}{H^*}", HOMEO, (0.05, -0.2)),
+]
+
+
+def brain_outline(width):
+    """A brain seen from the side, facing left and `width` across: a lobed cerebrum, the cerebellum
+    and the stem, and two faint folds."""
+    def at(x, y):
+        return width * np.array([x, y, 0])
+
+    lobes = [(-0.36, -0.02, 0.15), (-0.30, 0.13, 0.15), (-0.17, 0.23, 0.16), (0.0, 0.26, 0.16), (0.17, 0.23, 0.16),
+             (0.31, 0.12, 0.15), (0.37, -0.02, 0.14), (0.27, -0.12, 0.13), (0.1, -0.14, 0.14), (-0.1, -0.14, 0.14),
+             (-0.27, -0.12, 0.13), (0.0, 0.05, 0.28)]
+    parts = [Circle(radius=width * r).move_to(at(x, y)) for x, y, r in lobes]
+    parts.append(Ellipse(width=0.26 * width, height=0.14 * width).move_to(at(0.25, -0.25)))  # cerebellum
+    parts.append(Rectangle(width=0.07 * width, height=0.18 * width).rotate(0.3).move_to(at(0.1, -0.3)))  # stem
+    shape = Union(*parts).set_stroke(MODEL, width=4).set_fill(MODEL, opacity=0.06)
+    folds = VGroup(  # a few short folds near the edge, clear of the equations
+        ArcBetweenPoints(at(-0.43, 0.06), at(-0.33, 0.07), angle=-0.8),
+        ArcBetweenPoints(at(0.27, 0.32), at(0.34, 0.24), angle=0.7),
+        ArcBetweenPoints(at(0.42, -0.02), at(0.4, -0.13), angle=0.7),
+        ArcBetweenPoints(at(0.18, -0.24), at(0.32, -0.25), angle=0.6),  # the cerebellum's edge
+    ).set_stroke(MODEL, width=3, opacity=0.35)
+    return VGroup(shape, folds)
+
+
+def brain_glow(brain, run_time=1.8):
+    """The brain switches on like the agent's does whenever it takes in an equation (common.neon)."""
+    shape = brain[0]
+
+    def update(_, alpha):
+        v = neon(alpha)
+        shape.set_fill(opacity=0.06 + 0.24 * v)
+        shape.set_stroke(width=4 + 4 * v)
+
+    return UpdateFromAlphaFunc(shape, update, run_time=run_time)
 
 # s5 -> s2 -> s3 -> s6 -> s9 -> s8 -> s5
 WANDER = ["up", "down"]  # s5 -> s2 -> s5
@@ -62,25 +120,41 @@ class Scene01AgentEnvironment(Scene):
         self.wait(0.1)
 
         # "Currently, it is dumb, with nothing in its brain."
-        self.play(agent.blink())
-        bubble = VGroup(
-            Circle(radius=0.08),
-            Circle(radius=0.13).shift(0.35 * UR),
-            Ellipse(width=3.0, height=1.6).shift(1.6 * UR + 0.15 * RIGHT),
-        ).set_stroke(MUTED, width=3)
-        bubble.next_to(agent.head, UR, buff=-0.15)
-        bubble[2] = DashedVMobject(bubble[2], num_dashes=40)
-        self.play(LaggedStart(*[FadeIn(part, scale=0.6) for part in bubble], lag_ratio=0.35))
-        self.wait(1.5)
+        self.wait(0.7)
+        # "...dumb..."  The face goes vacant: mismatched eyes, the tongue out, a slow wobble.
+        self.play(agent.set_mood("dumb"))
+        agent.idle()
+        self.wait(0.4)
+        # "...with nothing in its brain."  We zoom in through its forehead until the inside of its head
+        # fills the screen, and an empty brain draws in.
+        agent.stop_idle()
+        pivot = agent.head.get_center() + 0.72 * agent.radius * UP
+        brain = brain_outline(BRAIN_WIDTH).move_to(0.2 * DOWN).set_z_index(11)
+        self.play(FadeOut(agent_label),
+                  agent.animate(rate_func=rate_functions.ease_in_cubic).scale(ZOOM, about_point=pivot).shift(-pivot),
+                  run_time=1.4)
+        self.play(Create(brain[0]), FadeIn(brain[1]), run_time=1.0)
+        self.wait(0.4)
 
-        # "We will slowly inject certain 'properties' into its brain through equations."
-        props = VGroup(
-            MathTex(r"V(s)"), MathTex(r"Q(s,a)"), MathTex(r"\pi(s)"), MathTex(r"\gamma")
-        ).set_color(MODEL).scale(0.8)
-        props.arrange_in_grid(rows=2, cols=2, buff=(0.45, 0.2)).move_to(bubble[2])
-        self.play(LaggedStart(*[FadeIn(p, scale=1.4) for p in props], lag_ratio=0.3))
-        self.wait(2)
-        self.play(FadeOut(props, bubble))
+        # "We will slowly inject certain 'properties' into its brain through equations."  The equations
+        # to come glide in on gentle arcs and settle in the brain, which then lights up.
+        props = VGroup(*[
+            MathTex(tex, font_size=36, color=color).move_to(BRAIN_WIDTH * np.array([x, y, 0]) + brain[0].get_center())
+            for tex, color, (x, y) in PROPERTIES
+        ]).set_z_index(12)
+        starts = [p.copy().scale(1.6).move_to(2.6 * p.get_center()).set_opacity(0) for p in props]
+        self.play(LaggedStart(*[ReplacementTransform(a, b, path_arc=0.6, rate_func=smooth) for a, b in zip(starts, props)],
+                              lag_ratio=0.18, run_time=3.2))
+        self.play(brain_glow(brain))
+        self.wait(0.3)
+        # Back out: the brain and its equations shrink into the head and fade (they come one by one, later),
+        # and the face settles.
+        inside = VGroup(brain, props)
+        self.play(agent.animate(rate_func=rate_functions.ease_out_cubic).shift(pivot).scale(1 / ZOOM, about_point=pivot),
+                  inside.animate(rate_func=rate_functions.ease_out_cubic).shift(pivot).scale(1 / ZOOM, about_point=pivot)
+                  .set_opacity(0), run_time=1.2)
+        self.remove(inside)
+        self.play(agent.set_mood("blank"), run_time=0.5)
 
         # "Next, you need an environment."
         self.next_section("environment")
@@ -89,7 +163,6 @@ class Scene01AgentEnvironment(Scene):
         maze = Maze(7, 7, cell=CELL_MAZE)
         frame = maze.outline
         self.play(
-            FadeOut(agent_label),
             agent.animate.scale(AGENT_RATIO * CELL_MAZE / agent.radius).move_to(maze.center_of(25)),
             Create(frame),
         )

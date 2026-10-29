@@ -26,8 +26,6 @@ from manim import (
     FadeTransform,
     GrowArrow,
     Indicate,
-    LaggedStart,
-    ManimColor,
     MathTex,
     Rectangle,
     Scene,
@@ -38,18 +36,28 @@ from manim import (
     Write,
     always_redraw,
     rate_functions,
-    UpdateFromAlphaFunc,
-    interpolate_color,
-    smooth,
 )
 
 from common import (
-    DOPAMINE, HARM, HOMEO, INK, MUTED, Agent, Gauge, PacedScene, apple, brain_light, moon, sun, water_glass,
+    DOPAMINE, HARM, HOMEO, INK, MUTED, Agent, Gauge, PacedScene, absorb, apple, brain_light, moon, sun, water_glass,
 )
 from scene12_setpoint import RX, drive, end_frame as scene12_end_frame
 
 START_H = 30  # where H sits when the outcomes are offered (D = 8)
 BAR_SCALE = 0.09  # bar height per unit of D: D = 24.5 is 2.2 units tall
+
+# Narration cues (seconds from the start), from the recorded voiceover.
+T_PREVIEW = 3.6  # ...how much will this outcome reduce the agent's homeostatic deviation?"
+T_CLOSER = 7.5  # "Moving H closer to the setpoint gives a positive reward.
+T_FURTHER = 11.9  # "Moving it further away can give a negative one.
+T_OVERSHOOT = 15.3  # "And overshooting the target can make an outcome less beneficial, or even aversive."
+T_CORE = 20.0  # "This is the core HRL idea.
+T_LEARN = 25.8  # ...and the agent uses it to learn which actions are worth pursuing."
+T_SO_FAR = 30.5  # "So far, this is a theory of motivated behaviour,
+T_NOT_YET = 33.2  # ...not yet of addiction.
+T_FOOD, T_WATER, T_REST = 36.0, 36.5, 37.0  # "It explains why food, water, or rest
+T_RESTORE = 37.6  # ...become more valuable when they restore a regulated state."
+T_END = 41.8
 
 
 def reward(before, after):
@@ -73,34 +81,6 @@ def outcome(icon, caption):
     """An outcome on offer: its picture and what it does to H."""
     label = MathTex(caption, font_size=26, color=INK)
     return VGroup(icon, label).arrange(DOWN, buff=0.15)
-
-
-def neon(alpha):
-    """Brightness of a neon sign switching on: a few stutters, a full blaze, then a slow settle back."""
-    for start, end, level in ((0, 0.05, 0.8), (0.05, 0.09, 0.1), (0.09, 0.13, 1), (0.13, 0.17, 0.35)):
-        if start <= alpha < end:
-            return level
-    return 1 if alpha < 0.5 else 1 - smooth((alpha - 0.5) / 0.5)
-
-
-def light_up(agent, brain, run_time=2.4):
-    """The brain flickers on like a neon sign, with a soft teal glow over the head, then settles back."""
-    disc, h = brain
-    base = disc.get_fill_opacity()
-    layers = 18  # stacked translucent discs: a smooth falloff
-    halo = VGroup(*[
-        Circle(radius=1.1 * agent.radius * (k + 1) / layers, stroke_width=0, fill_color=HOMEO, fill_opacity=0)
-        for k in range(layers)
-    ]).move_to(disc).set_z_index(agent.z_index + 0.5)  # over the face, under the disc and the H
-
-    def update(_, alpha):
-        v = neon(alpha)
-        disc.set_fill(opacity=base + (0.8 - base) * v)
-        h.set_color(interpolate_color(ManimColor(HOMEO), ManimColor(INK), v))
-        for layer in halo:
-            layer.set_fill(opacity=0.025 * v)
-
-    return UpdateFromAlphaFunc(halo, update, run_time=run_time, remover=True)
 
 
 class DeviationBar(VGroup):
@@ -166,7 +146,7 @@ def end_frame():
 
 
 class Scene13HomeostaticReward(PacedScene, Scene):
-    """Paced like Maths 10–12: animations 35% slower, every narration line keeps its full time."""
+    """Paced like Maths 10–12 (animations 35% slower); each beat waits for its narration cue."""
 
     REPAY_ACROSS_SECTIONS = False
 
@@ -180,11 +160,11 @@ class Scene13HomeostaticReward(PacedScene, Scene):
         arc_before = gauge.gap(0.5).copy().clear_updaters().set_stroke(opacity=0.3)
         bar_before = bar.ghost()
         plot_before = Circle(radius=0.09).set_stroke(INK, width=2.5).move_to(axes.c2p(before, drive(before)))
-        self.play(FadeIn(arc_before, bar_before, plot_before), run_time=0.3)
-        self.play(gauge.value.animate.set_value(after / 100), run_time=0.7)
+        self.play(FadeIn(arc_before, bar_before, plot_before), run_time=0.2)
+        self.play(gauge.value.animate.set_value(after / 100), run_time=0.6)
         after_value = bar.after_value()
         arrow = bar.change(before, after)
-        self.play(FadeIn(after_value), GrowArrow(arrow), run_time=0.5)
+        self.play(FadeIn(after_value), GrowArrow(arrow), run_time=0.4)
         added = [arc_before, bar_before, plot_before, after_value, arrow]
         if formula_at is not None:
             r = reward(before, after)
@@ -194,7 +174,7 @@ class Scene13HomeostaticReward(PacedScene, Scene):
             line[4].set_color(HARM)
             line[6].set_color(DOPAMINE if r > 0 else HARM)
             self.play(FadeIn(line[:2]), FadeTransform(bar_before[1].copy(), line[2]), FadeIn(line[3]),
-                      FadeTransform(after_value.copy(), line[4]), run_time=0.6)
+                      FadeTransform(after_value.copy(), line[4]), run_time=0.5)
             self.play(FadeIn(line[5], line[6]), run_time=0.3)
             added.append(line)
         return VGroup(*added)
@@ -221,17 +201,16 @@ class Scene13HomeostaticReward(PacedScene, Scene):
                   VGroup(f["plot"], f["tracer"]).animate.shift(0.45 * RIGHT), FadeIn(bar), run_time=0.6)
         self.play(gauge.value.animate.set_value(START_H / 100), run_time=1.0)
         self.play(FadeIn(water, water_name, shift=0.15 * UP), FadeIn(hot_day, hot_name, shift=0.15 * UP), run_time=0.6)
-        self.wait(0.6)
         # "...how much will this outcome reduce the agent's homeostatic deviation?"
+        self.at(T_PREVIEW)
         previews = {}
         for name, after, color, item in (("water", START_H + 15, HOMEO, water), ("hot", START_H - 15, MUTED, hot_day)):
             previews[name] = Dot(axes.c2p(after, drive(after)), radius=0.08, color=color)
             self.play(Indicate(item, color=color, scale_factor=1.1), FadeIn(previews[name]), run_time=0.7)
-            self.wait(0.3)
+            self.wait(0.2)
         chosen = SurroundingRectangle(VGroup(water, water_name), color=DOPAMINE, buff=0.12, corner_radius=0.1)
         self.play(Create(chosen), previews["hot"].animate.set_opacity(0.25),
-                  VGroup(hot_day, hot_name).animate.set_opacity(0.4), run_time=0.6)
-        self.wait(0.6)
+                  VGroup(hot_day, hot_name).animate.set_opacity(0.4), run_time=0.5)
 
         # "Moving H closer to the setpoint gives a positive reward. Moving it further away can give a
         # negative one. And overshooting the target can make an outcome less beneficial, or even aversive."
@@ -240,32 +219,33 @@ class Scene13HomeostaticReward(PacedScene, Scene):
         r_eq = MathTex(r"r_{\text{homeostatic}}", "=", r"D(H_{\text{before}})", "-", r"D(H_{\text{after}})",
                        font_size=34, color=INK).move_to([RX, 2.3, 0])
         r_eq[0].set_color(DOPAMINE)
-        self.play(FadeOut(previews["water"], previews["hot"]), Write(r_eq), run_time=1.1)
+        self.at(T_CLOSER)
+        self.play(FadeOut(previews["water"], previews["hot"]), Write(r_eq), run_time=0.8)
         # "...closer to the setpoint gives a positive reward."
         case = self.show_case(gauge, bar, axes, START_H, START_H + 15, formula_at=[RX, 1.5, 0])
-        self.wait(0.3)
-        # "...further away can give a negative one."
+        # "Moving it further away can give a negative one."
+        self.at(T_FURTHER)
         self.play(FadeOut(case), chosen.animate.become(SurroundingRectangle(VGroup(hot_day, hot_name), color=HARM,
                                                                             buff=0.12, corner_radius=0.1)),
                   VGroup(hot_day, hot_name).animate.set_opacity(1), VGroup(water, water_name).animate.set_opacity(0.4),
-                  gauge.value.animate.set_value(START_H / 100), run_time=0.4)
+                  gauge.value.animate.set_value(START_H / 100), run_time=0.3)
         case = self.show_case(gauge, bar, axes, START_H, START_H - 15, formula_at=[RX, 1.5, 0])
-        self.wait(0.3)
-        # "...overshooting the target can make an outcome less beneficial, or even aversive."  Three glasses.
+        # "And overshooting the target can make an outcome less beneficial, or even aversive."  Three glasses.
         flood = outcome(three_glasses(), r"H + 45").move_to(hot_day)
         flood_name = Text("three glasses", font_size=18, color=MUTED).next_to(flood, UP, buff=0.1)
+        self.at(T_OVERSHOOT)
         self.play(FadeOut(case, chosen), FadeOut(hot_day, hot_name), FadeIn(flood, flood_name),
                   VGroup(water, water_name).animate.set_opacity(0.4), gauge.value.animate.set_value(START_H / 100),
                   run_time=0.4)
         case = self.show_case(gauge, bar, axes, START_H, START_H + 45, formula_at=[RX, 1.5, 0])
         overshoot_note = Text("overshoot", font_size=22, color=HARM).next_to(gauge._point(0.75, 1.3), RIGHT, buff=0.05)
         self.play(FadeIn(overshoot_note, shift=0.1 * LEFT), run_time=0.4)
-        self.wait(0.4)
 
         # "This is the core HRL idea. Reward comes from the anticipated reduction in deviation, and the
         # agent uses it to learn which actions are worth pursuing."
         self.next_section("core idea")
         # Only the agent and the equation stay.
+        self.at(T_CORE)
         self.play(FadeOut(case, overshoot_note, water, water_name, flood, flood_name, gauge, f["target"],
                           f["setpoint_word"], f["gap"], bar, f["squared"], f["plot"], f["tracer"]),
                   VGroup(agent, brain).animate.scale(1.2).move_to([-3.4, -0.6, 0]),
@@ -273,36 +253,34 @@ class Scene13HomeostaticReward(PacedScene, Scene):
         box = SurroundingRectangle(r_eq, color=DOPAMINE, buff=0.2, corner_radius=0.12)
         core = Text("the core HRL idea", font_size=24, color=DOPAMINE).next_to(box, UP, buff=0.15)
         self.play(FadeIn(box, core), run_time=0.7)
-        self.wait(1.4)
         # "...the agent uses it to learn which actions are worth pursuing."  The whole boxed card glides
         # into the brain, which lights up as it arrives.
-        card = VGroup(r_eq, box, core).set_z_index(agent.z_index + 3)  # in front of the head all the way in
-        landed = card.copy().scale(0.08).move_to(agent.brain_point())
-        landed[0].set_opacity(0.5)
-        landed[1].set_stroke(opacity=0.5)  # (set_opacity would also fill the box)
-        landed[2].set_opacity(0.5)
-        self.play(Transform(card, landed, path_arc=0.5, rate_func=smooth), run_time=1.4)
-        self.remove(card)
-        self.play(light_up(agent, brain))
-        self.wait(0.6)
+        self.at(T_LEARN)
+        self.play(absorb(VGroup(r_eq, box, core), agent, brain, color=HOMEO))
 
         # "So far, this is a theory of motivated behaviour, not yet of addiction. It explains why food,
         # water, or rest become more valuable when they restore a regulated state."
-        # One agent, low on H: a glass of water, an apple and a rest each bring it back to the setpoint.
+        # One agent, low on H: an apple, a glass of water and a rest (the script's order, each on its
+        # word) bring it back to the setpoint.
         self.next_section("motivated behaviour")
         m = motivated_frame(level=0.2, expression="blank")
         title, not_yet, one, g = m["heading"], m["not_yet"], m["agent"], m["gauge"]
+        self.at(T_SO_FAR)
         self.play(FadeOut(agent, brain), run_time=0.6)
         self.play(FadeIn(title, shift=0.1 * DOWN), FadeIn(one, m["brain"], g, m["mark"], m["gap"]), run_time=0.8)
+        self.at(T_NOT_YET)
         self.play(FadeIn(not_yet), run_time=0.5)
-        self.wait(2.5)
-        # "...food, water, or rest become more valuable when they restore a regulated state."
-        items = VGroup(water_glass(height=0.8), apple(size=0.85), moon(size=0.85))
+        # "...food, water, or rest..."  Each appears on its word.
+        items = VGroup(apple(size=0.85), water_glass(height=0.8), moon(size=0.85))
         items.arrange(RIGHT, buff=0.8).move_to([4.6, -0.6, 0])
-        self.play(LaggedStart(*[FadeIn(i, shift=0.15 * UP) for i in items], lag_ratio=0.25), run_time=0.9)
+        for item, t in zip(items, (T_FOOD, T_WATER, T_REST)):
+            self.at(t)
+            self.play(FadeIn(item, shift=0.15 * UP), run_time=0.3)
+        # "...become more valuable when they restore a regulated state."
+        self.at(T_RESTORE)
         for item, level in zip(items, (0.32, 0.43, 0.5)):
             self.play(item.animate.scale(0.25).move_to(one.get_center()).set_opacity(0),
-                      g.value.animate.set_value(level), run_time=0.8, rate_func=rate_functions.ease_in_sine)
+                      g.value.animate.set_value(level), run_time=0.7, rate_func=rate_functions.ease_in_sine)
             self.remove(item)
         self.play(Transform(one.mouth, one.make_mouth("happy")), run_time=0.4)
-        self.wait(1)
+        self.at(T_END)

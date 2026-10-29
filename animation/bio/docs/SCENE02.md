@@ -2,7 +2,7 @@
 
 Open `animation/index.html` through Live Server: Scene 02 is the next presentation page after Scene 01, before Biology. You can also open `animation/bio/html/scene02.html` to preview it on its own. Its bundled player is included; no install is needed to watch it. Scene 01's page and MP4 are retained.
 
-23 seconds · 690 frames · 30 FPS · 1920 × 1080 · no audio.
+32 seconds · 960 frames · 30 FPS · 1920 × 1080 · no audio.
 
 From `animation/bio/remotion` with Node.js 22+:
 
@@ -20,7 +20,13 @@ In Studio, choose `Scene02-RiskAndAddiction`. The render command produces `anima
 npm run render:scene02 -- --browser-executable="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 ```
 
-| Frames | Visual story |
+The first second preserves Scene 01’s closing artwork exactly. During seconds 1–4.5, the diagram shows action, a positive outcome, and a curved feedback loop; during 4.5–8 seconds the same action repeats despite a red negative outcome. At second 8, the negative-outcome diagram shrinks and fades directly into the stick-man sequence; the question does not return. The full video remains 32 seconds, with the extra second held at the end.
+
+`bio/remotion/src/OpeningLearningCycle.tsx` implements this deterministic opening. Timing and rendering checks preserve frames 0–30 and the direct outgoing transition at frames 240–305. The MP4 remains silent; no narration was edited.
+
+The table below describes the unchanged story timeline after the eight-second opening hold. Add 240 to these frame values for video timestamps.
+
+| Story frames | Visual story |
 | --- | --- |
 | 0–59 | Scene 01's closing brain, processor and learning loop shrink and fade as the new character and crossroads draw in. |
 | 60–119 | Apple and neutral mystery box appear; the character considers the options. |

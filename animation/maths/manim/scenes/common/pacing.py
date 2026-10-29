@@ -2,7 +2,8 @@
 extra time is taken back out of the pauses that follow (never below MIN_PAUSE), so beats stay on
 their narration and the scene only grows where the pauses cannot absorb it."""
 
-from manim.animation.animation import prepare_animation
+from manim import config
+from manim.animation.animation import Wait, prepare_animation
 
 
 class PacedScene:
@@ -30,3 +31,10 @@ class PacedScene:
         repaid = min(self.slow_debt, max(0.0, duration - self.MIN_PAUSE))
         self.slow_debt -= repaid
         super().wait(duration - repaid, **kwargs)
+
+    def at(self, t):
+        """Wait until t seconds into the scene (a no-op once that time has passed). A cue already
+        allows for the extra time SLOW added before it, so nothing is left to repay."""
+        self.slow_debt = 0.0
+        if t - self.time >= 1 / config.frame_rate:
+            super().play(Wait(run_time=t - self.time))  # (Scene.wait would go through play() and be slowed)

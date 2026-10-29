@@ -1,10 +1,11 @@
 import React from 'react';
+import {brainFocus} from './brain-attention';
 import {AbsoluteFill,Sequence,useCurrentFrame} from 'remotion';
 import {anatomyToScreen,BrainAnatomy,BrainRegionLabel,BRAIN_REGIONS,type BrainCamera} from './BrainAnatomy';
 import {ENDING_CAMERA05} from './Scene05_DopamineRewardPredictionErrors';
 import {AnimatedArrow,C,Label,SourceCitation} from './components';
 import {draw,ease,fade,mix,progress} from './motion';
-import {CocaineContainer} from './dopamine-introduction-components';
+import {CocainePowderBag} from './dopamine-introduction-components';
 import {RewardSymbol,WarningSymbol} from './risk-components';
 import {RodentPathwayComparison} from './rodent-pathway-comparison';
 import {Scene06Opening} from './scene06-opening';
@@ -17,7 +18,7 @@ export const BRAIN_START06=13*30;
 export const scene06ContentFrame=(frame:number)=>frame<BRAIN_START06?Math.min(frame,225):frame<630?frame-120+150*ease(frame,570,630):frame<990?frame+30:frame<1590?1019:frame+120;
 // Complete imagined reward, imagined risk and the chosen movement before the 33s cut.
 export const scene06PreviewFrame=(contentFrame:number)=>contentFrame<900?contentFrame:contentFrame<=1020?900+(contentFrame-900)*(355/120):contentFrame;
-const blend=(a:BrainCamera,b:BrainCamera,t:number):BrainCamera=>({x:mix(a.x,b.x,t),y:mix(a.y,b.y,t),scale:mix(a.scale,b.scale,t),anteriorRight:true});
+const blend=(a:BrainCamera,b:BrainCamera,t:number):BrainCamera=>({x:mix(a.x,b.x,t),y:mix(a.y,b.y,t),scale:mix(a.scale,b.scale,t),anteriorRight:false});
 export const getScene06Camera=(frame:number):BrainCamera=>{
   const f=Math.min(frame,T06.hold);
   let camera=blend(ENDING_CAMERA05,{x:950,y:500,scale:1.4},ease(f,210,360));
@@ -41,10 +42,13 @@ export const MesocorticalPlanningArtwork:React.FC<{frame:number}>=({frame})=>{
   const labels=progress(f,300,340)*(1-progress(f,570,630));
   const last=progress(f,1740,1770);
   return <g opacity={anatomy}>
-    <BrainAnatomy {...s.camera} cortexOpacity={.6} frame={f} highlights={{VTA:1,NAc:s.nac,PFC:s.pfc}} pathwayProgress={{mesolimbic:1,mesocortical:s.corticalPath}} pathwayOpacity={{mesolimbic:mix(.2,.8,ease(f,1380,1470)),mesocortical:1}} activity={{mesolimbic:s.limbicActivity,mesocortical:s.corticalActivity}}/>
-    <BrainRegionLabel region="VTA" camera={s.camera} x={730} y={850} opacity={Math.max(labels,last)}/>
-    <BrainRegionLabel region="PFC" camera={s.camera} x={1600} y={420} fullName opacity={Math.max(labels*progress(f,450,480),last)}/>
-    <BrainRegionLabel region="NAc" camera={s.camera} x={1270} y={850} opacity={last}/>
+    <BrainAnatomy {...s.camera}
+      regionFocus={{VTA:brainFocus(f,[270,570]),PFC:brainFocus(f,[390,450],[450,1290],[1720,1800])}}
+      pathwayFocus={{mesocortical:brainFocus(f,[390,570]).strength}}
+      cortexOpacity={.6} frame={f} highlights={{VTA:1,NAc:s.nac,PFC:s.pfc}} pathwayProgress={{mesolimbic:1,mesocortical:s.corticalPath}} pathwayOpacity={{mesolimbic:mix(.2,.8,ease(f,1380,1470)),mesocortical:1}} activity={{mesolimbic:s.limbicActivity,mesocortical:s.corticalActivity}}/>
+    <BrainRegionLabel mirrorPosition region="VTA" camera={s.camera} x={730} y={850} opacity={Math.max(labels,last)}/>
+    <BrainRegionLabel mirrorPosition region="PFC" camera={s.camera} x={1600} y={420} fullName opacity={Math.max(labels*progress(f,450,480),last)}/>
+    <BrainRegionLabel mirrorPosition region="NAc" camera={s.camera} x={1270} y={850} opacity={last}/>
   </g>;
 };
 
@@ -79,7 +83,7 @@ export const PathwayComparison:React.FC<{frame:number}>=({frame:f})=>{
     <g opacity={progress(f,1380,1410)}><Label x={570} y={100} color={C.yellow} size={27}>MESOLIMBIC · VTA → NAc</Label><Label x={1350} y={100} color={C.yellow} size={27}>MESOCORTICAL · VTA → PFC</Label></g>
     <g opacity={nacOpacity}>
       <ProjectionNeuronInset frame={f} target="NAc" x={560} y={745} change={incomingNac}/>
-      <CocaineContainer x={230} y={690} scale={.65}/><Label x={260} y={830} color={C.gray} size={20}>REWARDING STIMULUS</Label>
+      <CocainePowderBag x={230} y={690} scale={.65}/><Label x={260} y={830} color={C.gray} size={20}>REWARDING STIMULUS</Label>
     </g>
     <g opacity={pfcOpacity}><ProjectionNeuronInset frame={f} target="PFC" x={1360} y={745} change={incomingPfc}/><WarningSymbol x={1680} y={690} scale={.8}/><Label x={1650} y={830} color={C.red} size={20}>AVERSIVE EXPERIENCE</Label></g>
     <g opacity={fade(f,1490,1510,1560)}><Label x={960} y={550} size={27}>ALTERED INPUT TO NAc-PROJECTING NEURONS</Label></g>

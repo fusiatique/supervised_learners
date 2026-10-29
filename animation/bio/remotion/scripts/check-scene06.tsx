@@ -35,7 +35,7 @@ for(let f=0;f<1800;f++){
  assert.ok(Math.hypot(camera.x-prev.x,camera.y-prev.y)<20,'No camera jump');
  assert.ok(Math.abs(camera.scale-prev.scale)<.04);
  const vta=anatomyToScreen(BRAIN_REGIONS.VTA.center,camera),pfc=anatomyToScreen(BRAIN_REGIONS.PFC.center,camera);
- assert.ok(pfc[0]>vta[0],'Anterior orientation is preserved');
+ assert.ok(pfc[0]<vta[0],'Anterior orientation is preserved');
  forward.set(f,JSON.stringify(getScene06State(f)));
 }
 for(let f=1799;f>=0;f--)assert.equal(JSON.stringify(getScene06State(f)),forward.get(f));

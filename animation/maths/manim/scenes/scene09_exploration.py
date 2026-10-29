@@ -1,10 +1,9 @@
 """Maths 09 — Exploration versus exploitation, and epsilon-greedy.
 
-Narration: from "But there is another problem." to "That best-known action can change as it learns."
-Starts on Maths 08's last frame (zoomed in on the agent at the 10).
+Narration: from "But there is another problem." to "...and what it finds can change its best-known
+action."  Starts on Maths 07's last frame (the agent smiling on the 10).
 """
 
-import random
 from pathlib import Path
 
 import numpy as np
@@ -43,34 +42,38 @@ from manim import (
 )
 
 from common import (
-    ACTIONS, BG, CELL, COL_X, PacedScene, DOPAMINE, HIGHLIGHT, INK, MODEL, MUTED, REWARDS_5X5, WORLD_SHIFT, PolicyBox, Reward,
-    big_world, dashed_trail, discounted_value, evaluate_policy, field_opacity, glow_square, improve_policy,
-    policy_arrow, policy_route, value_tex,
+    BG, CELL, COL_X, PacedScene, DOPAMINE, HIGHLIGHT, INK, MODEL, MUTED, REWARDS_5X5, Reward, dashed_trail,
+    discounted_value, field_opacity, glow_square, improve_policy, policy_arrow, policy_route, value_tex,
 )
+from scene07_policy_improvement import end_frame as scene07_end_frame
 
 GAMMA = 0.9
-GOAL = 9  # where Maths 08 leaves the agent, on the 10
+GOAL = 9  # where Maths 07 leaves the agent, on the 10
 JUNCTION = 14  # the known 10 is one step up; the unexplored corner is one step down
 FOG = [19, 20, 24, 25]  # the unexplored corner
 HIDDEN = 24  # the bigger reward hidden in it
 HIDDEN_REWARD = 20
 REWARDS_ALL = {**REWARDS_5X5, HIDDEN: HIDDEN_REWARD}
-ARGMAX_TEX = r"\pi(s) = \arg\max_a Q^\pi(s, a)"
 EGREEDY_TEX = r"\pi = \varepsilon\text{-greedy on } Q^\pi"
 HAMSTER_IMAGE = Path(__file__).resolve().parents[2] / "suffering_hamster.jpg"  # animation/maths/
 WORD_Y = 2.95
 LEFT_X, RIGHT_X2 = COL_X - 1.65, COL_X + 1.65  # the exploitation and exploration sides of the column
 
-
-def maths08_policy(grid):
-    """The optimal policy Maths 08 ends on: Maths 07's seeded random policy, improved four times."""
-    others = [s for s in range(1, 26) if s not in REWARDS_5X5 and s != 8]
-    rng = random.Random(7)
-    policy = {s: rng.choice(list(ACTIONS)) for s in others}
-    policy[8] = "up"
-    for _ in range(4):
-        policy = improve_policy(policy, evaluate_policy(policy, grid, GAMMA), grid, GAMMA)
-    return policy
+# Narration cues (seconds from the start), from the recorded voiceover: the lines start at 0:00, 0:03,
+# 0:09 and 0:18, about 0.43 s a word.
+T_HAMSTER = 0.8  # (during "But there is another problem.")
+T_SHOULD = 3.0  # "Should the agent
+T_FOLLOW = 4.3  # ...always follow the path it knows,
+T_NEW = 6.4  # ...or sometimes try something new?"
+T_EGREEDY = 9.0  # "A common answer is epsilon-greedy:
+T_USUALLY = 12.1  # ...the agent usually takes its best-known action,
+T_RANDOM = 14.4  # ...but with probability epsilon,
+T_TRIES = 16.2  # ...tries a random one."
+T_MATTERS = 18.0  # "That matters, because the agent only learns about states it visits.
+T_BARELY = 22.6  # Where it has barely been, it can't tell which action is best,
+T_FINDS = 27.7  # ...and what it finds
+T_CHANGE = 29.3  # ...can change its best-known action."
+T_END = 32.6
 
 
 def fog_cell(grid, s):
@@ -150,8 +153,10 @@ def pill(text, point, color=DOPAMINE):
 
 
 class Scene09Exploration(PacedScene, MovingCameraScene):
-    """Every animation runs 35% slower than written (PacedScene), with the extra time taken
-    back out of the following pauses, so the screen is easier to follow."""
+    """Animations run as written (no PacedScene slow-down, which made this scene drag); each beat waits
+    for its narration cue."""
+
+    SLOW = 1.0
 
     def reset_to(self, stage, s, run_time=0.3):
         """The agent fades out where it is and reappears at s (each half takes run_time)."""
@@ -162,168 +167,109 @@ class Scene09Exploration(PacedScene, MovingCameraScene):
         self.play(FadeIn(body, scale=0.6), stage.grid[s].animate.set_fill(HIGHLIGHT), run_time=run_time)
 
     def construct(self):
-        frame = self.camera.frame
-        # Maths 08's last frame: zoomed in on the smiling agent at the 10, with the optimal policy.
-        stage, _, stars, start_tag = big_world(s=GOAL)
-        grid = stage.grid
-        VGroup(stage.group, *stars.values(), start_tag).shift(WORLD_SHIFT)
-        stage.agent.mouth.become(stage.agent.make_mouth("happy"))
-        V = {s: discounted_value(s, GAMMA, grid) for s in range(1, 26)}
-        glows = {s: glow_square(grid, s, V[s]) for s in V}
-        values = {s: value_tex(V[s], grid, s) for s in V}
-        policy = maths08_policy(grid)
-        arrows_in_cells = {s: policy_arrow(grid, s, a) for s, a in policy.items()}
-        box = PolicyBox(ARGMAX_TEX, font_size=32)
-        frame.scale(0.5).move_to(stage.agent.get_center() + 0.6 * DOWN + 0.5 * LEFT)
-        self.add(stage.group, *stars.values(), start_tag, *glows.values(), *values.values(), *arrows_in_cells.values(), box)
+        # Maths 07's last frame: the agent smiling on the 10, every state valued with its best action.
+        f = scene07_end_frame()
+        stage, stars, grid = f["stage"], f["stars"], f["stage"].grid
+        glows, values, policy, arrows_in_cells, box = f["glows"], f["values"], f["policy"], f["arrows"], f["box"]
+        column = VGroup(f["idea"], f["title"], f["q_eq"], f["rule"])
+        self.add(stage.group, *stars.values(), f["start_tag"], *glows.values(), *values.values(),
+                 *arrows_in_cells.values(), column, box)
 
-        # "But there is another problem."  The camera pulls back out, and the suffering hamster
-        # flashes over the whole screen for a split second, half see-through: an attention grabber.
+        # "But there is another problem."  The right column clears, the smile fades, and the suffering
+        # hamster flashes over the whole screen for a split second, half see-through: an attention grabber.
         self.next_section("another problem")
-        self.play(frame.animate.set(width=config.frame_width).move_to(ORIGIN),
-                  stage.agent.mouth.animate.become(stage.agent.make_mouth("blank")), run_time=1)
+        self.play(FadeOut(column), stage.agent.mouth.animate.become(stage.agent.make_mouth("blank")), run_time=0.6)
         # Loaded through Pillow as RGBA: Manim cannot set the opacity of a plain RGB JPEG.
         hamster = ImageMobject(np.array(PILImage.open(HAMSTER_IMAGE).convert("RGBA"))).set_z_index(40)
         # Fitted to the screen height so the whole picture shows, mouth included, without distortion.
         hamster.scale_to_fit_height(config.frame_height).move_to(ORIGIN).set_opacity(0.5)
+        self.at(T_HAMSTER)
         self.play(FadeIn(hamster, scale=1.08), run_time=0.08)
         self.wait(0.32)
         self.play(FadeOut(hamster), run_time=0.2)
 
-        # "Once the agent finds a rewarding path, should it always follow it? Or should it sometimes
-        # try something new, in case there's a better reward elsewhere?"
-        # The agent steps to a junction: the known 10 above, an unexplored corner below.
-        self.next_section("junction")
+        # "Should the agent always follow the path it knows, or sometimes try something new?"
+        # The agent steps to a junction: the known 10 above (exploiting), an unexplored corner below
+        # (exploring).
+        self.next_section("dilemma")
         hidden_star = Reward(size=0.4).set_z_index(5).move_to(grid.center_of(HIDDEN))
         hidden_value = value_tex(HIDDEN_REWARD, grid, HIDDEN)
         fog = {s: fog_cell(grid, s) for s in FOG}
-        self.play(stage.place(JUNCTION, run_time=0.9))
-        arrows = stage.add_arrows()
-        self.play(LaggedStart(*[FadeIn(a) for a in arrows], lag_ratio=0.1), run_time=0.5)
-        self.wait(1.2)
-        # "...should it always follow it?"  The known path up to the 10.
-        self.play(stage.light("up", color=DOPAMINE), Indicate(stars[GOAL], color=DOPAMINE), run_time=0.8)
-        self.wait(2)
-        # "...try something new, in case there's a better reward elsewhere?"  The corner below is unexplored.
-        under_fog = [glows[s] for s in FOG] + [values[s] for s in FOG] + [arrows_in_cells[s] for s in FOG]
-        self.play(LaggedStart(*[FadeIn(fog[s], scale=1.05) for s in FOG], lag_ratio=0.15),
-                  FadeOut(*under_fog), run_time=1)
-        self.play(stage.light("down", color=MODEL), Indicate(VGroup(*fog.values()), color=MODEL, scale_factor=1.03),
-                  run_time=0.8)
-        self.wait(2.3)
-
-        # "This is the exploration-exploitation dilemma."
-        self.next_section("dilemma")
         exploit = Text("Exploitation", font_size=34, color=DOPAMINE).move_to([LEFT_X, WORD_Y, 0])
         explore = Text("Exploration", font_size=34, color=MODEL).move_to([RIGHT_X2, WORD_Y, 0])
-        self.play(FadeIn(exploit, shift=0.3 * RIGHT), FadeIn(explore, shift=0.3 * LEFT), run_time=0.8)
-        self.wait(0.8)
+        self.at(T_SHOULD)
+        self.play(stage.place(JUNCTION, run_time=0.6))
+        arrows = stage.add_arrows()
+        self.play(LaggedStart(*[FadeIn(a) for a in arrows], lag_ratio=0.1), run_time=0.4)
+        # "...always follow the path it knows..."
+        self.at(T_FOLLOW)
+        self.play(stage.light("up", color=DOPAMINE), Indicate(stars[GOAL], color=DOPAMINE),
+                  FadeIn(exploit, shift=0.3 * RIGHT), run_time=0.7)
+        # "...or sometimes try something new?"  The corner below is unexplored.
+        under_fog = [glows[s] for s in FOG] + [values[s] for s in FOG] + [arrows_in_cells[s] for s in FOG]
+        self.at(T_NEW)
+        self.play(LaggedStart(*[FadeIn(fog[s], scale=1.05) for s in FOG], lag_ratio=0.15),
+                  FadeOut(*under_fog), run_time=0.7)
+        self.play(stage.light("down", color=MODEL), FadeIn(explore, shift=0.3 * LEFT), run_time=0.6)
 
-        # "Exploration means trying actions to discover new outcomes. Exploitation means using what the
-        # agent already knows to get the best known reward."  Each comes with its path, as a ghost.
-        self.next_section("definitions")
-        explore_def = Text("try actions to discover\nnew outcomes", font_size=19, color=MUTED,
-                           line_spacing=0.8).next_to(explore, DOWN, buff=0.25)
-        exploit_def = Text("use what it knows to get\nthe best known reward", font_size=19, color=MUTED,
-                           line_spacing=0.8).next_to(exploit, DOWN, buff=0.25)
-        explore_trail = dashed_trail([grid.center_of(s) for s in (JUNCTION, 19, HIDDEN)], MODEL).set_z_index(9)
-        guess = Star(n=5, outer_radius=0.4, inner_radius=0.18, color=MODEL).set_fill(opacity=0)
-        guess = VGroup(DashedVMobject(guess, num_dashes=20), Text("?", font_size=26, color=MODEL)).move_to(
-            grid.center_of(HIDDEN)).set_z_index(9)
-        exploit_trail = dashed_trail([grid.center_of(s) for s in (JUNCTION, GOAL)], DOPAMINE).set_z_index(9)
-        self.wait(0.8)
-        self.play(FadeIn(explore_def, shift=0.1 * DOWN), Create(explore_trail), run_time=0.9)
-        self.play(FadeIn(guess, scale=1.3), run_time=0.5)
-        self.wait(2.1)
-        self.play(FadeIn(exploit_def, shift=0.1 * DOWN), Create(exploit_trail),
-                  Indicate(stars[GOAL], color=DOPAMINE), run_time=0.9)
-        self.wait(2.4)
-
-        # "If it only explores, it never uses what it learns; if it only exploits, it might never find
-        # something better."
-        self.next_section("needs both")
-        only_explore = Text("only exploring:\nnever uses what it learns", font_size=18, color=MODEL,
-                            line_spacing=0.8).next_to(explore_def, DOWN, buff=0.45)
-        only_exploit = Text("only exploiting: might\nnever find something better", font_size=18, color=DOPAMINE,
-                            line_spacing=0.8).next_to(exploit_def, DOWN, buff=0.45)
-        # "If it only explores..."
-        self.play(FadeIn(only_explore, shift=0.1 * DOWN), run_time=0.6)
-        self.wait(2.4)
-        # "If it only exploits..."
-        self.play(FadeIn(only_exploit, shift=0.1 * DOWN), run_time=0.6)
-        self.wait(2.9)
-
-        # "So how do we balance the two?"  The two words sit on a seesaw that tips each way, then levels.
-        self.next_section("balance")
-        pivot_point = np.array([COL_X, 0.9, 0])
-        beam = Line(pivot_point + 2.0 * LEFT, pivot_point + 2.0 * RIGHT).set_stroke(INK, width=5)
-        pivot = Triangle(stroke_width=0, fill_color=MUTED, fill_opacity=1).scale(0.22).next_to(pivot_point, DOWN, buff=0)
-        self.play(FadeOut(explore_def, exploit_def, only_explore, only_exploit, explore_trail, exploit_trail, guess),
-                  FadeIn(beam, pivot),
-                  exploit.animate.scale(0.72).next_to(beam.get_start(), UP, buff=0.12).shift(0.55 * RIGHT),
-                  explore.animate.scale(0.72).next_to(beam.get_end(), UP, buff=0.12).shift(0.55 * LEFT),
-                  stage.unlight(), run_time=0.8)
-        seesaw = VGroup(beam, exploit, explore)
-        self.play(Rotate(seesaw, 0.14, about_point=pivot_point), run_time=0.45)
-        self.play(Rotate(seesaw, -0.28, about_point=pivot_point), run_time=0.6)
-        self.play(Rotate(seesaw, 0.14, about_point=pivot_point), run_time=0.45)
-
-        # "One common approach is epsilon-greedy exploration."
+        # "A common answer is epsilon-greedy: the agent usually takes its best-known action, but with
+        # probability epsilon, tries a random one."  The rule, a slider at 0.1 and a bar split into
+        # "explore" (violet, epsilon) and "exploit" (amber, 1 - epsilon); then one of each.
         self.next_section("epsilon-greedy")
         title, rule = epsilon_heading()
-        self.play(FadeOut(beam, pivot, exploit, explore), FadeIn(title, shift=0.1 * DOWN), run_time=0.6)
-        self.play(Write(rule), run_time=1.3)
-        self.wait(0.4)
-
-        # "Epsilon controls how often the agent explores."  A slider for epsilon, and a bar split into
-        # the share of random (exploring) and best-known (exploiting) choices.
-        self.next_section("slider")
-        eps = ValueTracker(0.5)
+        eps = ValueTracker(0.1)
         line, ends, eps_label, knob, readout, bar, bar_labels = epsilon_controls(eps)
-        self.play(FadeIn(line, ends, eps_label, knob, readout, bar, bar_labels), box.swap(EGREEDY_TEX, font_size=32),
-                  run_time=0.8)
-        self.wait(1.4)
-
-        # "At zero, it always exploits. At one, it always explores. In between, it usually picks its
-        # best-known action but sometimes tries something else."  The demo runs under the last part.
-        self.next_section("extremes")
-        # "At zero, it always exploits."
-        self.play(eps.animate.set_value(0), run_time=0.8)
-        self.wait(0.8)
-        # "At one, it always explores."
-        self.play(eps.animate.set_value(1), run_time=1.2)
-        self.wait(0.6)
-        # "In between..."
-        self.play(eps.animate.set_value(0.1), run_time=1.2)
+        self.at(T_EGREEDY)
+        self.play(FadeOut(exploit, explore), FadeIn(title, shift=0.1 * DOWN), stage.unlight(), run_time=0.5)
+        self.play(Write(rule), FadeIn(line, ends, eps_label, knob, readout, bar, bar_labels),
+                  box.swap(EGREEDY_TEX, font_size=32), run_time=1.0)
 
         def choose(kind):
             part = bar[0] if kind == "explore" else bar[1]
             color = MODEL if kind == "explore" else DOPAMINE
             return Indicate(part, color=color, scale_factor=1.12)
 
-        # "...it usually picks its best-known action..."  The amber part of the bar pulses and the
-        # agent takes the known path to the 10, then resets to the junction.
-        self.play(choose("exploit"), stage.light("up", color=DOPAMINE), run_time=0.3)
-        self.play(stage.move("up", run_time=0.35))
-        self.play(stars[GOAL].collect(), run_time=0.35)
-        self.reset_to(stage, JUNCTION, run_time=0.25)
-        # "...but sometimes tries something else."  The violet part pulses: a random step into the
-        # fog, which lifts around the agent to reveal a bigger reward.
+        # "...usually takes its best-known action..."  The amber part pulses and the agent takes the
+        # known path to the 10, then resets to the junction.
+        self.at(T_USUALLY)
+        self.play(choose("exploit"), stage.light("up", color=DOPAMINE), run_time=0.5)
+        self.play(stage.move("up", run_time=0.5))
+        self.play(stars[GOAL].collect(), run_time=0.5)
+        self.reset_to(stage, JUNCTION, run_time=0.3)
+        # "...but with probability epsilon..."  The violet part pulses.  "...tries a random one."  A random
+        # step into the fog, which lifts from the cell it lands on.
         dice = pill("random!", grid.center_of(JUNCTION) + 0.5 * grid.cell * (RIGHT + UP), color=MODEL)
-        self.play(choose("explore"), FadeIn(dice, scale=1.3), stage.light("down", color=MODEL), run_time=0.4)
-        self.play(stage.move("down", run_time=0.35), FadeOut(dice), FadeOut(fog[19], scale=1.1), run_time=0.35)
+        self.at(T_RANDOM)
+        self.play(choose("explore"), run_time=0.6)
+        self.at(T_TRIES)
+        self.play(FadeIn(dice, scale=1.3), stage.light("down", color=MODEL), run_time=0.4)
+        self.play(stage.move("down", run_time=0.5), FadeOut(dice), FadeOut(fog[19], scale=1.1), run_time=0.5)
+        self.play(stage.unlight(), run_time=0.3)
+
+        # "That matters, because the agent only learns about states it visits. Where it has barely been,
+        # it can't tell which action is best..."  The rest of the corner is still fogged: unvisited,
+        # nothing learned there yet (the grey cells of our simulation's policy map).
+        unknown = Text("never visited: no idea yet which action is best", font_size=22, color=MUTED).move_to(
+            [grid.get_x(), -3.45, 0])
+        self.at(T_MATTERS)
+        self.play(Indicate(VGroup(*[fog[s] for s in (20, 24, 25)]), color=MODEL, scale_factor=1.04),
+                  FadeIn(unknown, shift=0.1 * UP), run_time=0.7)
+        self.at(T_BARELY)
+        self.play(*[fog[s][1].animate(rate_func=rate_functions.there_and_back).scale(1.4) for s in (20, 24, 25)],
+                  run_time=0.8)
+        # "...and what it finds..."  Exploring the corner reveals a bigger reward, a 20.
+        self.at(T_FINDS)
         self.add(hidden_star, hidden_value)
         self.bring_to_front(fog[25])
-        self.play(FadeOut(fog[20], fog[24], scale=1.1), FadeIn(hidden_star, scale=1.6), FadeIn(hidden_value), run_time=0.5)
-        self.play(hidden_star.collect(), Indicate(hidden_value, color=DOPAMINE, scale_factor=1.6), stage.unlight(),
-                  run_time=0.5)
+        self.play(FadeOut(fog[20], fog[24], unknown, scale=1.1), FadeIn(hidden_star, scale=1.6), FadeIn(hidden_value),
+                  run_time=0.6)
+        self.play(hidden_star.collect(), Indicate(hidden_value, color=DOPAMINE, scale_factor=1.6), run_time=0.5)
 
-        # "That best-known action can change as it learns."
-        # With the 20 known, every value is recalculated and the arrows swing; the route from the
-        # junction now heads down to the 20 instead of up to the 10.
+        # "...can change its best-known action."  With the 20 known, every value is recalculated and the
+        # arrows that now have a better action swing; the route from the junction now heads down to the 20.
         self.next_section("route changes")
         V_new, known, new_policy, changed, revealed = after_discovery(grid, policy)
-        self.wait(0.6)
+        self.at(T_CHANGE)
         self.play(
             *[Transform(values[s], value_tex(V_new[s], grid, s)) for s in known if s not in revealed],
             *[glows[s].animate.set_fill(opacity=glow_opacity(V_new[s])) for s in known if s not in revealed],
@@ -331,13 +277,13 @@ class Scene09Exploration(PacedScene, MovingCameraScene):
             *[FadeIn(glow_square(grid, s, V_new[s]).set_fill(opacity=glow_opacity(V_new[s])), value_tex(V_new[s], grid, s))
               for s in revealed],
             FadeIn(glow_square(grid, HIDDEN, HIDDEN_REWARD).set_fill(opacity=glow_opacity(HIDDEN_REWARD))),
-            run_time=1,
+            run_time=0.8,
         )
         self.play(LaggedStart(*[Transform(arrows_in_cells[s], policy_arrow(grid, s, new_policy[s])) for s in changed],
-                              lag_ratio=0.1),
+                              lag_ratio=0.15),
                   *[FadeIn(policy_arrow(grid, s, new_policy[s])) for s in revealed if s != stage.state],
-                  run_time=1.2)
+                  run_time=1.0)
         route, _ = policy_route(new_policy | {HIDDEN: "up"}, JUNCTION, grid, rewards=REWARDS_ALL)
         new_route = dashed_trail([grid.center_of(s) for s in route], DOPAMINE).set_z_index(9)
-        self.play(Create(new_route), Indicate(arrows_in_cells[JUNCTION], color=DOPAMINE, scale_factor=1.5), run_time=1)
-        self.wait(1.2)
+        self.play(Create(new_route), Indicate(arrows_in_cells[JUNCTION], color=DOPAMINE, scale_factor=1.5), run_time=0.9)
+        self.at(T_END)

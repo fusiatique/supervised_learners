@@ -1,41 +1,43 @@
-"""Maths 07 — The action-value function and policy improvement.
+"""Maths 07 — Choosing actions by their value.
 
-Narration: from "Now let's use these values to choose better actions."
-to "...This is precisely why the state-value function matters."
-Starts on Maths 06's last frame.
+Narration: from "Now let's use these values to choose actions." to "...and heads straight for the
+reward."  Starts on Maths 06's last frame.
 """
-
-import random
 
 from manim import (
     DOWN,
     LEFT,
     RIGHT,
     UP,
-    Circumscribe,
-    RoundedRectangle,
     FadeIn,
     FadeOut,
-    FadeTransform,
     Indicate,
     LaggedStart,
     MathTex,
+    RoundedRectangle,
     Scene,
     Text,
-    Transform,
     VGroup,
     Write,
+    config,
 )
 
 from common import (
-    ACTIONS, BG, COL_X, DOPAMINE, GREEDY_TEX, INK, MODEL, MUTED, REWARDS_5X5, WORLD_SHIFT,
-    PolicyBox, bellman_expectation, big_world, discounted_value, glow_square, policy_arrow, value_tex,
+    ACTIONS, BG, COL_X, DOPAMINE, GREEDY_TEX, MODEL, MUTED, REWARDS_5X5, INK, PolicyBox, discounted_value,
+    final_policy, policy_arrow,
 )
+from scene06_bellman import GAMMA, bellman_idea, valued_world
 
-GAMMA = 0.9
-EXAMPLE = 8  # the state before the 10, where the agent ends Maths 06
-ARGMAX_TEX = r"\pi(s) = \arg\max_a Q^\pi(s, a)"
-TIE_ORDER = ["up", "right", "left", "down"]  # how ties are broken when choosing the arg max
+EXAMPLE, GOAL = 8, 9  # the agent starts on the state before the 10, and steps onto it
+CHOOSE_TEX = r"\pi(s) = \text{action with the highest } Q(s, a)"
+
+# Narration cues (seconds from the start), at about 145 words per minute.
+T_ACTION = 4.5  # "The value of an action is
+T_GIVES = 6.9  # ...the reward it gives,
+T_LEADS = 8.6  # ...plus the discounted value of where it leads."
+T_PICKS = 13.1  # "In every state, the agent simply picks the action with the highest value,
+T_HEADS = 18.4  # ...and heads straight for the reward."
+T_END = 22.4
 
 
 def fmt(v):
@@ -60,145 +62,91 @@ def action_pills(grid, s, texts):
     }
 
 
+def q_column():
+    """The right column at the end of Maths 07: the Bellman idea (small, at the top), the action value
+    Q(s, a) and the rule for choosing. Returns (idea, title, q_eq, rule)."""
+    _, idea = bellman_idea()
+    idea.scale(0.7).move_to([COL_X, 2.6, 0])
+    q_eq = MathTex("Q(s, a)", "=", "r(s, a, s')", r"+\ \gamma V(s')", font_size=44, color=INK).move_to([COL_X, 0.55, 0])
+    q_eq[0].set_color(MODEL)
+    q_eq[2].set_color(DOPAMINE)
+    title = Text("the value of an action", font_size=28, color=MODEL).next_to(q_eq, UP, buff=0.35)
+    rule = Text("choose the action with the highest Q", font_size=24, color=MUTED).next_to(q_eq, DOWN, buff=0.4)
+    return idea, title, q_eq, rule
+
+
+def end_frame():
+    """Everything on screen when Maths 07 ends, built in place: the agent smiling on the 10, every
+    state valued with its best action, and the right column. Returns a dict of the pieces."""
+    stage, stars, start_tag, glows, values = valued_world(s=GOAL)
+    stage.agent.mouth.become(stage.agent.make_mouth("happy"))
+    grid = stage.grid
+    policy = final_policy(grid)
+    idea, title, q_eq, rule = q_column()
+    return {
+        "stage": stage, "stars": stars, "start_tag": start_tag, "glows": glows, "values": values,
+        "policy": policy, "arrows": {s: policy_arrow(grid, s, a) for s, a in policy.items()},
+        "idea": idea, "title": title, "q_eq": q_eq, "rule": rule, "box": PolicyBox(CHOOSE_TEX, font_size=30),
+    }
+
+
 class Scene07PolicyImprovement(Scene):
+    def at(self, t):
+        """Wait until t seconds into the scene (a no-op if that time has passed)."""
+        if t - self.time >= 1 / config.frame_rate:
+            self.wait(t - self.time)
+
     def construct(self):
         # Maths 06's last frame.
-        stage, r_values, stars, start_tag = big_world(s=EXAMPLE)
+        stage, stars, start_tag, glows, values = valued_world(s=EXAMPLE)
         grid = stage.grid
-        arrows = stage.add_arrows()
-        VGroup(stage.group, arrows, *stars.values(), start_tag).shift(WORLD_SHIFT)
-        V = {s: discounted_value(s, GAMMA, grid) for s in range(1, 26)}
-        glows = VGroup(*[glow_square(grid, s, V[s]) for s in V])
-        values = {s: value_tex(V[s], grid, s) for s in V}
-        label, bellman_eq, where = bellman_expectation()
+        heading, idea = bellman_idea()
         box = PolicyBox(GREEDY_TEX, font_size=30)
-        self.add(stage.group, arrows, *stars.values(), start_tag, glows, *values.values(), label, bellman_eq, where, box)
+        self.add(stage.group, stage.arrows, *stars.values(), start_tag, *glows.values(), *values.values(),
+                 heading, idea, box)
 
-        def q(s, a):
-            """Q(s, a) = r(s, a, s') + gamma V(s'): no reward for leaving an ordinary state."""
-            return GAMMA * V[grid.step(s, a)]
+        # "Now let's use these values to choose actions."  The idea moves up out of the way; the values
+        # pulse in a wave.
+        self.next_section("choose actions")
+        small_idea, title, q_eq, rule = q_column()
+        cells = [s for s in range(1, 26) if s not in REWARDS_5X5]
+        self.play(FadeOut(heading), idea.animate.become(small_idea), run_time=0.8)
+        self.play(LaggedStart(*[Indicate(values[s], color=DOPAMINE, scale_factor=1.35) for s in cells],
+                              lag_ratio=0.04), run_time=1.6)
 
-        # "Now let's use these values to choose better actions."  The values, then the policy that will use them.
-        self.next_section("use the values")
-        self.play(Indicate(bellman_eq, color=MODEL, scale_factor=1.05), run_time=0.9)
-        self.play(Indicate(box, color=MODEL, scale_factor=1.06), run_time=0.8)
-        self.wait(1.4)
+        # "The value of an action is the reward it gives, plus the discounted value of where it leads."
+        # Q(s, a) builds term by term; then each of the agent's four actions gets its Q.
+        self.next_section("action value")
+        self.at(T_ACTION)
+        self.play(FadeIn(title, shift=0.1 * DOWN), Write(q_eq[:2]), run_time=0.7)
+        self.at(T_GIVES)
+        self.play(FadeIn(q_eq[2], shift=0.1 * LEFT), run_time=0.5)
+        self.at(T_LEADS)
+        self.play(FadeIn(q_eq[3], shift=0.1 * LEFT), run_time=0.6)
+        V = {s: discounted_value(s, GAMMA, grid) for s in range(1, 26)}
+        q = {a: GAMMA * V[grid.step(EXAMPLE, a)] for a in ACTIONS}
+        pills = action_pills(grid, EXAMPLE, {a: f"Q = {fmt(v)}" for a, v in q.items()})
+        self.play(LaggedStart(*[FadeIn(p, scale=1.2) for p in pills.values()], lag_ratio=0.15), run_time=1.0)
 
-        # "Suppose we've calculated the value of every state in the maze."
-        self.next_section("suppose")
-        self.play(stage.place(EXAMPLE, run_time=1),
-                  LaggedStart(*[Indicate(v, color=DOPAMINE, scale_factor=1.4) for v in values.values()], lag_ratio=0.03),
-                  run_time=1.6)
-        self.wait(2)
+        # "In every state, the agent simply picks the action with the highest value..."  Here that is
+        # right; the rule replaces the old one in the box, and every state gets its best action.
+        self.next_section("highest value")
+        best = max(q, key=q.get)
+        policy = final_policy(grid)
+        arrows = {s: policy_arrow(grid, s, a) for s, a in policy.items() if s != EXAMPLE}
+        order = sorted(arrows, key=lambda s: -V[s])  # outwards from the rewards
+        self.at(T_PICKS)
+        self.play(stage.light(best, color=DOPAMINE), Indicate(pills[best], color=DOPAMINE, scale_factor=1.3),
+                  FadeIn(rule, shift=0.1 * UP), run_time=0.8)
+        self.play(box.swap(CHOOSE_TEX, font_size=30),
+                  LaggedStart(*[FadeIn(arrows[s], scale=0.6) for s in order], lag_ratio=0.08), run_time=2.2)
 
-        # "For every action, we ask two questions."
-        self.next_section("two questions")
-        compact = bellman_eq.copy().scale(0.62).move_to([COL_X, 3.05, 0])
-        self.play(FadeOut(label, where), Transform(bellman_eq, compact), run_time=0.7)
-        self.wait(1.6)
-        # "First, what immediate reward does it give?"
-        q1 = Text("1.  What immediate reward does it give?", font_size=24, color=INK).move_to([COL_X, 2.25, 0])
-        q2 = Text("2.  How valuable is the state it takes us to?", font_size=24, color=INK).move_to([COL_X, 1.75, 0])
-        VGroup(q1, q2).align_to(q2, LEFT)
-        q1[2:].set_color(INK)
-        rewards_r = action_pills(grid, EXAMPLE, {a: "r = 0" for a in ACTIONS})
-        self.play(FadeIn(q1, shift=0.1 * DOWN), run_time=0.5)
-        self.play(LaggedStart(*[FadeIn(l, scale=1.3) for l in rewards_r.values()], lag_ratio=0.1), run_time=0.7)
-        self.wait(1.3)
-        # "Second, how valuable is the state it takes us to?"
-        neighbours = [grid.step(EXAMPLE, a) for a in ACTIONS]
-        self.play(FadeIn(q2, shift=0.1 * DOWN), run_time=0.5)
-        self.play(LaggedStart(*[Circumscribe(values[s], color=DOPAMINE, buff=0.06) for s in neighbours], lag_ratio=0.15),
-                  run_time=1.4)
-        self.wait(1.3)
-
-        # "For our deterministic environment, combining these gives us:"
-        self.next_section("Q")
-        q_eq = MathTex(r"Q^\pi(s, a)", "=", "r(s, a, s')", "+", r"\gamma", r"V^\pi(s')", font_size=44, color=INK)
-        q_eq.move_to([COL_X, 0.55, 0])
-        q_eq[0].set_color(MODEL)
-        q_eq[2].set_color(DOPAMINE)
-        q_eq[5].set_color(DOPAMINE)
-        self.wait(1)
-        self.play(Write(q_eq), run_time=1.3)
-        self.wait(0.6)
-
-        # "This is the action-value function. It tells us how good a particular action is in a particular
-        # state, assuming we follow our current policy."
-        self.next_section("action-value")
-        q_title = Text("action-value function", font_size=28, color=MODEL).next_to(q_eq, UP, buff=0.3)
-        self.play(FadeIn(q_title, shift=0.1 * DOWN), run_time=0.6)
-        self.wait(1.8)
-        # "...how good a particular action is in a particular state..."  Each arrow's r becomes its Q.
-        q_values = {a: q(EXAMPLE, a) for a in ACTIONS}
-        best = max(q_values, key=q_values.get)
-        q_labels = action_pills(grid, EXAMPLE, {a: f"Q = {fmt(v)}" for a, v in q_values.items()})
-        self.wait(0.8)
-        self.play(*[FadeTransform(rewards_r[a], q_labels[a]) for a in ACTIONS], run_time=0.9)
-        self.wait(4.6)
-
-        # "In this example, right has the highest value. So we update our policy to choose right whenever
-        # the agent finds itself in this state."
-        self.next_section("choose right")
-        self.wait(0.8)
-        self.play(stage.light(best, color=DOPAMINE), Indicate(q_labels[best], color=DOPAMINE, scale_factor=1.4), run_time=0.8)
-        self.wait(3)
-        # "...update our policy to choose right..."
-        self.play(Circumscribe(grid[EXAMPLE], color=MODEL, buff=0), run_time=1)
-        self.wait(3.1)
-
-        # "More generally:"
-        self.next_section("arg max")
-        argmax = MathTex(r"\pi_{\text{new}}(s)", "=", r"\arg\max_a", r"Q^\pi(s, a)", font_size=44, color=INK)
-        argmax.move_to([COL_X, -0.75, 0])
-        argmax[0].set_color(MODEL)
-        argmax[3][0].set_color(MODEL)
-        self.play(Write(argmax), run_time=1.2)
-        self.wait(1.6)
-        # "Arg max simply means: choose the action with the highest value."
-        meaning = Text("choose the action with the highest Q", font_size=22, color=MUTED).next_to(argmax, DOWN, buff=0.25)
-        self.play(Indicate(argmax[2], color=DOPAMINE, scale_factor=1.15), FadeIn(meaning, shift=0.1 * UP), run_time=0.9)
-        self.wait(2)
-        # The new policy replaces the old one in the box.
-        self.play(box.swap(ARGMAX_TEX, font_size=32), run_time=0.9)
-        self.wait(0.8)
-
-        # "Doing this for every state gives a new policy that is at least as good as the old one.
-        # This process is called policy improvement."
-        # The old policy (a random arrow in every state) swings, state by state, to the arg max.
-        self.next_section("improve")
-        self.play(stage.unlight(), FadeOut(*q_labels.values()), run_time=0.5)
-        cells = [s for s in range(1, 26) if s not in REWARDS_5X5 and s != EXAMPLE]
-        rng = random.Random(7)
-        old = {s: policy_arrow(grid, s, rng.choice(list(ACTIONS)), color=MUTED) for s in cells}
-        new_action = {s: max(TIE_ORDER, key=lambda a: (q(s, a), -TIE_ORDER.index(a))) for s in cells}
-        new = {s: policy_arrow(grid, s, new_action[s]) for s in cells}
-        self.play(LaggedStart(*[FadeIn(old[s]) for s in cells], lag_ratio=0.03), run_time=1)
-        self.wait(0.6)
-        order = sorted(cells, key=lambda s: -V[s])  # the wave starts next to the rewards
-        self.play(LaggedStart(*[Transform(old[s], new[s]) for s in order], lag_ratio=0.08), run_time=3)
-        self.play(stage.light(best, color=MODEL), run_time=0.4)
-        self.wait(0.8)
-        # "This process is called policy improvement."
-        improvement = Text("policy improvement", font_size=32, color=MODEL).move_to([COL_X, 2.0, 0])
-        self.play(FadeOut(q1, q2), FadeIn(improvement, shift=0.1 * DOWN), run_time=0.7)
-        self.wait(1.4)
-
-        # "Notice that the agent can now choose an action with no immediate reward if it leads to a more
-        # valuable state. This is precisely why the state-value function matters."
-        # s7's arrow points right: no reward for the step, but it leads to s8, worth 9.
-        self.next_section("why values matter")
-        focus = 7
-        self.wait(1.6)
-        no_reward = pill("r = 0", grid.center_of(focus) + 0.28 * grid.cell * (LEFT + UP))
-        self.play(Circumscribe(grid[focus], color=MODEL, buff=0), Indicate(old[focus], color=MODEL, scale_factor=1.4),
-                  FadeIn(no_reward, scale=1.3), run_time=1.2)
-        self.wait(0.8)
-        self.play(Circumscribe(values[EXAMPLE], color=DOPAMINE, buff=0.06), Indicate(values[EXAMPLE], color=DOPAMINE),
-                  run_time=1)
-        self.wait(2.5)
-        # "This is precisely why the state-value function matters."
-        self.play(Indicate(bellman_eq, color=DOPAMINE, scale_factor=1.1),
-                  LaggedStart(*[Indicate(v, color=DOPAMINE, scale_factor=1.3) for v in values.values()], lag_ratio=0.02),
-                  run_time=1.6)
-        self.wait(1.5)
+        # "...and heads straight for the reward."  The agent steps onto the 10 and smiles; its own
+        # state's arrow shows as it leaves.
+        self.at(T_HEADS)
+        agent = stage.agent
+        self.play(FadeOut(*pills.values(), stage.arrows), run_time=0.4)
+        stage.arrows = VGroup()
+        self.play(stage.move(best, run_time=0.5), FadeIn(policy_arrow(grid, EXAMPLE, policy[EXAMPLE])))
+        self.play(stars[GOAL].collect(), agent.mouth.animate.become(agent.make_mouth("happy")), run_time=0.6)
+        self.at(T_END)

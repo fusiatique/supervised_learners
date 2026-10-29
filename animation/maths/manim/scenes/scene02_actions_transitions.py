@@ -67,8 +67,8 @@ class Scene02ActionsTransitions(Scene):
             self.play(stage.move(name, run_time=0.45))
         self.play(stage.unlight(), run_time=0.3)
 
-        # "Now, for the agent to 'interact' with the environment, the environment needs a set of
-        # rules that takes the agent's current state and action as input..."
+        # "The environment then needs a rule that takes the agent's current state and action, and
+        # outputs its new state."
         self.next_section("rules")
         rule = general_rule()
         s_label = Text("state", font_size=24, color=MUTED).next_to(rule[1], DOWN, buff=0.3)
@@ -79,17 +79,16 @@ class Scene02ActionsTransitions(Scene):
             VGroup(stage.group, arrows).animate.shift(GRID_SHIFT),
             run_time=0.8,
         )
-        self.wait(1.3)
-        # "...with the environment..."
+        # "The environment..."
         self.play(Indicate(grid, color=INK, scale_factor=1.03))
-        self.wait(4)
-        # "...the agent's current state and action as input..."
+        self.wait(1.2)
+        # "...the agent's current state and action..."
         self.play(FadeIn(rule[1], s_label, shift=0.2 * DOWN), run_time=0.6)
         self.wait(0.3)
         self.play(FadeIn(rule[3], a_label, shift=0.2 * DOWN), run_time=0.6)
-        self.wait(0.9)
+        self.wait(0.4)
 
-        # "...and output the agent's new state."
+        # "...and outputs its new state."
         self.play(FadeIn(rule[0], rule[2], rule[4]), run_time=0.6)
         self.play(FadeIn(rule[5], rule[6], new_label, shift=0.2 * DOWN), run_time=0.6)
         self.wait(0.6)
@@ -101,35 +100,35 @@ class Scene02ActionsTransitions(Scene):
         with_action = rule_with(state="s_{5}", action=r"\text{right}")
         question = rule_with(state="s_{5}", action=r"\text{right}", result="?")
         answer = rule_with(state="s_{5}", action=r"\text{right}", result="s_{6}")
-        # "So if the agent's state is s5..."
-        self.wait(2.4)
+        # "So if the agent is in s5..."
+        self.wait(0.8)
         self.play(
             *morph_parts(rule, with_state), FadeOut(s_label),
             stage.agent.animate(rate_func=rate_functions.there_and_back).scale(1.15),
             run_time=0.6,
         )
-        self.wait(2.2)
-        # "...and the agent chooses the action 'right'..."
+        self.wait(0.8)
+        # "...and chooses 'right'..."
         self.play(*morph_parts(with_state, with_action), FadeOut(a_label), stage.light("right"), run_time=0.6)
-        self.wait(1)
-        # "...what is the resulting state?"
+        self.wait(0.4)
+        # "...where does it end up?"
         self.play(*morph_parts(with_action, question), FadeOut(new_label), run_time=0.6)
-        self.wait(1.6)
+        self.wait(0.8)
 
-        # "Hopefully it's intuitive: s6."
+        # "s6."
         self.play(*morph_parts(question, answer), stage.move("right"))
         self.play(stage.unlight(), run_time=0.3)
 
-        # "This is an example of a ... [pause] ... transition function."
+        # "This is a transition function..."
         self.next_section("transition function")
-        self.wait(1.6)
+        self.wait(0.6)
         heading = Text("transition function", font_size=46, color=MODEL).move_to([RIGHT_X, 0.1, 0])
         underline = Line(heading.get_left(), heading.get_right(), color=MODEL, stroke_width=3).next_to(heading, DOWN, buff=0.15)
         self.play(Write(heading), run_time=0.9)
         self.play(Create(underline), Indicate(heading, color=MODEL, scale_factor=1.08), run_time=0.7)
         self.wait(0.7)
 
-        # "...and the environment needs this for every state-action pair."
+        # "...and the environment needs one for every state-action pair."
         # The heading settles above the rule, the example generalises back to f(s, a) = s',
         # and every state-action pair streams up underneath.
         self.next_section("all pairs")

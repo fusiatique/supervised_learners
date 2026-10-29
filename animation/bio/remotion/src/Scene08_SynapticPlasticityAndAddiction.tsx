@@ -1,8 +1,9 @@
 import React from 'react';
+import {brainFocus} from './brain-attention';
 import {AbsoluteFill,useCurrentFrame} from 'remotion';
 import {anatomyToScreen,BrainAnatomy,BrainRegionLabel,BRAIN_REGIONS,type BrainCamera} from './BrainAnatomy';
 import {C,HumanCharacter,Label,SourceCitation} from './components';
-import {CocaineContainer,DopamineMessenger} from './dopamine-introduction-components';
+import {CocainePowderBag,DopamineMessenger} from './dopamine-introduction-components';
 import {CueSymbol} from './reward-components';
 import {RewardSymbol} from './risk-components';
 import {curvePoint,draw,ease,mix,progress} from './motion';
@@ -67,7 +68,7 @@ const LearnedNetwork:React.FC<{f:number}>=({f})=>{
  const scale=mix(1.15,.82,ease(f,810,875))*mix(1,.83,ease(f,1170,1210))*mix(1,.2,anatomical);
  return <g opacity={start*end}>
   <PlasticNeuralNetwork frame={f} x={960} y={mix(585,470,anatomical)} scale={scale} strengths={strengths08(f)} amount={1} dopamine={dopamine*modulation} active={f>=890&&f<=905?0:1}/>
-  <Text f={f} start={815} end={860} text="LEARNING CHANGES CONNECTION STRENGTHS" size={33}/>
+  <Text f={f} start={815} end={845} text="LEARNING CHANGES CONNECTION STRENGTHS" size={33}/>
   <Text f={f} start={865} end={935} text="A LASTING NETWORK PATTERN" color={C.green}/>
   {f>900&&<g opacity={section(f,901,1170)}>
    <DopamineMessenger x={1650} y={260} scale={.75} frame={f} amount={progress(f,901,935)}/>
@@ -90,7 +91,7 @@ const LearnedNetwork:React.FC<{f:number}>=({f})=>{
   </g>
   <Text f={f} start={1290} end={1350} text="LEARNED CUE–REWARD ASSOCIATION" size={33}/>
   <g opacity={section(f,1350,1530)}>
-   <CocaineContainer x={1680} y={475} scale={.8} amount={progress(f,1350,1380)}/>
+   <CocainePowderBag x={1680} y={475} scale={.8} amount={progress(f,1350,1380)}/>
    {[1350,1380,1410].map(at=>{const t=progress(f,at,at+35);return <circle key={at} cx={1680} cy={475} r={65+70*t} fill="none" stroke={C.yellow} strokeWidth={2} opacity={Math.sin(t*Math.PI)*.5}/>;})}
   </g>
   <Text f={f} start={1350} end={1440} text="REPEATED DRUG EXPOSURE" color={C.yellow}/>
@@ -98,23 +99,23 @@ const LearnedNetwork:React.FC<{f:number}>=({f})=>{
  </g>;
 };
 
-export const CAMERA08:BrainCamera={x:960,y:470,scale:1.05,anteriorRight:true};
+export const CAMERA08:BrainCamera={x:960,y:470,scale:1.05,anteriorRight:false};
 const AnatomyAndCueResponses:React.FC<{f:number}>=({f})=>{
  const amount=progress(f,1530,1590),out=1-progress(f,2010,2040),shrink=ease(f,1620,1680);
  const camera={...CAMERA08,y:mix(470,350,shrink),scale:mix(1.05,.8,shrink)};
  const nac=anatomyToScreen(BRAIN_REGIONS.NAc.center,camera),pfc=anatomyToScreen(BRAIN_REGIONS.PFC.center,camera);
  const insets=amount*(1-progress(f,1620,1650));
  return <g opacity={amount*out}>
-  <BrainAnatomy {...camera} frame={0} amount={1} cortexOpacity={.65} highlights={{NAc:1,PFC:1}} pathwayOpacity={{mesolimbic:0,mesocortical:0}}/>
+  <BrainAnatomy {...camera} regionFocus={{NAc:{...brainFocus(f,[1530,1830]),age:f-1575},PFC:{...brainFocus(f,[1530,1830]),age:f-1575}}} frame={0} amount={1} cortexOpacity={.65} highlights={{NAc:1,PFC:1}} pathwayOpacity={{mesolimbic:0,mesocortical:0}}/>
   <g opacity={1-progress(f,1620,1650)}>
-   <BrainRegionLabel region="NAc" camera={camera} x={nac[0]-140} y={nac[1]+80} opacity={amount}/>
-   <BrainRegionLabel region="PFC" camera={camera} x={pfc[0]+120} y={pfc[1]-80} opacity={amount}/>
+   <BrainRegionLabel region="NAc" camera={camera} x={nac[0]-110} y={nac[1]+100} opacity={amount}/>
+   <BrainRegionLabel region="PFC" camera={camera} x={pfc[0]-120} y={pfc[1]-80} opacity={amount}/>
   </g>
   <g opacity={insets}>
-   {[[400,690,'NAc',nac],[1510,690,'PFC',pfc]].map(([x,y,name,target])=>{
+   {[[1510,690,'NAc',nac],[400,690,'PFC',pfc]].map(([x,y,name,target])=>{
     const tx=target as number[],cx=x as number,cy=y as number;
     return <g key={name as string}>
-     <path d={`M${tx}Q${cx} ${tx[1]} ${cx} ${cy-175}`} fill="none" stroke={C.gray} strokeWidth={2} strokeDasharray="5 7"/>
+     <path d={name==='NAc'?`M${tx}C${tx[0]} ${cy+150} ${cx-210} ${cy+150} ${cx-180} ${cy+55}`:`M${tx}Q${cx} ${tx[1]} ${cx} ${cy-175}`} fill="none" stroke={C.gray} strokeWidth={2} strokeDasharray="5 7"/>
      <circle cx={cx} cy={cy} r={185} fill={C.bg} stroke={C.gray} strokeWidth={2}/>
      <PlasticNeuralNetwork frame={f} x={cx} y={cy} scale={.25} strengths={DRUG_STRENGTHS} active={.4}/>
      <Label x={cx} y={cy+235} size={28} color={C.yellow}>{name as string}</Label>
@@ -131,7 +132,7 @@ const CueResponseLane:React.FC<{f:number;y:number;drug?:boolean}>=({f,y,drug=fal
  const response=progress(f,1710,1750),strength=drug?1:.26;
  const t=((Math.max(0,f-1710))%75)/75;
  return <g>
-  {drug?<CocaineContainer x={400} y={y} scale={.45}/>:<RewardSymbol x={400} y={y} scale={.65}/>}
+  {drug?<CocainePowderBag x={400} y={y} scale={.45}/>:<RewardSymbol x={400} y={y} scale={.65}/>}
   <path d={`M490 ${y}Q820 ${y-60} 1120 ${y}`} fill="none" stroke={drug?C.yellow:C.green} strokeWidth={drug?4:2} opacity={drug?.9:.45}/>
   <circle cx={mix(490,1120,t)} cy={y-35*Math.sin(t*Math.PI)} r={drug?6:4} fill={drug?C.yellow:C.green} opacity={response}/>
   <PlasticNeuralNetwork frame={f} x={1360} y={y-5} scale={.25} strengths={drug?DRUG_STRENGTHS:NETWORK_EDGES.map(()=>.2)} active={response*strength}/>
@@ -147,7 +148,7 @@ const PersistenceAndEnding:React.FC<{f:number}>=({f})=>{
    <path d="M600 950H1420M1405 940L1420 950 1405 960" stroke={C.gray} strokeWidth={2} fill="none" {...draw(progress(f,1830,1870))}/>
    <circle cx={mix(620,1380,ease(f,1830,1950))} cy={950} r={7} fill={C.yellow}/>
    <Label x={600} y={1005} size={23} color={C.gray}>DURING USE</Label><Label x={1340} y={1005} size={23} color={C.gray}>AFTER STOPPING</Label>
-   <g opacity={cue}><CocaineContainer x={210} y={570} scale={.65}/><CueSymbol x={210} y={410} scale={.65} ring={progress(f,1920,1950)}/></g>
+   <g opacity={cue}><CocainePowderBag x={210} y={570} scale={.65}/><CueSymbol x={210} y={410} scale={.65} ring={progress(f,1920,1950)}/></g>
    <g opacity={section(f,1950,2010)}><HumanCharacter x={1720} y={790} scale={.8} frame={f} expression="conflicted" look={-5}/></g>
   </g>
   <Text f={f} start={1830} end={1890} text="CHANGES CAN PERSIST AFTER STOPPING" size={32}/>

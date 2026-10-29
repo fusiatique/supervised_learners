@@ -24,7 +24,7 @@ Start reading at 0:00. Timings assume about 165 words per minute.
 | 0:13 | "That's our reward function." | Every other cell gets its R(s) = 0. |
 | 0:14.5 | "Now, we can add our first bit of intelligence: take the action that leads to the highest reward state." | The reward function moves to the top. On "take the action…" (0:17.5) the rule writes in: π(s) = the action a with the highest R(f(s, a)). |
 | 0:21 | "That's our agent's new 'policy'." | "new policy" appears above the rule. |
-| 0:22.5 | "If no action leads to a higher value, it chooses randomly, like before." | "if tied: choose at random" appears under it; then (0:24.5) the whole rule shrinks into the agent's brain with a flash, the policy box swaps to π(s) = action with highest R(f(s, a)), and the ¼ labels go. |
+| 0:22.5 | "If no action leads to a higher value, it chooses randomly, like before." | "if tied: choose at random" appears under it; then (0:24) the whole rule glides into the agent's brain on a gentle arc and the brain lights up like a neon sign (the same beat as every equation the agent takes in, `absorb`), while the policy box swaps to π(s) = action with highest R(f(s, a)) and the ¼ labels go. |
 | 0:27 | "Now if the agent is next to a reward state, it will go towards that!" | Beside each arrow, the reward of the state it leads to: 0, 0, 10, 0. On "go towards that" (0:29) the 10 and its arrow light amber; the agent steps onto the reward (a burst) and smiles. |
 | 0:31.5 | "Now we can make the environment bigger…" | The 3 × 3 grid fades; the agent shrinks into the start cell (s21) of a 5 × 5 grid; rewards drop into s9 (10) and s18 (5); every cell gets its R(s); the arrows return. |
 | 0:35 | "…and reset the agent to the start state whenever it reaches a 'reward state'." | One episode under the greedy policy: random while every neighbour is 0 (s21 → s16 → s11 → s12 → s17), then straight onto the 5 (amber arrow, burst, 0:39). The agent fades out and reappears at the start, which pulses. |
@@ -37,7 +37,7 @@ Each gap is a `self.wait(...)` under a comment quoting its narration line in `sc
 - `GridStage.arrow_labels(texts, colors)` places a label beside each arrow; Maths 03's ¼s use it too.
 - `common/reward.py`: `reward_values(grid, rewards)` writes R(s) in each cell's corner (amber for a reward, faint for 0).
 - `PolicyBox.swap(tex, font_size)` now resizes the frame, and the box's text is layered above its frame so animating the frame never hides it.
-- The greedy rule is written in words rather than with arg max, which the script introduces later (policy improvement).
+- The greedy rule is written in words rather than with arg max; the script never needs the notation.
 - The 5 × 5 episode is scripted: every step before the last is a genuine tie, so any order would be a valid random choice. It ends on the nearby 5, not the 10, which sets up Maths 05 (rewards several steps away).
 
 ## Handoff

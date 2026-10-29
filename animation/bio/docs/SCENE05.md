@@ -58,3 +58,9 @@ The spike trains are illustrative, not experimental recordings. The rodent scene
 ## Scene 06 handoff
 
 Use `<AccumbensInputsArtwork frame={2370}/>` inside the existing navy 1920 × 1080 SVG canvas. This is the final held artwork. `ENDING_CAMERA05` supplies the camera for shifting attention toward PFC next. VTA/NAc, the established dopamine projection, additional blue inputs, and the conceptual learned-value indicator remain visible. Reuse `SourceCitation` separately as appropriate for the next narration.
+
+Removed the 66–69s cue/reward comparison shot. A 12-frame eased crossfade connects the predictive-cue example directly to the omitted-reward sequence. All following footage shifts three seconds earlier; total duration is 130 seconds.
+
+Follow-up: removed the comparison-chart artwork itself, including its residual fade after the cut. The 66-second transition now fades through the background over 12 frames instead of layering outgoing and incoming charts. Total duration remains 130 seconds.
+
+The negative-outcome to expectation-update transition now receives one extra second through smooth, monotonic playback easing over 70–74s. The negative-outcome title stays visible longer and the update illustration enters with a 45-frame eased fade. Total duration: 131 seconds.

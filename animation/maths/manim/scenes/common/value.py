@@ -2,6 +2,7 @@
 (which starts on them): the gamma-driven value field, the right-column equations, the
 gamma slider with its weight bars, and dashed path trails."""
 
+import random
 from collections import deque
 from functools import lru_cache
 
@@ -23,6 +24,7 @@ from manim import (
     always_redraw,
 )
 
+from .grid import ACTIONS
 from .theme import DOPAMINE, INK, MODEL, MUTED
 from .world import REWARDS_5X5
 
@@ -236,3 +238,15 @@ def bellman_expectation():
     where = MathTex(r"\text{where } a = \pi(s)", font_size=32, color=MUTED).next_to(eq, DOWN, buff=0.35)
     label = Text("Bellman expectation equation:", font_size=28, color=MUTED).next_to(eq, UP, buff=0.4)
     return label, eq, where
+
+
+def final_policy(grid, gamma=0.9):
+    """The policy the agent follows from Maths 07 on: a seeded random policy (s8 starting on "up"),
+    improved until it stops changing. It is optimal; where actions tie it keeps its current one."""
+    states = [s for s in range(1, grid.rows * grid.cols + 1) if s not in REWARDS_5X5]
+    rng = random.Random(7)
+    policy = {s: rng.choice(list(ACTIONS)) for s in states if s != 8}
+    policy[8] = "up"
+    for _ in range(4):
+        policy = improve_policy(policy, evaluate_policy(policy, grid, gamma), grid, gamma)
+    return policy
