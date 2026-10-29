@@ -545,6 +545,19 @@ function buildSliders() {
 }
 
 buildSliders();
+
+// Puts every parameter slider, and the speed, back to its default, as the
+// tutorial's panels start. The speed's default is its value in index.html.
+$('params-default').addEventListener('click', () => {
+  const defaults = config();
+  for (const { key } of SLIDERS) {
+    const input = $(`param-${key}`);
+    input.value = defaults[key];
+    input.dispatchEvent(new Event('input'));
+  }
+  $('speed').value = $('speed').defaultValue;
+  $('speed').dispatchEvent(new Event('input'));
+});
 $('show-learning-details').addEventListener('change', (event) => {
   showLearningDetails = event.target.checked;
   $('environment-intro').classList.toggle('learning-visible', showLearningDetails);
@@ -619,7 +632,12 @@ $('play').addEventListener('click', () => {
   requestAnimationFrame(playing ? frame : animateWalk);
 });
 $('step').addEventListener('click', () => { tick(); render(); requestAnimationFrame(animateWalk); });
-$('reset').addEventListener('click', reset);
+// A new agent starts with the drug as the page first loaded: off on the main
+// page, and as the tutorial panel set it (index.html?drug=...) in the tutorial.
+$('reset').addEventListener('click', () => {
+  $('drug-available').checked = embed.get('drug') === '1';
+  reset();
+});
 $('speed').addEventListener('input', updateSpeedLabel);
 $('window').addEventListener('change', () => setX(Number($('window').value), life.t));
 

@@ -31,8 +31,8 @@
     .minimal-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
     .environment-stage { position: relative; }
     .learning-map-info { position: absolute; right: 0; top: 10px; z-index: 5; }
-    .learning-map-info button { border: 1px solid var(--border); border-radius: 50%; background: var(--surface); color: var(--text-secondary); width: 24px; height: 24px; padding: 0; cursor: help; }
-    #environment-learning-help { display: none; position: absolute; right: 0; top: 28px; width: min(300px, 70vw); margin: 0; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); box-shadow: 0 4px 16px #0002; }
+    .learning-map-info button { padding: 0; border: 0; border-bottom: 1px dotted currentColor; border-radius: 0; background: transparent; color: var(--text-secondary); font: inherit; font-size: 12px; font-weight: 700; cursor: help; }
+    #environment-learning-help { display: none; position: absolute; right: 0; top: 24px; width: max-content; max-width: min(320px, 80vw); margin: 0; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); box-shadow: 0 4px 16px #0002; color: var(--text-secondary); font-size: 13px; font-weight: 400; }
     .learning-map-info:hover #environment-learning-help, .learning-map-info:focus-within #environment-learning-help { display: block; }
     #environment-intro { transition: opacity 150ms ease; }
     #environment-intro.learning-visible { opacity: 0.6; }
@@ -46,9 +46,9 @@
     #policy { display: block; width: 100%; max-width: 320px; aspect-ratio: 1; margin: 0 auto; }
     .policy-help { position: relative; width: fit-content; margin-top: 10px; }
     .policy-help summary { cursor: pointer; list-style: none; font-size: 12px; color: var(--text-secondary); }
-    .policy-help > button { padding: 0; border: 0; background: transparent; color: var(--text-secondary); font: inherit; font-size: 12px; cursor: help; }
+    .policy-help > button { padding: 0; border: 0; border-bottom: 1px dotted currentColor; border-radius: 0; background: transparent; color: var(--text-secondary); font: inherit; font-size: 12px; font-weight: 700; cursor: help; }
     .policy-help summary::-webkit-details-marker { display: none; }
-    #policy-help { display: none; position: absolute; bottom: calc(100% + 8px); left: 0; width: min(280px, 65vw); margin: 0; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); box-shadow: 0 4px 16px #0002; z-index: 10; }
+    #policy-help { display: none; position: absolute; bottom: calc(100% + 8px); left: 0; width: max-content; max-width: min(320px, 80vw); margin: 0; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); box-shadow: 0 4px 16px #0002; color: var(--text-secondary); font-size: 13px; font-weight: 400; z-index: 10; }
     .policy-help:hover #policy-help, .policy-help:focus-within #policy-help, .policy-help[open] #policy-help { display: block; }
     .key { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: var(--text-secondary); margin-top: 10px; }
     .key span { display: inline-flex; align-items: center; gap: 6px; }
@@ -107,14 +107,14 @@
           <button id="reset" type="button">Reset</button>
           <label class="speed">
             <span>Speed</span>
-            <input id="speed" type="range" min="0" max="100" value="55">
+            <input id="speed" type="range" autocomplete="off" min="0" max="100" step="any" value="8.467">
             <output id="speed-label"></output>
           </label>
     </div>
       <div class="sidebar-scroll">
       <section data-panel="events">
         <h2>Life events</h2>
-        <label class="check"><input id="drug-available" type="checkbox"><span>Drug available</span></label>
+        <label class="check"><input id="drug-available" type="checkbox" autocomplete="off"><span>Drug available</span></label>
         <p class="hint">Let the agent learn natural rewards first (a few thousand steps at high speed), then make the drug available.</p>
         <div class="toolbar">
           <button id="dose" type="button">Give 1 dose</button>
@@ -126,6 +126,7 @@
         <h2>Parameters</h2>
         <div id="params"></div>
         <p class="hint">Tipping point <i>S − natural gain / k</i> = <strong id="tipping"></strong></p>
+        <button id="params-default" type="button" class="params-default">Default settings</button>
       </section>
       <details data-panel="model">
         <summary>The model</summary>
@@ -155,7 +156,7 @@ r  = D(H) − D(H')
         <div class="environment-heading">
           <h2>Environment</h2>
           <label class="check learning-details-toggle">
-            <input id="show-learning-details" type="checkbox" aria-controls="environment-learning-help decision-details">
+            <input id="show-learning-details" type="checkbox" autocomplete="off" aria-controls="environment-learning-help decision-details">
             <span>Show decision details</span>
           </label>
         </div>
@@ -164,7 +165,7 @@ r  = D(H) − D(H')
         <div class="environment-stage">
         <canvas id="environment" aria-label="The agent choosing between a natural reward, nothing and the drug"></canvas>
           <div class="learning-map-info" data-learning-details hidden>
-            <button type="button" aria-label="About the learning values" aria-describedby="environment-learning-help">ⓘ</button>
+            <button type="button" aria-describedby="environment-learning-help">About these values</button>
             <p id="environment-learning-help" class="hint" role="tooltip">“Previous state Q” and the bars show expected future return from the previous decision’s state. “Current state Q” shows it for the upcoming decision; bold values are the highest, with ties broken randomly. These are learned estimates, not the reward just received. Exploration can select any available action.</p>
           </div>
         </div>
@@ -210,7 +211,7 @@ r  = D(H) − D(H')
         <div class="toolbar">
           <label class="speed">
             <span>Show last</span>
-            <select id="window">
+            <select id="window" autocomplete="off">
               <option value="200" selected>200 steps</option>
               <option value="500">500 steps</option>
               <option value="5000">5,000 steps</option>
@@ -248,7 +249,7 @@ r  = D(H) − D(H')
             <span><i class="tick" style="background: var(--text-primary); width: 3px; height: 14px"></i>Forced dose</span>
           </div>
           <div class="state-help">
-            <button id="state-info" class="state-info-button" type="button" aria-expanded="false" aria-controls="state-info-popup" aria-haspopup="dialog">States <span class="state-info-symbol" aria-hidden="true">i</span></button>
+            <button id="state-info" class="state-info-button" type="button" aria-expanded="false" aria-controls="state-info-popup" aria-haspopup="dialog">States</button>
             <div id="state-info-popup" class="state-info-popup" role="dialog" aria-labelledby="state-info-title" hidden>
               <h3 id="state-info-title">Understanding the states</h3>
               <dl>
@@ -274,7 +275,7 @@ r  = D(H) − D(H')
           <p class="hint">Its preferred action in each (<i>H</i>, <i>B</i>) state. The dot is where it is now, and the fading line is the path of its last 100 steps.</p>
           <canvas id="policy" aria-label="Preferred action for each internal state" aria-describedby="policy-help policy-details"></canvas>
           <div class="policy-help">
-            <button type="button" aria-describedby="policy-help">ⓘ Explore the map</button>
+            <button type="button" aria-describedby="policy-help">Explore the map</button>
             <p id="policy-help" class="hint" role="tooltip">Hover over a box or tap it to see its internal state values (H and B) and learn which action the agent currently prefers there. The dot labelled “Agent now” marks its current internal state.</p>
           </div>
           <p id="policy-details" class="hint" hidden></p>

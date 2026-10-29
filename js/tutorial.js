@@ -1,6 +1,7 @@
 // Interactive figures for tutorial.html. The explainers run the real model
 // from model.js; the live panels are the simulation itself, embedded.
 import { NOTHING, NATURAL, DRUG, ACTIONS, config, step, naturalCeiling, tippingPoint } from './model.js';
+import { faceShape, FACE_UNIT, actionIconSvg } from './environmentView.js';
 
 const $ = (id) => document.getElementById(id);
 const fmt = (value, digits = 1) => Number(value.toFixed(digits)).toString();
@@ -95,11 +96,6 @@ function rewardExplorer() {
   // Same left-to-right order, symbols and colours as the Environment panel.
   const ORDER = [NATURAL, NOTHING, DRUG];
   const classes = { [NOTHING]: 'nothing', [NATURAL]: 'natural', [DRUG]: 'drug' };
-  const icons = {
-    [NATURAL]: '<circle class="action-icon-natural" cx="0" cy="1" r="9" /><path class="action-icon-stem" d="M 0 -7 L 3 -12" />',
-    [NOTHING]: '<circle class="action-icon-nothing" cx="0" cy="0" r="9" />',
-    [DRUG]: '<g transform="rotate(-36)"><rect class="action-icon-capsule" x="-12" y="-5" width="24" height="10" rx="5" /><path class="action-icon-drug" d="M 0 -5 H 7 A 5 5 0 0 1 7 5 H 0 Z" /></g>',
-  };
   const signed = (v) => `${v >= 0 ? '+' : '−'}${fmt(Math.abs(v), 2)}`;
 
   // The agent's face as the Environment panel draws it (environmentView.js
@@ -112,18 +108,17 @@ function rewardExplorer() {
       return `rgb(${[0, 1, 2].map((i) => Math.round(channel(a, i) + (channel(b, i) - channel(a, i)) * t)).join(', ')})`;
     };
     const fill = mood < 0 ? mix(css('--face-neutral'), css('--face-sad'), -mood) : mix(css('--face-neutral'), css('--face-happy'), mood);
-    const worry = Math.max(0, -mood) * 2.5;
-    const arch = Math.max(0, mood) * 1.5;
-    const brows = [-1, 1].map((side) => {
-      const outer = side * 7.5;
-      const inner = side * 2;
-      return `M ${outer} ${-7 + worry} Q ${(outer + inner) / 2} ${-8.5 - arch} ${inner} ${-8 - worry}`;
-    }).join(' ');
-    const mouthY = 5 - Math.max(0, -mood) * 2;
+    // The same face as environmentView.js drawFace.
+    const r = 13;
+    const k = r / FACE_UNIT;
+    const { half, y, control, brows } = faceShape(mood);
+    const eyes = [-1, 1].map((side) => `M ${side * 12 * k} ${-6 * k} V ${-2 * k}`).join(' ');
+    const mouth = `M ${-half * k} ${y * k} Q 0 ${control * k} ${half * k} ${y * k}`;
+    const browPath = `M ${-19 * k} ${-12 * k} L ${-7 * k} ${-15 * k} M ${7 * k} ${-15 * k} L ${19 * k} ${-12 * k}`;
     return `<svg class="agent-face" viewBox="-15 -15 30 30" role="img" aria-label="The agent">
-      <circle r="13" fill="${fill}" />
-      <path d="${brows} M -6 ${mouthY} Q 0 ${mouthY + 7 * mood} 6 ${mouthY}" />
-      <circle class="face-eye" cx="-4.5" cy="-2.5" r="1.7" /><circle class="face-eye" cx="4.5" cy="-2.5" r="1.7" />
+      <circle r="${r}" fill="${fill}" />
+      <path d="${eyes} ${mouth}" />
+      ${brows > 0 ? `<path d="${browPath}" opacity="${brows}" />` : ''}
     </svg>`;
   }
 
@@ -174,7 +169,7 @@ function rewardExplorer() {
         ? `H change ${signed(driveReduction)} · pleasure − harm ${signed(drugTerm)}`
         : '';
       return `<div class="option-box ${classes[action]}${isBest ? ' best' : ''}">
-        <div class="option-name"><svg class="action-icon" viewBox="-13 -13 26 26" aria-hidden="true">${icons[action]}</svg>${ACTIONS[action].name}</div>
+        <div class="option-name">${actionIconSvg(action)}${ACTIONS[action].name}</div>
         <div class="option-move">H ${H} → ${fmt(nextH)}</div>
         <div class="option-track" aria-hidden="true"><span class="option-bar ${classes[action]}" style="left:${left}%;width:${width}%"></span></div>
         <div class="option-reward">Reward <strong>${signed(reward)}</strong></div>
@@ -223,15 +218,17 @@ window.addEventListener('message', (event) => {
   }
 });
 
-// Reloading an embed brings back its starting agent, which Reset cannot:
-// Reset gives an agent that has learned nothing.
+// Restarting an embed brings back its starting agent and default settings,
+// which Reset cannot: Reset gives an agent that has learned nothing.
 for (const figure of document.querySelectorAll('.simulation-embed')) {
   const frame = figure.querySelector('iframe');
   const restart = document.createElement('button');
   restart.type = 'button';
   restart.className = 'embed-restart';
   restart.textContent = 'Restart panel';
-  restart.addEventListener('click', () => frame.contentWindow.location.reload());
+  // Loading the page afresh rather than reloading it: on a reload, browsers
+  // restore controls such as the speed slider to where the reader left them.
+  restart.addEventListener('click', () => { frame.src = frame.getAttribute('src'); });
   figure.querySelector('figcaption').prepend(restart);
 }
 
@@ -252,5 +249,60 @@ for (const word of document.querySelectorAll('.hover-info')) {
   word.addEventListener('focusin', place);
 }
 
+// --- Slides: one section at a time ------------------------------------------
+
+// Shows one section at a time. The menu, the progress bar and each section's
+// Previous/Next buttons are built from the sections' ids and data-nav labels.
+function slides() {
+  const sections = [...document.querySelectorAll('.tutorial-content > section[id]')];
+  const nav = $('tutorial-nav-links');
+  if (!sections.length || !nav) return;
+
+  const links = sections.map((section, i) => {
+    const link = document.createElement('a');
+    link.href = `#${section.id}`;
+    link.innerHTML = `${i ? `<span class="nav-number">${i}</span>` : ''}${section.dataset.nav}`;
+    nav.append(link);
+    return link;
+  });
+
+  sections.forEach((section, i) => {
+    const pager = document.createElement('div');
+    pager.className = 'slide-pager';
+    const prev = sections[i - 1];
+    const next = sections[i + 1];
+    pager.innerHTML = `
+      ${prev ? `<a class="pager-link" href="#${prev.id}">← Previous<span class="pager-title">${prev.dataset.nav}</span></a>` : '<span></span>'}
+      <span class="pager-count">${i + 1} of ${sections.length}</span>
+      ${next ? `<a class="pager-link next" href="#${next.id}">Next →<span class="pager-title">${next.dataset.nav}</span></a>` : '<a class="pager-link" href="index.html">Open the full simulation →</a>'}`;
+    section.append(pager);
+  });
+
+  function show(id, scroll = true) {
+    const index = Math.max(0, sections.findIndex((section) => section.id === id));
+    sections.forEach((section, i) => { section.hidden = i !== index; });
+    links.forEach((link, i) => {
+      if (i === index) link.setAttribute('aria-current', 'page');
+      else link.removeAttribute('aria-current');
+    });
+    $('tutorial-progress').style.width = `${((index + 1) / sections.length) * 100}%`;
+    links[index].scrollIntoView({ block: 'nearest', inline: 'center' });
+    if (scroll) window.scrollTo({ top: 0 });
+  }
+
+  const current = () => sections.findIndex((section) => !section.hidden);
+  window.addEventListener('hashchange', () => show(location.hash.slice(1)));
+  // Arrow keys move between sections, except while a slider or field has focus.
+  document.addEventListener('keydown', (event) => {
+    if (event.altKey || event.ctrlKey || event.metaKey) return;
+    if (event.target.closest('input, select, textarea, [contenteditable]')) return;
+    const step = { ArrowRight: 1, ArrowLeft: -1 }[event.key];
+    const target = sections[current() + (step ?? 0)];
+    if (step && target) location.hash = target.id;
+  });
+  show(location.hash.slice(1), false);
+}
+
+slides();
 ceilingExplorer();
 rewardExplorer();
