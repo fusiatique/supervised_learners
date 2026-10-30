@@ -1,7 +1,8 @@
 // Interactive figures for tutorial.html. The explainers run the real model
 // from model.js; the live panels are the simulation itself, embedded.
 import { NOTHING, NATURAL, DRUG, ACTIONS, config, step, naturalCeiling, tippingPoint } from './model.js';
-import { faceShape, FACE_UNIT, actionIconSvg } from './environmentView.js';
+import { actionIconSvg } from './environmentView.js';
+import { moodOf, fatigueOf, faceColor, faceParts } from './face.js';
 
 const $ = (id) => document.getElementById(id);
 const fmt = (value, digits = 1) => Number(value.toFixed(digits)).toString();
@@ -98,27 +99,20 @@ function rewardExplorer() {
   const classes = { [NOTHING]: 'nothing', [NATURAL]: 'natural', [DRUG]: 'drug' };
   const signed = (v) => `${v >= 0 ? '+' : '−'}${fmt(Math.abs(v), 2)}`;
 
-  // The agent's face as the Environment panel draws it (environmentView.js
-  // drawFace): mood 1 with H at the setpoint, -1 when H is 20 or more away.
-  function face(H) {
-    const mood = 1 - 2 * Math.min(1, Math.abs(H - p.S) / 20);
+  // The agent's face as the Environment panel draws it (face.js). There is
+  // no history of choices here, so it shows H and B but no craving.
+  function face(H, B) {
     const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-    const mix = (a, b, t) => {
-      const channel = (hex, i) => parseInt(hex.slice(1 + 2 * i, 3 + 2 * i), 16);
-      return `rgb(${[0, 1, 2].map((i) => Math.round(channel(a, i) + (channel(b, i) - channel(a, i)) * t)).join(', ')})`;
-    };
-    const fill = mood < 0 ? mix(css('--face-neutral'), css('--face-sad'), -mood) : mix(css('--face-neutral'), css('--face-happy'), mood);
-    // The same face as environmentView.js drawFace.
+    const expression = { mood: moodOf(H, p), fatigue: fatigueOf(B, p) };
+    const colors = { happy: css('--face-happy'), neutral: css('--face-neutral'), sad: css('--face-sad'), worn: css('--face-worn') };
     const r = 13;
-    const k = r / FACE_UNIT;
-    const { half, y, control, brows } = faceShape(mood);
-    const eyes = [-1, 1].map((side) => `M ${side * 12 * k} ${-6 * k} V ${-2 * k}`).join(' ');
-    const mouth = `M ${-half * k} ${y * k} Q 0 ${control * k} ${half * k} ${y * k}`;
-    const browPath = `M ${-19 * k} ${-12 * k} L ${-7 * k} ${-15 * k} M ${7 * k} ${-15 * k} L ${19 * k} ${-12 * k}`;
+    const { features, brows, lids, bags } = faceParts(expression, r);
+    const faded = [brows, lids, bags].filter((part) => part.opacity > 0)
+      .map((part) => `<path d="${part.d}" opacity="${part.opacity}" />`).join('');
     return `<svg class="agent-face" viewBox="-15 -15 30 30" role="img" aria-label="The agent">
-      <circle r="${r}" fill="${fill}" />
-      <path d="${eyes} ${mouth}" />
-      ${brows > 0 ? `<path d="${browPath}" opacity="${brows}" />` : ''}
+      <circle r="${r}" fill="${faceColor(expression, colors)}" />
+      <path d="${features}" />
+      ${faded}
     </svg>`;
   }
 
@@ -177,7 +171,7 @@ function rewardExplorer() {
         <div class="option-best">${isBest ? 'Best choice' : ''}</div>
       </div>`;
     }).join('');
-    $('reward-agent').innerHTML = `<div style="grid-column: ${ORDER.indexOf(best.action) + 1}">${face(H)}</div>`;
+    $('reward-agent').innerHTML = `<div style="grid-column: ${ORDER.indexOf(best.action) + 1}">${face(H, B)}</div>`;
     $('reward-meter').innerHTML = meter(H, B, results);
 
     const distance = Math.abs(p.S - H);

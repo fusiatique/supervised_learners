@@ -1,5 +1,6 @@
 import { ACTIONS, NOTHING, NATURAL, DRUG, naturalCeiling } from './model.js';
 import { cssVar, prepareCanvas, CANVAS_FONT } from './theme.js';
+import { moodOf, fatigueOf, cravingOf, faceColor, faceParts } from './face.js';
 
 // The environment panel: three stations the agent walks between, one per
 // action, each showing the value the agent has learned for that action in the
@@ -157,75 +158,49 @@ function drawStations(ctx, life, view, shares, { cardW, centers }, advanced) {
   });
 }
 
-// How content the agent is: 1 with H at the setpoint, 0 when H is
-// MOOD_RANGE / 2 away, -1 when it is MOOD_RANGE or more away, either way.
-const MOOD_RANGE = 20;
-const moodOf = (H, S) => 1 - 2 * Math.min(1, Math.abs(H - S) / MOOD_RANGE);
+// The page's face colours, for face.js.
+const faceColors = () => ({
+  happy: cssVar('--face-happy'),
+  neutral: cssVar('--face-neutral'),
+  sad: cssVar('--face-sad'),
+  worn: cssVar('--face-worn'),
+});
 
-// Mixes two #rrggbb colours, t = 0 giving a and t = 1 giving b.
-function mix(a, b, t) {
-  const channel = (hex, i) => parseInt(hex.slice(1 + 2 * i, 3 + 2 * i), 16);
-  const rgb = [0, 1, 2].map((i) => Math.round(channel(a, i) + (channel(b, i) - channel(a, i)) * t));
-  return `rgb(${rgb.join(', ')})`;
-}
-
-// Face colour: red when distressed (mood -1), yellow when neutral, green when content (1).
-const faceColor = (mood) => mood < 0
-  ? mix(cssVar('--face-neutral'), cssVar('--face-sad'), -mood)
-  : mix(cssVar('--face-neutral'), cssVar('--face-happy'), mood);
-
-// The bio videos' character's face (animation/bio/remotion/src/components.tsx
-// HumanCharacter), in units of its head radius of 37: short upright eyes, a
-// mouth (half width, height, curve control) that blends from 'satisfied'
-// (mood 1) through 'neutral' (0) to 'disappointed' (-1), and the disappointed
-// brows, faded in as the mood falls.
-const FACE_UNIT = 37;
-const MOUTHS = { satisfied: [13, 11, 26], neutral: [10, 13, 20], disappointed: [10, 18, 10] };
-function faceShape(mood) {
-  const [a, b, t] = mood >= 0 ? [MOUTHS.neutral, MOUTHS.satisfied, mood] : [MOUTHS.neutral, MOUTHS.disappointed, -mood];
-  const [half, y, control] = a.map((v, i) => v + (b[i] - v) * t);
-  return { half, y, control, brows: Math.max(0, -mood) };
-}
-
-// Draws the face at (x, y) with a head radius of 13, in the page's colours.
-function drawFace(ctx, x, y, mood) {
+// Draws the face (face.js) at (x, y) with a head radius of 13, in the page's colours.
+function drawFace(ctx, x, y, expression) {
   const r = 13;
-  const k = r / FACE_UNIT;
   const ink = cssVar('--agent-ink');
-  ctx.fillStyle = faceColor(mood);
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.fillStyle = faceColor(expression, faceColors());
   ctx.strokeStyle = ink;
   ctx.lineWidth = 1.5;
   ctx.beginPath();
-  ctx.arc(x, y, r, 0, 2 * Math.PI);
+  ctx.arc(0, 0, r, 0, 2 * Math.PI);
   ctx.fill();
   ctx.stroke();
 
-  const { half, y: mouthY, control, brows } = faceShape(mood);
+  const { features, brows, lids, bags, sweat } = faceParts(expression, r);
   ctx.lineCap = 'round';
   ctx.lineWidth = 1.6;
-  ctx.beginPath();
-  for (const side of [-1, 1]) {
-    ctx.moveTo(x + side * 12 * k, y - 6 * k);
-    ctx.lineTo(x + side * 12 * k, y - 2 * k);
+  ctx.stroke(new Path2D(features));
+  for (const part of [brows, lids, bags]) {
+    if (part.opacity <= 0) continue;
+    ctx.globalAlpha = part.opacity;
+    ctx.stroke(new Path2D(part.d));
   }
-  ctx.moveTo(x - half * k, y + mouthY * k);
-  ctx.quadraticCurveTo(x, y + control * k, x + half * k, y + mouthY * k);
-  ctx.stroke();
-  if (brows > 0) {
-    ctx.globalAlpha = brows;
-    ctx.beginPath();
-    ctx.moveTo(x - 19 * k, y - 12 * k);
-    ctx.lineTo(x - 7 * k, y - 15 * k);
-    ctx.moveTo(x + 7 * k, y - 15 * k);
-    ctx.lineTo(x + 19 * k, y - 12 * k);
-    ctx.stroke();
-    ctx.globalAlpha = 1;
+  if (sweat.opacity > 0) {
+    ctx.globalAlpha = sweat.opacity;
+    ctx.fillStyle = cssVar('--face-sweat');
+    ctx.lineWidth = 1;
+    const drop = new Path2D(sweat.d);
+    ctx.fill(drop);
+    ctx.stroke(drop);
   }
-  ctx.lineCap = 'butt';
-  ctx.lineWidth = 1;
+  ctx.restore();
 }
 
-function drawAgent(ctx, view, centers, floorY, now, mood) {
+function drawAgent(ctx, view, centers, floorY, now, expression) {
   const t = view.duration > 0 ? Math.min(1, (now - view.at) / view.duration) : 1;
   const ease = t * t * (3 - 2 * t);
   const x = centers[view.from] + (centers[view.to] - centers[view.from]) * ease;
@@ -246,7 +221,9 @@ function drawAgent(ctx, view, centers, floorY, now, mood) {
     ctx.stroke();
   }
 
-  drawFace(ctx, x, y, mood);
+  // A craving agent keeps glancing towards the drug station.
+  const glance = Math.max(-1, Math.min(1, (centers[DRUG] - x) / 40));
+  drawFace(ctx, x, y, { ...expression, glance });
 
   // A forced dose shows briefly as a tag above the agent.
   if (now - view.forcedAt < 900) {
@@ -322,10 +299,12 @@ export function drawEnvironment(canvas, life, view, shares, now, advanced = fals
   const geometry = layout(width);
   const floorY = CARD_TOP + CARD_H + 34;
   drawStations(ctx, life, view, shares, geometry, advanced);
-  const mood = moodOf(life.state.H, life.p.S);
-  const moving = drawAgent(ctx, view, geometry.centers, floorY, now, mood);
+  const expression = {
+    mood: moodOf(life.state.H, life.p),
+    fatigue: fatigueOf(life.state.B, life.p),
+    craving: cravingOf(shares[DRUG]),
+  };
+  const moving = drawAgent(ctx, view, geometry.centers, floorY, now, expression);
   drawMeter(ctx, life, width, height - 52);
   return moving;
 }
-
-export { faceShape, FACE_UNIT };

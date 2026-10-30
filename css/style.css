@@ -42,6 +42,8 @@
   --face-happy: #8fd18a;
   --face-neutral: #f3dc91;
   --face-sad: #ef8f80;
+  --face-worn: #b9b3a6;
+  --face-sweat: #9fd0f2;
   --diagram-blue: #4b83bd;
   --diagram-gold: #a77b0b;
   --diagram-green: #43825f;
@@ -1145,8 +1147,8 @@ summary {
 .key-tick-drug { fill: var(--act-drug); }
 .key-tick-forced { fill: var(--text-primary); }
 
-/* Inline copies of the agent's face (js/environmentView.js drawFace) at
-   mood 1, 0 and -1. */
+/* Inline copies of the agent's face (js/face.js) at mood 1, 0 and -1, worn
+   down by a low baseline, and craving. */
 .face-icon { width: 1.3em; height: 1.3em; vertical-align: -0.3em; }
 .face-icon circle:not(.face-eye) { stroke: var(--agent-ink); stroke-width: 1.5; }
 .face-icon path { fill: none; stroke: var(--agent-ink); stroke-width: 1.6; stroke-linecap: round; }
@@ -1154,6 +1156,8 @@ summary {
 .face-icon .face-happy { fill: var(--face-happy); }
 .face-icon .face-neutral { fill: var(--face-neutral); }
 .face-icon .face-sad { fill: var(--face-sad); }
+.face-icon .face-tired { fill: color-mix(in srgb, var(--face-neutral) 40%, var(--face-worn)); }
+.face-icon path.face-sweat { fill: var(--face-sweat); stroke-width: 1; }
 
 .action-list {
   list-style: none;
