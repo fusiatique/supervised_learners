@@ -32,7 +32,11 @@
     "render:scene08": "remotion render src/index.tsx Scene08-SynapticPlasticityAndAddiction ../video/scene08-synaptic-plasticity-and-addiction.mp4 --codec=h264 --muted",
     "check:scene08": "esbuild scripts/check-scene08.tsx --bundle --platform=node --packages=external --outfile=node_modules/.cache/check-scene08.cjs && node node_modules/.cache/check-scene08.cjs",
     "check:scene01": "esbuild scripts/check-scene01.tsx --bundle --platform=node --packages=external --outfile=node_modules/.cache/check-scene01.cjs && node node_modules/.cache/check-scene01.cjs",
-    "check:anatomy": "esbuild scripts/check-brain-anatomy.tsx --bundle --platform=node --packages=external --outfile=node_modules/.cache/check-brain-anatomy.cjs && node node_modules/.cache/check-brain-anatomy.cjs"
+    "check:anatomy": "esbuild scripts/check-brain-anatomy.tsx --bundle --platform=node --packages=external --outfile=node_modules/.cache/check-brain-anatomy.cjs && node node_modules/.cache/check-brain-anatomy.cjs",
+    "render:intro": "remotion render src/index.tsx Intro ../../Intro/video/intro.mp4 --codec=h264 --muted",
+    "render:outro1": "remotion render src/index.tsx Outro1-BringingTogether ../../outro/video/outro1-bringing-together.mp4 --codec=h264 --muted",
+    "render:outro2": "remotion render src/index.tsx Outro2-WhereItGoesWrong ../../outro/video/outro2-where-it-goes-wrong.mp4 --codec=h264 --muted",
+    "render:outro3": "remotion render src/index.tsx Outro3-Conclusion ../../outro/video/outro3-conclusion.mp4 --codec=h264 --muted"
   },
   "dependencies": {
     "@remotion/cli": "4.0.484",
